@@ -1,0 +1,10 @@
+nr-toolbox v1.0 (C) 2013-2016  Niklas Rosenstein
+All rights reserved.
+
+This copy of this software is for your alone purpose. Any form
+redistribution without the prior consent of the copyright owner is
+not permitted.
+
+The author and maintainer of this software gives no warranty on
+potential harms this software might cause. This includes crashes
+and/or data-loss.

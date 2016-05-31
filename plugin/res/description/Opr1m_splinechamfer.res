@@ -1,0 +1,20 @@
+// Copyright (C) 2012-2013, Niklas Rosenstein
+
+CONTAINER Opr1m_splinechamfer {
+    NAME Opr1m_splinechamfer;
+    INCLUDE Obase;
+
+    GROUP ID_OBJECTPROPERTIES {
+        REAL   PR1M_SPLINECHAMFER_RADIUS { MIN 0; STEP 1; UNIT METER; }
+        REAL   PR1M_SPLINECHAMFER_RATIO { MIN 0.01; STEP 0.1; }
+        BOOL   PR1M_SPLINECHAMFER_LIMIT { DEFAULT 1; }
+        SPLINE PR1M_SPLINECHAMFER_SPLINE {}
+
+        SEPARATOR {};
+
+        LINK PR1M_SPLINECHAMFER_SELECTION { ACCEPT { Tpointselection; }; }
+        BOOL PR1M_SPLINECHAMFER_INVERSESELECTION { DEFAULT 0; }
+    }
+
+}
+

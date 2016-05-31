@@ -1,0 +1,6 @@
+STRINGTABLE Opr1m_proxygen {
+    Opr1m_proxygen "Oproxygen";
+    PR1M_PROXYGEN_DETAILED "Detailed";
+    PR1M_PROXYGEN_HIERARCHY "Include Hierarchy";
+    PR1M_PROXYGEN_OBJECTS "Objects";
+}

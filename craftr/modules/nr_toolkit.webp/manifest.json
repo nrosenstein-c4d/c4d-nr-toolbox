@@ -1,0 +1,11 @@
+{
+  "name": "nr_toolkit.webp",
+  "version": "1.0.0",
+  "author": "",
+  "url": "",
+  "dependencies": {},
+  "options": {
+    "include": "path",
+    "libpath": "path"
+  }
+}

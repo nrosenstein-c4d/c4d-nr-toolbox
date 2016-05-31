@@ -1,0 +1,126 @@
+/* Python TestNode
+#include <lib_py.h>
+#include "Tvpython.h"
+
+PythonBase* AllocPythonBase(PythonLibrary* lib) {
+    GePythonGIL gil;
+    PythonBase* base = lib->Alloc();
+    if (!base) return NULL;
+    if (!lib->Initiated(base)) {
+        lib->Free(base);
+        return NULL;
+    }
+    return base;
+}
+
+void FreePythonBase(PythonLibrary* lib, PythonBase*& base) {
+    GePythonGIL gil;
+    lib->Free(base);
+}
+
+class TvPythonData : public TvOperatorData {
+
+    typedef TvOperatorData super;
+
+    PythonLibrary lib;
+    PythonBase* base;
+    _PyObject* pyExecute;
+
+public:
+
+    static NodeData* Alloc() { return gNew(TvPythonData); }
+
+    TvPythonData() : pyExecute(NULL), base(AllocPythonBase(&lib)) {}
+
+    ~TvPythonData() {
+        FreePython();
+        if (base) FreePythonBase(&lib, base);
+        base = NULL;
+    }
+
+    void FreePython() {
+        GePythonGIL gil;
+        if (pyExecute) lib.DecRef(pyExecute);
+        pyExecute = NULL;
+    }
+
+    /* TvOperatorData Overrides * /
+
+    virtual Bool Execute(TvNode* host, TvNode* root, BaseList2D* context) {
+        GePrint(__FUNCTION__);
+        if (!host) return FALSE;
+        if (!base) {
+            GePrint("No base");
+            return FALSE;
+        }
+        if (!pyExecute) {
+            GePrint("No pyExecute");
+            return FALSE;
+        }
+        GePythonGIL gil;
+        lib.SetGeListNode(base, "host", host, TRUE);
+        lib.SetGeListNode(base, "context", context, TRUE);
+        _PyObject* re = lib.CallFunction(pyExecute);
+        return TRUE;
+    }
+
+    /*
+    virtual Bool AskCondition(TvNode* host, TvNode* root, BaseList2D* context);
+
+    virtual Bool AcceptChild(TvNode* host, TvNode* other);
+
+    virtual Bool AllowRemoveChild(TvNode* host, TvNode* child);
+    * /
+
+    /* NodeData Overrides * /
+
+    virtual Bool Message(GeListNode* gNode, LONG type, void* pData);
+
+};
+
+Bool TvPythonData::Message(GeListNode* gNode, LONG type, void* pData) {
+    if (!gNode) return FALSE;
+    TvNode* tNode = (TvNode*) gNode;
+
+    switch (type) {
+        case MSG_DESCRIPTION_COMMAND: {
+            DescriptionCommand* data = (DescriptionCommand*) pData;
+            if (data->id == TVPYTHON_COMPILE) {
+                FreePython();
+                if (!base) return TRUE;
+                GePrint("Evaluating Python Source.");
+
+                BaseContainer* bc = ((TvNode*) gNode)->GetDataInstance();
+                String code = bc->GetString(TVPYTHON_CODE);
+
+                GePythonGIL gil;
+                if (!lib.Run(code, base, tNode->GetName(), XPYCOMPILERINPUT_FILE)) {
+                    lib.ErrPrint();
+                }
+                else {
+                    _PyObject* obj;
+
+                    obj = lib.GetObject(base, "Execute");
+                    GePrint("Got A PyObject..");
+                    if (obj && lib.FunctionCheck(obj)) {
+                        GePrint("> Its a function !");
+                        lib.IncRef(obj);
+                        pyExecute = obj;
+                    }
+
+                }
+                return TRUE;
+            }
+            break;
+        }
+    }
+    return super::Message(gNode, type, pData);
+}
+
+static Bool RegisterTvPython() {
+    return TvRegisterOperatorPlugin(
+        Tvpython, GeLoadString(IDC_TVPYTHON),
+        TVPLUGIN_CONDITION | TVPLUGIN_EXPRESSION, TvPythonData::Alloc,
+        "Tvpython", AutoBitmap("Tvpython.png"), 0);
+}
+*/

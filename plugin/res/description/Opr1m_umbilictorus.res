@@ -1,0 +1,20 @@
+// coding: ansii
+//
+// Copyright (C) 2012-2013, Niklas Rosenstein
+// All rights reserved.
+
+CONTAINER Opr1m_umbilictorus {
+    NAME Opr1m_umbilictorus;
+    INCLUDE Obase;
+
+    GROUP ID_OBJECTPROPERTIES {
+        REAL PR1M_UMBILICTORUS_RADIUS { UNIT METER; MIN 0; }
+        REAL PR1M_UMBILICTORUS_PIPERADIUS { UNIT METER; MIN 0; }
+        REAL PR1M_UMBILICTORUS_SMOOTHNESS { MIN 1; STEP 0.05; }
+        BOOL PR1M_UMBILICTORUS_DOSLICE {};
+        REAL PR1M_UMBILICTORUS_DEGREEMIN { UNIT DEGREE; MIN 0; MAX 360; }
+        REAL PR1M_UMBILICTORUS_DEGREEMAX { UNIT DEGREE; MIN 0; MAX 360; }
+    }
+
+    INCLUDE Opr1m_complexshape;
+}

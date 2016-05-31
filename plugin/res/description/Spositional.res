@@ -1,0 +1,6 @@
+CONTAINER Spositional {
+    INCLUDE Sbase;
+
+    GROUP ID_SMEARINGENGINE_PROPERTIES {
+    }
+}

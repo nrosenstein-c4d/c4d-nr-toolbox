@@ -1,0 +1,27 @@
+// C4D-DialogResource
+
+DIALOGSTRINGS IDS_AUTOCONNECT_DLG_MAIN
+{
+  IDS_AUTOCONNECT_CMB_MODE_ALL       "All";
+  IDS_AUTOCONNECT_CMB_MODE_CHAIN     "Chain";
+  IDS_AUTOCONNECT_CMB_MODE_NEIGHBOR  "Neighbor";
+  IDS_AUTOCONNECT_DLG_MAIN           "AutoConnect";
+  IDS_BUTTON1        "Execute";
+  IDS_CHECK          "Closed Chain";
+  IDS_CHECK1         "Compound Objects";
+  IDS_CHECK2         "Add Dynamics Tag";
+  IDS_STATIC1        "Options";
+  IDS_STATIC10       "Static text";
+  IDS_STATIC11       "Static text";
+  IDS_STATIC12       "[]";
+  IDS_STATIC13       "Group";
+  IDS_STATIC14       "Max. Conn.";
+  IDS_STATIC15       "Group";
+  IDS_STATIC16       "Group";
+  IDS_STATIC17       "Group";
+  IDS_STATIC2        "Mode";
+  IDS_STATIC5        "Radius";
+  IDS_STATIC7        "Group";
+  IDS_STATIC8        "Force";
+  IDS_STATIC9        "Type";
+}

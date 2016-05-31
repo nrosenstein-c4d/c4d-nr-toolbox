@@ -1,0 +1,16 @@
+{
+  "name": "nr_toolkit",
+  "version": "1.0.0",
+  "project_dir": "..",
+  "author": "",
+  "url": "",
+  "dependencies": {
+    "craftr.lang.cxx": "*",
+    "craftr.lib.dlib": "*",
+    "craftr.utils.git": "*",
+    "NiklasRosenstein.maxon.c4d": "*",
+    "NiklasRosenstein.cpp-nr": "*",
+    "nr_toolkit.webp": "*"
+  },
+  "options": {}
+}

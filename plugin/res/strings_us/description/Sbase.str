@@ -1,0 +1,3 @@
+STRINGTABLE Sbase {
+    ID_SMEARINGENGINE_PROPERTIES "Smearing";
+}

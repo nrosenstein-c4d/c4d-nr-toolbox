@@ -1,0 +1,11 @@
+CONTAINER Gvmodata {
+    NAME Gvmodata;
+    INCLUDE Gvbase;
+
+    GROUP ID_GVPROPERTIES {
+        BOOL MODATANODE_EASYMODE { DEFAULT 1; }
+    }
+    GROUP ID_GVPORTS {
+        LONG iMODATANODE_INDEX { DEFAULT 0; INPORT; }
+    }
+}

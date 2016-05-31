@@ -1,0 +1,3 @@
+STRINGTABLE Shistorical {
+    SHISTORICAL_TIMEDELTA "Time Delta";
+}

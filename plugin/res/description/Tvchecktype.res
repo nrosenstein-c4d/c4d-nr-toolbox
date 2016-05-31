@@ -1,0 +1,9 @@
+CONTAINER Tvchecktype {
+    NAME Tvchecktype;
+    INCLUDE Tvbase;
+
+    GROUP ID_TVPROPERTIES {
+        LONG TVCHECKTYPE_TYPEID { DEFAULT 0; }
+        BUTTON TVCHECKTYPE_BTN_CHOOSE {}
+    }
+}

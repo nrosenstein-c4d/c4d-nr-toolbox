@@ -1,0 +1,12 @@
+// Copyright (C) 2012-2013, Niklas Rosenstein
+
+STRINGTABLE Opr1m_splinechamfer {
+    Opr1m_splinechamfer                 "Spline Chamfer Object";
+    PR1M_SPLINECHAMFER_RADIUS           "Radius";
+    PR1M_SPLINECHAMFER_RATIO            "Tangent Aspect Ratio";
+    PR1M_SPLINECHAMFER_SPLINE           "Spline";
+    PR1M_SPLINECHAMFER_SELECTION        "Point Selection";
+    PR1M_SPLINECHAMFER_INVERSESELECTION "Inverse Selection Effect";
+    PR1M_SPLINECHAMFER_LIMIT            "Limit";
+}
+

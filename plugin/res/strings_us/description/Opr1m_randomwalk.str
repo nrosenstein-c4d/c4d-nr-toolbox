@@ -1,0 +1,12 @@
+STRINGTABLE Opr1m_randomwalk {
+    Opr1m_randomwalk "Random Walk";
+    RANDOMWALK_START "Start";
+    RANDOMWALK_STOP "Stop";
+    RANDOMWALK_DIRECTIONS "Directions";
+    RANDOMWALK_3D "3D";
+    RANDOMWALK_ZEROANGLE "Zero Angle";
+    RANDOMWALK_KEEPORIGIN "Keep Origin";
+    RANDOMWALK_SEED "Seed";
+    RANDOMWALK_STEP_MIN "Step Min";
+    RANDOMWALK_STEP_MAX "Step Max";
+}

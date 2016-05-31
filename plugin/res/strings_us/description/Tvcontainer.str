@@ -1,0 +1,7 @@
+STRINGTABLE Tvcontainer {
+    Tvcontainer "Tvcontainer";
+    TVCONTAINER_DEFAULT "Default Value";
+    TVCONTAINER_CONDITIONMODE "Mode";
+        TVCONTAINER_CONDITIONMODE_AND "And";
+        TVCONTAINER_CONDITIONMODE_OR "Or";
+}

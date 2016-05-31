@@ -1,0 +1,5 @@
+CONTAINER Wbase {
+    GROUP ID_WEIGHTINGENGINE_PROPERTIES {
+        DEFAULT 1;
+    }
+}

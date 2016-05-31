@@ -1,0 +1,9 @@
+STRINGTABLE Tvprintcontext {
+    Tvprintcontext "Print Context";
+    TVPRINTCONTEXT_PRINTNAME "Print Name";
+    TVPRINTCONTEXT_MODE "Mode";
+        TVPRINTCONTEXT_MODE_CONTEXTNAME "Context Object";
+        TVPRINTCONTEXT_MODE_CUSTOMTEXT "Custom Text";
+        TVPRINTCONTEXT_MODE_COMBINED "Combined";
+    TVPRINTCONTEXT_CUSTOMTEXT "Custom Text";
+}

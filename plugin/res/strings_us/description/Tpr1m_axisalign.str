@@ -1,0 +1,21 @@
+// coding: ansii
+//
+// Copyright (C) 2012-2013, Niklas Rosenstein
+// All rights reserved.
+
+STRINGTABLE Tpr1m_axisalign {
+    Tpr1m_axisalign                 "Axis Alignment Tag";
+
+    PR1M_ALIGNMENT_ENABLED          "Enabled";
+
+    PR1M_ALIGNMENT_X                "X Alignment";
+    PR1M_ALIGNMENT_Y                "Y Alignment";
+    PR1M_ALIGNMENT_Z                "Z Alignment";
+    PR1M_ALIGNMENT_OFF              "Offset";
+    PR1M_ALIGNMENT_OFFMUL           "Offset Multiplier";
+    PR1M_ALIGNMENT_INVERSEOFF       "Invert Offset";
+
+    PR1M_ALIGNMENT_USECACHE         "Apply on Cache";
+    PR1M_ALIGNMENT_INCLUDEHIERARCHY "Include Hierarchy";
+    PR1M_ALIGNMENT_INDICATOR        "Indicator";
+}

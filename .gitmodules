@@ -1,0 +1,30 @@
+[submodule "vendor/nr_logging"]
+	path = vendor/nr_logging
+	url = git@github.com:NiklasRosenstein/nr_logging.git
+[submodule "vendor/nr_string"]
+	path = vendor/nr_string
+	url = git@github.com:NiklasRosenstein/nr_string.git
+[submodule "craftr/modules/nr_iterator"]
+	path = craftr/modules/nr_iterator
+	url = https://github.com/NiklasRosenstein/nr_iterator.git
+[submodule "craftr/modules/nr_csv"]
+	path = craftr/modules/nr_csv
+	url = https://github.com/NiklasRosenstein/nr_csv.git
+[submodule "craftr/modules/nr_macros"]
+	path = craftr/modules/nr_macros
+	url = https://github.com/NiklasRosenstein/nr_macros.git
+[submodule "craftr/modules/nr_matrix"]
+	path = craftr/modules/nr_matrix
+	url = https://github.com/NiklasRosenstein/nr_matrix.git
+[submodule "craftr/modules/nr_tree_node"]
+	path = craftr/modules/nr_tree_node
+	url = https://github.com/NiklasRosenstein/nr_tree_node.git
+[submodule "craftr/modules/nr_c4d"]
+	path = craftr/modules/nr_c4d
+	url = git@gitlab.niklasrosenstein.com:niklas/nr_c4d.git
+[submodule "craftr/modules/NiklasRosenstein.maxon.c4d"]
+	path = craftr/modules/NiklasRosenstein.maxon.c4d
+	url = https://github.com/craftr-build/NiklasRosenstein.maxon.c4d.git
+[submodule "craftr/modules/cpp-nr"]
+	path = craftr/modules/NiklasRosenstein.cpp-nr
+	url = https://github.com/NiklasRosenstein/cpp-nr.git

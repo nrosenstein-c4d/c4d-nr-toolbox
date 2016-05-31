@@ -1,0 +1,9 @@
+CONTAINER Tvpython {
+    NAME Tvpython;
+    INCLUDE Tvbase;
+
+    GROUP ID_TVPROPERTIES {
+        STRING TVPYTHON_CODE { CUSTOMGUI MULTISTRING; SCALE_H; }
+        BUTTON TVPYTHON_COMPILE {};
+    }
+}

@@ -1,0 +1,11 @@
+// coding: ansii
+//
+// Copyright (C) 2012-2013, Niklas Rosenstein
+// All rights reserved.
+
+STRINGTABLE Opr1m_torusknot {
+    Opr1m_torusknot         "Torus Knot Spline";
+    PR1M_TORUSKNOT_RADIUS   "Radius";
+    PR1M_TORUSKNOT_LEFT     "Left";
+    PR1M_TORUSKNOT_RIGHT    "Right";
+}

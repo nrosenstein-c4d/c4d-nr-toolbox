@@ -1,0 +1,4 @@
+STRINGTABLE Tvselect {
+    Tvselect "Select";
+    TVSELECT_STATUS "Status";
+}

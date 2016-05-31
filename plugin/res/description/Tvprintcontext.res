@@ -1,0 +1,17 @@
+CONTAINER Tvprintcontext {
+    NAME Tvprintcontext;
+    INCLUDE Tvbase;
+
+    GROUP ID_TVPROPERTIES {
+        BOOL TVPRINTCONTEXT_PRINTNAME { DEFAULT 1; }
+        LONG TVPRINTCONTEXT_MODE {
+            CYCLE {
+                TVPRINTCONTEXT_MODE_CONTEXTNAME;
+                TVPRINTCONTEXT_MODE_CUSTOMTEXT;
+                TVPRINTCONTEXT_MODE_COMBINED;
+            }
+        }
+        STRING TVPRINTCONTEXT_CUSTOMTEXT { CUSTOMGUI MULTISTRING; }
+    }
+
+}

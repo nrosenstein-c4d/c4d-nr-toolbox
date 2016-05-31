@@ -1,0 +1,13 @@
+// coding: ansii
+//
+// Copyright (C) 2012-2013, Niklas Rosenstein
+// All rights reserved.
+
+STRINGTABLE Opr1m_teardrop {
+    Opr1m_teardrop          "Tear Drop Shape";
+    PR1M_TEARDROP_A         "A";
+    PR1M_TEARDROP_B         "B";
+    PR1M_TEARDROP_SPHERIFY  "Spherify";
+    PR1M_TEARDROP_LENGTH    "Length";
+}
+

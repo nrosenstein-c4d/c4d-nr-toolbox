@@ -1,0 +1,16 @@
+CONTAINER Xnrswatch {
+  NAME Xnrswatch;
+  INCLUDE Xbase;
+
+  GROUP ID_SHADERPROPERTIES {
+    GROUP {
+      COLUMNS 3;
+
+      LONG XNRSWATCH_ID { }
+
+      STATICTEXT XNRSWATCH_NAME { ANIM OFF; }
+
+      POPUP XNRSWATCH_SELECT { ANIM OFF; }
+    }
+  }
+}

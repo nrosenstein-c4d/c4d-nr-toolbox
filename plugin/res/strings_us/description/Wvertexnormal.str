@@ -1,0 +1,3 @@
+STRINGTABLE Wvertexnormal {
+    WVERTEXNORMAL_VERTEXBASEDMOVEMENT "Vertex Movement";
+}

@@ -1,0 +1,10 @@
+STRINGTABLE Tvbase {
+    Tvbase "TeaPresso Node";
+    TVBASE_COLORMODE "Color Mode";
+        TVBASE_COLORMODE_AUTO "Auto";
+        TVBASE_COLORMODE_INHERIT "Inherit";
+        TVBASE_COLORMODE_USE "Use";
+    TVBASE_COLOR "Color";
+    ID_TVPROPERTIES "Node";
+    TVBASE_ENABLED "Enabled";
+}

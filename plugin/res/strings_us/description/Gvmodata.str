@@ -1,0 +1,5 @@
+STRINGTABLE Gvmodata {
+    Gvmodata "MoData";
+    MODATANODE_EASYMODE "Easy Mode";
+    iMODATANODE_INDEX "Clone Index";
+}

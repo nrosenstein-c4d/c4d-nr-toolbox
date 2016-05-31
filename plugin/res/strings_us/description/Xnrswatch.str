@@ -1,0 +1,6 @@
+STRINGTABLE Xnrswatch {
+  Xnrswatch "nrSwatch";
+  XNRSWATCH_ID "Swatch ID";
+  XNRSWATCH_NAME "<Swatch Name>";
+  XNRSWATCH_SELECT "Select Swatch";
+}

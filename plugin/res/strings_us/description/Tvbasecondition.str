@@ -1,0 +1,4 @@
+STRINGTABLE Tvbasecondition {
+    Tvbasecondition "Tvbasecondition";
+    TVBASECONDITION_INVERT "Invert";
+}

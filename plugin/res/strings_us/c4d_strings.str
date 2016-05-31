@@ -1,0 +1,190 @@
+STRINGTABLE
+{
+  IDS_MENU_OBJECTS "Objects";
+  IDS_MENU_SPLINES "Splines";
+  IDS_MENU_DEFORMERS "Deformers";
+  IDS_MENU_EFFECTORS "Effectors";
+
+  // Commands
+  // --------
+
+  IDS_RESOLVEDUPLICATES_NAME "Resolve Duplicates";
+  IDS_RESOLVEDUPLICATES_HELP "Replace duplicate geometry with render instances.";
+  IDS_RESOLVEDUPLICATES_ASKUNDO "[Resolve Duplicates]: Do you want to create an undo step for this operation? It is recommended to chose 'No' for large scenes and save the scene before running the command.";
+  IDS_RESOLVEDUPLICATES_COLLECTINFO "[Resolve Duplicates]: Collecting object information...";
+  IDS_RESOLVEDUPLICATES_FINDDUPLICATES "[Resolve Duplicates]: Finding duplicates...";
+
+  IDS_EXPLODE_NAME "Explode Segments";
+  IDS_EXPLODE_HELP "Explode geometry groups into separate objects.";
+  IDS_EXPLODE_FINDING_GROUPS "[Explode]: Finding polygon groups...";
+  IDS_EXPLODE_BUILDING_GEOMETRY "[Explode]: Building new geometry...";
+  IDS_EXPLODE_INSERTING_OBJECTS "[Explode]: Inserting generated objects into the scene...";
+
+  // Dependency Manager
+  // ------------------
+
+  IDC_DEPENDENCYMANAGER_NAME "Dependency Manager";
+  IDC_DEPENDENCYMANAGER_HELP "Opens the Dependency Manager. Hold CTRL to create a new window.";
+  IDC_DEPENDENCYMANAGER_DUPLICATE_TOOLTIP "Create a new Dependency Manager window.";
+  IDC_DEPENDENCYMANAGER_SHOWEMPTY_TOOLTIP "Show/Hide emtpy source objects.";
+  IDC_DEPENDENCYTYPE_EFFECTORS "MoGraph Effectors";
+  IDC_DEPENDENCYTYPE_FORCES "Dynamics Forces";
+  IDC_DIALOGMAXREACHED "Only # dialogs can be opened at the same time.";
+  MENU_TYPE "Mode";
+  MENU_TYPE_CUSTOM "Custom";
+
+  // TimeHide
+  // --------
+
+  IDC_TIMEHIDE_NAME "TimeHide";
+
+  // Pr1mitives
+  // ----------
+
+  IDS_PR1MITIVE_NAME      "Pr1mitive #";
+  IDS_NETNOTRUNNING       "Pr1mitive #: You can not use the NET license with a Cinema 4D instance. Enter DEMO for the demo-version.";
+
+  IDS_LASTRUN             "Last pass solved in # milliseconds.";
+  IDS_LASTRUN_MULTI       "Last pass solved in # milliseconds using # thread(s).";
+
+  IDS_Opr1m_room          "Room";
+  IDS_Opr1m_splinechamfer "Spline Chamfer";
+  IDS_Opr1m_proxygen      "Proxy Generator";
+  IDS_Opr1m_torusknot     "Torus Knot";
+  IDS_Opr1m_pillow        "Pillow";
+  IDS_Opr1m_seashell      "Seashell";
+  IDS_Opr1m_jet           "Jet Shape";
+  IDS_Opr1m_umbilictorus  "Umbilic Torus";
+  IDS_Opr1m_spintorus     "Spin Torus";
+  IDS_Opr1m_teardrop      "Tear Drop";
+  IDS_Opr1m_expression    "Expression Shape";
+  IDS_Tpr1m_axisalign     "Axis Align";
+
+  // Smear Deformer
+  // --------------
+
+  IDC_SMEARDEFORMER_NAME "Smear Deformer";
+  IDC_SMEARDEFORMER_VERSIONPROBLEM "Smear Deformer requires R# or newer.";
+  IDC_SMEARING_POSITIONAL "Direct";
+  IDC_SMEARING_HISTORICAL "Blend";
+  IDC_WEIGHTING_VERTEXNORMAL "Vertex Normal";
+
+  // XPresso Effector
+  // ----------------
+
+  IDC_CSVEFFECTOR_NAME "CSV";
+  IDC_CSVNODE_NAME "CSV Reader";
+  IDC_XPRESSOEFFECTOR_NAME "XPresso";
+  IDC_MODATANODE_NAME "MoData";
+  IDC_XPE_NAME "XPresso Effector";
+  IDC_POLYSIZEEFFECTOR_NAME "PolySize";
+
+  IDC_CSVEFFECTOR_STATS_FORMAT "# Row(s), # Column(s)";
+  IDC_CSVEFFECTOR_STATS_NOFILE "File not found.";
+  IDC_CSVEFFECTOR_STATS_UNKOWNERROR "Unknown error.";
+
+  IDC_CSVNODE_FILENAME "Filename";
+  IDC_CSVNODE_HEADER "Has Header";
+  IDC_CSVNODE_DELIMITER "Delimiter";
+  IDC_CSVNODE_ROWINDEX "Row Index";
+  IDC_CSVNODE_LOADED "Loaded";
+  IDC_CSVNODE_COLCOUNT_TOTAL "Total Columns";
+  IDC_CSVNODE_COLCOUNT "Current Columns";
+  IDC_CSVNODE_ROWCOUNT "Row Count";
+
+  IDC_CSVNODE_INVALIDPORT "Unkown Column";
+  IDC_CSVNODE_TABLECOLUMN_PREFIX "Column: ";
+
+  IDC_MODATANODE_PORT_INDEX "Clone Index";
+  IDC_MODATANODE_PORT_OBJECT "MoGraph Object";
+  IDC_MODATANODE_PORT_HOST "Effector";
+  IDC_MODATANODE_PORT_COUNT "Clone Count";
+  IDC_MODATANODE_PORT_ITERCOUNT "Iteration End";
+  IDC_MODATANODE_PORT_FALLOFF "Effector Falloff";
+  IDC_MODATANODE_PORT_INDEXOUT "Clone Index";
+  IDC_MODATANODE_PORT_SELWEIGHT "Selection Weight";
+
+  IDC_MODATANODE_PORT_MATRIX "Matrix";
+  IDC_MODATANODE_PORT_COLOR "Color";
+  IDC_MODATANODE_PORT_SIZE "Size";
+  IDC_MODATANODE_PORT_UVW "UVW";
+  IDC_MODATANODE_PORT_FLAGS "Flags";
+  IDC_MODATANODE_PORT_WEIGHT "Weight";
+  IDC_MODATANODE_PORT_CLONE "Clone Offset";
+  IDC_MODATANODE_PORT_TIME "Time";
+  IDC_MODATANODE_PORT_FALLOFF_WGT "Falloff Weight";
+  IDC_MODATANODE_PORT_SPLINE_SEGMENT "Spline Segment";
+  IDC_MODATANODE_PORT_GROWTH "Growth";
+  IDC_MODATANODE_PORT_LASTMAT "Last Matrix";
+  IDC_MODATANODE_PORT_STARTMAT "Start Matrix";
+  IDC_MODATANODE_PORT_ALT_INDEX "Alternative Index";
+
+  IDC_C4DVERSIONTOOLD "XPresso Effector: Runs on R15 or newer only.";
+  IDC_REGISTERED "XPresso Effector: Registered";
+
+  // TeaPresso
+  // ---------
+
+  IDC_TEAPRESSO "Tea Presso";
+
+  IDC_TVROOT "Root Node";
+  IDC_TVCURRENTDOCUMENT "Current Document";
+  IDC_TVCONTAINER "Container";
+  IDC_TVEACHDOCUMENT "For Each Document";
+  IDC_TVEACHOBJECT "For Each Object";
+  IDC_TVEACHTAG "For Each Tag";
+  IDC_TVCONDITION "Condition";
+  IDC_TVIF "If";
+  IDC_TVTHEN "Then";
+  IDC_TVELSE "Else";
+  IDC_TVPRINTCONTEXT "Printer";
+      IDC_PRINTCONTEXT_NOOBJECT "<Empty>";
+  IDC_TVCHECKTYPE "Check Type";
+  IDC_TVISSELECTED "Is Selected";
+  IDC_TVPYTHON "Python";
+  IDC_TVSELECT "Select";
+
+  IDC_TEXT_INEXPRESSION "[Expression]";
+  IDC_TEXT_INCONDITION "[Condition]";
+
+  IDC_TVMANAGER_TITLE "TeaPresso Manager";
+  IDC_TVMANAGER_OPEN "TeaPresso Manager";
+  IDC_TVMANAGER_OPEN_HELP "Open the TeaPresso Manager dialog.";
+
+  IDC_TVPLUGINS_TITLE "TeaPresso Plugins";
+  IDC_TVPLUGINS_OPEN "TeaPresso Plugins";
+  IDC_TVPLUGINS_OPEN_HELP "Open the TeaPresso Plugins dialog.";
+
+  IDC_NODES "Nodes";
+  IDC_OBJECTS "Objects";
+  IDC_TAGS "Tags";
+  IDC_SHADERS "Shaders";
+  IDC_MATERIALS "Materials";
+  IDC_SCENEHOOKS "Scene Hooks";
+
+  CMG_TREEVIEW "Hierarchy";
+
+  CONTEXT_EDIT "Edit";
+  CONTEXT_PLUGINS "Add Node";
+  BTN_EXECUTE "Execute";
+  BTN_EDITROOT "Edit Root";
+
+  FOLDER_GENERAL "General";
+  FOLDER_CONDITIONS "Conditions";
+  FOLDER_EXPRESSIONS "Expressions";
+  FOLDER_ITERATORS "Iterators";
+  FOLDER_CONTEXTS "Contexts";
+
+  COLUMN_MAIN "Node";
+  COLUMN_ENABLED "Enabled";
+  COLUMN_CUSTOM "Custom";
+
+  // AutoConnect
+  // -----------
+
+  IDS_AUTOCONNECT_NAME "AutoConnect";
+  IDS_AUTOCONNECT_HELP "Opens the AutoConnect window.";
+  IDS_AUTOCONNECT_OBJECT "Auto Connect Object";
+  IDS_AUTOCONNECT_CMG_DEVLINK "visit Niklas Rosenstein  ";
+  IDS_AUTOCONNECT_CMG_DEVLINK_LINK "http://niklasrosenstein.de/";
+}

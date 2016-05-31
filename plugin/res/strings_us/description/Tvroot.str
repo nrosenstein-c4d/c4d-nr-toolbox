@@ -1,0 +1,4 @@
+STRINGTABLE Tvroot {
+    Tvroot "Root ";
+    TVROOT_ADDUNDOS "Add Undos";
+}

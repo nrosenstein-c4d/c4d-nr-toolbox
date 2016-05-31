@@ -1,0 +1,5 @@
+STRINGTABLE Oxpressoeffector {
+    Oxpressoeffector "XPresso";
+    XPRESSOEFFECTOR_TIMEDEPENDENT "Time Dependent";
+    XPRESSOEFFECTOR_DEPENDENCIES "Dependencies";
+}

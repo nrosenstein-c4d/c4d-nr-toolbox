@@ -1,0 +1,19 @@
+// coding: ansii
+//
+// Copyright (C) 2012-2013, Niklas Rosenstein
+// All rights reserved.
+
+CONTAINER Opr1m_complexshape {
+    NAME Opr1m_complexshape;
+    INCLUDE Obase;
+
+    GROUP ID_OBJECTPROPERTIES {
+        LONG PR1M_COMPLEXSHAPE_USEGMENTS { MIN 1; };
+        LONG PR1M_COMPLEXSHAPE_VSEGMENTS { MIN 1; };
+        BOOL PR1M_COMPLEXSHAPE_OPTIMIZE  { DEFAULT 1; };
+        BOOL PR1M_COMPLEXSHAPE_MULTITHREADING { DEFAULT 1; };
+        STATICTEXT PR1M_COMPLEXSHAPE_LASTRUN { };
+    }
+
+    // HIDE PR1M_COMPLEXSHAPE_MULTITHREADING;
+}
