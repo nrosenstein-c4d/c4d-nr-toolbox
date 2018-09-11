@@ -1,3 +1,0 @@
-+++
-title = "Umbilic Torus Shape"
-+++

@@ -1,3 +1,0 @@
-+++
-title = "Torus Knot Spline"
-+++
