@@ -77,7 +77,7 @@ class ComponentList(object):
         result.append('HAVE_' + comp.name.upper())
     return result
 
-  def compile_all(self, include, **options):
+  def compile_all(self, dependencies=(), **options):
     result = []
     defines = self.defines()
     for comp in self:
@@ -85,17 +85,10 @@ class ComponentList(object):
         continue
       target('Component_' + comp.name)
       depends(comp.dependencies)
-      depends([
-        'net.maxon.c4d:addons',
-        'net.maxon.c4d:sdk',
-        'net.dlib:dlib',
-        ':webp'
-      ])
+      depends(dependencies)
       properties({
         'cxx.srcs': comp.sources,
-        'cxx.type': 'library',
-        'cxx.preferredLinkage': 'static',
-        'cxx.includes': include,
+        'cxx.link': False,
         'cxx.defines': comp.defines + defines,
         'cxx.enableExceptions': True,
         'cxx.cppStd': 'c++17',
@@ -130,45 +123,56 @@ components = (ComponentList()
     sources=['source/main.cpp', 'source/menu.cpp', 'source/config.cpp', 'source/fs.cpp']
   )
   .add("autoconnect",
+    enabled=True,
     sources=['source/autoconnect.cpp'],
   )
   .add("commands",
+    enabled=True,
     sources=glob(['source/commands/*.cpp'])
   )
   .add("colorpalette",
+    enabled=True,
     sources=glob(['source/colorpalette/*.cpp']),
     descriptions=['Xnrswatch']
   )
   .add("depmanager",
+    enabled=True,
     sources=glob(['source/depmanager/*.cpp'])
   )
   .add("pr1mitive",
+    enabled=True,
     sources=glob(['source/pr1mitive/**/*.cpp']),
     descriptions=glob_descriptions('?pr1m*'),
     defines=['PRMT'],
   )
   .add("procedural",
+    enabled=True,
     sources=glob(['source/procedural/**/*.cpp']),
     descriptions=glob_descriptions('nrprocedural_*')
   )
   .add("smeardeformer",
+    enabled=True,
     sources=glob(['source/smeardeformer/**/*.cpp']),
     descriptions=glob_descriptions('W*') + glob_descriptions('S*') + ['Oxpressoeffector']
   )
   .add("teapresso",
+    enabled=True,
     sources=glob(['source/teapresso/*.cpp']),
     descriptions=glob_descriptions('Tv*')
   )
   .add("nrworkflow",
+    enabled=True,
     sources=glob(['source/nrworkflow/*.cpp']),
     descriptions=['Htoolbox']
   )
   .add("xpe",
+    enabled=True,
     sources=glob(['source/xpe/*.cpp']),
     files=['plugin/res/xpe-preset.c4d'],
     descriptions=['Gvcsv', 'Gvmodata', 'Ocsveffector', 'Oxpressoeffector']
   )
   .add("webpio",
+    enabled=True,
     sources=['source/webpio.cpp'],
     dependencies=[':webp']
   )
@@ -178,8 +182,15 @@ components = (ComponentList()
 # Compilation Targets
 # ============================================================================
 
-objects = components.compile_all(
-  include = [
+target('deps')
+depends([
+  'net.maxon.c4d:addons',
+  'net.maxon.c4d:sdk',
+  'net.dlib:dlib',
+  ':webp'
+], public=True)
+properties({
+  '@cxx.includes': [
     'plugin',
     'include',
     'source',
@@ -187,10 +198,15 @@ objects = components.compile_all(
     'vendor/NiklasRosenstein/nr.mathlib/include',
     'vendor/NiklasRosenstein/nr.utils/include',
     path.abs(gitversion_dir)
-  ]
-)
+  ],
+  '@cxx.defines': ['NR_TOOLBOX_ISR20'] if c4d.release >= 20 else []
+})
+
+
+objects = components.compile_all(dependencies=[':deps'])
 
 target('plugin')
+depends(':deps')
 depends(objects)
 properties({
   'cxx.productName': 'c4d-nr-toolkit' + c4d.plugin_suffix,

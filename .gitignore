@@ -18,6 +18,8 @@ generated/
 *.dylib64
 *.cdl
 *.cdl64
+*.xdl64
+*.xlib
 
 # Compiled Static libraries
 *.lai

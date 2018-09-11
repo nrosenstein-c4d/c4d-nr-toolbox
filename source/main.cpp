@@ -13,6 +13,8 @@
 
 namespace nr { using namespace niklasrosenstein; }
 
+NR_C4D_CLEANUP_HEAD;
+
 #define _REGISTER(x)\
   do {\
     extern Bool Register##x();\
@@ -133,7 +135,6 @@ void PluginEnd() {
 //============================================================================
 //============================================================================
 Bool PluginMessage(Int32 msg, void* pdata) {
-  GePrint(">>>>> nrtoolbox loaded\n"_s);
   switch (msg) {
     case C4DPL_INIT_SYS:
       c4d_apibridge::GlobalResource().Init();

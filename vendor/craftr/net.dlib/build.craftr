@@ -6,7 +6,7 @@ import {pkg_config} from 'net.craftr.tool.pkg-config'
 project('net.dlib', '1.0')
 
 options = module.options
-options.add('version', str, '19.2')
+options.add('version', str, '19.15')
 options.add('nogui', bool, False)
 options.add('isocpp', bool, False)
 
@@ -50,3 +50,5 @@ if options.isocpp:
   properties({
     '@cxx.defines+': ['DLIB_ISO_CPP_ONLY']
   })
+
+cxx.build()

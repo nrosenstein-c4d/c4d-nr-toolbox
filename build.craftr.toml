@@ -7,7 +7,8 @@ rtti = true
 
 [dlib]
 nogui = true
-isocpp = true
+isocpp = false
 
 [msvc]
 version = 140
+clangcl = true

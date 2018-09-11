@@ -4,13 +4,18 @@
 #include <map>
 #include <fstream>
 
-#include <c4d.h>
 #include <dlib/config_reader.h>
+#if NR_TOOLBOX_ISR20
+  #include "undef_win_macros.h"
+#endif
+
+#include <c4d.h>
 #include <NiklasRosenstein/c4d/cleanup.hpp>
 #include <NiklasRosenstein/c4d/raii.hpp>
 
 #include "config.h"
 #include "menu.h"
+
 
 using config_reader = dlib::config_reader;
 using config_reader_access_error = config_reader::config_reader_access_error;
