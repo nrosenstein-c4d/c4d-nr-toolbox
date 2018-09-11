@@ -11,6 +11,7 @@
 #include "utils.h"
 #include "extensions.h"
 #include "internal.h"
+#include "../menu.h"
 #include "res/c4d_symbols.h"
 
 #include <lib_activeobjectmanager.h>
@@ -213,11 +214,9 @@ public:
 
     /* BaseList2DTreeModel Overrides */
 
-    virtual BaseList2D* AskInsertObject(
-                void* root, void* ud, BaseList2D* node, void** pd, Bool copy);
+    virtual BaseList2D* AskInsertObject(void* root, void* ud, BaseList2D* node, void** pd, Bool copy) override;
 
-    virtual void AskInsertObjectDone(
-                void* root, void* ud, BaseList2D* node, void* pd);
+    virtual void AskInsertObjectDone(void* root, void* ud, BaseList2D* node, void* pd) override;
 
     /* TreeViewFunctions Overrides */
 
@@ -831,10 +830,11 @@ Bool TvManagerCommand::RestoreLayout(void* secret) {
 }
 
 static Bool RegisterTvManagerCommand() {
+    menu::root().AddPlugin(ID_TVMANAGER_COMMAND);
     return RegisterCommandPlugin(
         ID_TVMANAGER_COMMAND,
         GeLoadString(IDC_TVMANAGER_OPEN),
-        PLUGINFLAG_COMMAND_HOTKEY,
+        PLUGINFLAG_COMMAND_HOTKEY | PLUGINFLAG_HIDEPLUGINMENU,
         AutoBitmap("teapresso-manager.png"_s),
         GeLoadString(IDC_TVMANAGER_OPEN_HELP),
         NewObjClear(TvManagerCommand));
@@ -867,10 +867,11 @@ Bool TvPluginsCommand::RestoreLayout(void* secret) {
 }
 
 static Bool RegisterTvPluginsCommand() {
+    menu::root().AddPlugin(ID_TVPLUGINS_COMMAND);
     return RegisterCommandPlugin(
         ID_TVPLUGINS_COMMAND,
         GeLoadString(IDC_TVPLUGINS_OPEN),
-        PLUGINFLAG_COMMAND_HOTKEY,
+        PLUGINFLAG_COMMAND_HOTKEY | PLUGINFLAG_HIDEPLUGINMENU,
         AutoBitmap("teapresso-plugins.png"_s),
         GeLoadString(IDC_TVPLUGINS_OPEN_HELP),
         NewObjClear(TvPluginsCommand));
@@ -977,6 +978,7 @@ static Bool RegisterTeaPressoHook() {
 // ===========================================================================
 
 Bool RegisterTeapresso() {
+    menu::root().AddSeparator();
     if (!RegisterDescription(Tvbase, "Tvbase"_s)) {
         GePrint("Critical: Failed to register Tvbase description.");
         return false;
