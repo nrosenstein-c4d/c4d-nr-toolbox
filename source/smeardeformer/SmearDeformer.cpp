@@ -355,8 +355,8 @@ void SmearDeformer::CheckDirty(BaseObject* op, BaseDocument* doc) {
 }
 
 Bool SmearDeformer::EnsureEngines(BaseContainer* bc) {
-    Int32 id_weighting_engine = bc->GetBool(SMEARDEFORMER_WEIGHTINGENGINE);
-    Int32 id_smearing_engine = bc->GetBool(SMEARDEFORMER_SMEARINGENGINE);
+    Int32 id_weighting_engine = bc->GetInt32(SMEARDEFORMER_WEIGHTINGENGINE);
+    Int32 id_smearing_engine = bc->GetInt32(SMEARDEFORMER_SMEARINGENGINE);
     Bool reallocated = false;
 
     BaseEngine::Realloc((BaseEngine*&) m_weighting_engine, id_weighting_engine, ID_WEIGHTINGENGINE, &reallocated);
