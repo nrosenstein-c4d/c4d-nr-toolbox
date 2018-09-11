@@ -1,0 +1,202 @@
+import * from 'craftr'
+import cxx from 'net.craftr.lang.cxx'
+import c4d from 'net.maxon.c4d'
+from craftr.utils import sh
+
+project('com.niklasrosenstein.c4d-nr-toolbox', '1.0')
+
+target('webp')
+properties({
+  '@cxx.includes': ['vendor/webp/include'],
+  '@cxx.libpath': ['vendor/webp/lib'],
+  '@cxx.systemLibraries': ['libwebp']
+})
+
+# ============================================================================
+# GIT
+# ============================================================================
+
+def write_gitversion():
+  filename = path.join(module.scope.build_directory, 'include/GIT_VERSION.h')
+  dirname = path.dir(filename)
+  path.makedirs(dirname)
+  try:
+    description = sh.check_output(['git', 'describe', '--tags'], stderr=sh.DEVNULL).decode().strip()
+  except sh.CalledProcessError:
+    description = sh.check_output(['git', 'rev-parse', 'HEAD']).decode().strip()[:10]
+  with open(filename, 'w') as fp:
+    fp.write('#pragma once\n#define GIT_VERSION "{}"\n'.format(description))
+  return dirname
+
+gitversion_dir = write_gitversion()
+
+# ============================================================================
+# Components Base
+# ============================================================================
+
+class Component(object):
+  """
+  Represents a component of the nr-toolbox plugin that is to be compiled
+  into the plugin. Every component lists the source files that it needs
+  compiled, a preprocessor definition that will be set when the component
+  is enabled and a list of files that are to be included when packaging
+  the plugin.
+  """
+
+  instances = []
+
+  def __init__(self, name, defines=(), files=(), descriptions=(),
+               sources=(), enabled=True, dependencies=[]):
+    self.name = name
+    self.defines = ["HAVE_" + name.upper()] + list(defines)
+    self.files = list(files)
+    self.descriptions = descriptions
+    self.sources = sources
+    self.enabled = enabled
+    self.dependencies = dependencies
+
+  def __repr__(self):
+    return 'Component({})'.format(self.name)
+
+class ComponentList(object):
+
+  def __init__(self):
+    self.components = []
+
+  def __iter__(self):
+    return iter(filter(lambda x: x.enabled, self.components))
+
+  def add(self, *args, **kwargs):
+    self.components.append(Component(*args, **kwargs))
+    return self
+
+  def defines(self):
+    result = []
+    for comp in self:
+      if comp.enabled:
+        result.append('HAVE_' + comp.name.upper())
+    return result
+
+  def compile_all(self, include, **options):
+    result = []
+    defines = self.defines()
+    for comp in self:
+      if not comp.enabled:
+        continue
+      target('Objects_' + comp.name)
+      depends(comp.dependencies)
+      depends([
+        'net.maxon.c4d:addons',
+        'net.maxon.c4d:sdk',
+        'net.dlib:dlib',
+        ':webp'
+      ])
+      properties({
+        'cxx.srcs': comp.sources,
+        'cxx.type': 'library',
+        'cxx.preferredLinkage': 'static',
+        'cxx.includes': include,
+        'cxx.defines': comp.defines + defines,
+        'cxx.enableExceptions': True,
+        'cxx.cppStd': 'c++14',
+        'c4d.SourceProcessor': False
+      })
+      if OS.id == 'darwin':
+        properties({
+          'cxx.compilerFlags+': ['-Wno-shadow', '-Wno-missing-prototypes']
+        })
+      if OS.id == 'win':
+        properties({
+          'cxx.defines+': ['_CRT_SECURE_NO_WARNINGS'],
+          'cxx.prefixHeaders+': ['eh.h']  # temporary MSVC fix
+        })
+      c4d.build()
+      result.append(current_target())
+    return result
+
+def glob_descriptions(pattern):
+  result = glob(['plugin/res/description/' + pattern + '.h'])
+  return [path.rmvsuffix(path.base(x)) for x in result]
+
+# ============================================================================
+# Component Declaration
+# ============================================================================
+
+components = (ComponentList()
+  .add("main",
+    sources=['source/main.cpp', 'source/menu.cpp', 'source/config.cpp']
+  )
+  .add("autoconnect",
+    sources=['source/autoconnect.cpp'],
+  )
+  .add("commands",
+    sources=glob(['source/commands/*.cpp'])
+  )
+  .add("colorpalette",
+    sources=glob(['source/colorpalette/*.cpp']),
+    descriptions=['Xnrswatch']
+  )
+  .add("depmanager",
+    sources=glob(['source/depmanager/*.cpp'])
+  )
+  .add("pr1mitive",
+    sources=glob(['source/pr1mitive/**/*.cpp']),
+    descriptions=glob_descriptions('?pr1m*'),
+    defines=['PRMT'],
+  )
+  .add("procedural",
+    enabled=False,
+    sources=glob(['source/procedural/**/*.cpp']),
+    descriptions=glob_descriptions('nrprocedural_*')
+  )
+  .add("smeardeformer",
+    sources=glob(['source/smeardeformer/**/*.cpp']),
+    descriptions=glob_descriptions('W*') + glob_descriptions('S*') + ['Oxpressoeffector']
+  )
+  .add("teapresso",
+    enabled=False,
+    sources=glob(['source/teapresso/*.cpp']),
+    descriptions=glob_descriptions('Tv*')
+  )
+  .add("nrworkflow",
+    sources=glob(['source/nrworkflow/*.cpp']),
+    descriptions=['Htoolbox']
+  )
+  .add("xpe",
+    sources=glob(['source/xpe/*.cpp']),
+    files=['plugin/res/xpe-preset.c4d'],
+    descriptions=['Gvcsv', 'Gvmodata', 'Ocsveffector', 'Oxpressoeffector']
+  )
+  .add("webpio",
+    sources=['source/webpio.cpp'],
+    dependencies=[':webp']
+  )
+)
+
+# ============================================================================
+# Compilation Targets
+# ============================================================================
+
+objects = components.compile_all(
+  include = ['plugin', 'include', 'source', gitversion_dir]
+)
+
+target('plugin')
+depends(objects)
+properties({
+  'cxx.productName': 'c4d-nr-toolkit' + c4d.plugin_suffix,
+  'cxx.productDirectory': 'plugin'
+})
+c4d.build()
+
+"""
+serial_bin = cxx.executable(
+  inputs = objects + [cxx.compile_cpp(
+    sources = map(local, ['pr1mitive_serial_main.cpp']),
+    include = [local('source')]
+  )],
+  output = 'pr1mitive_serial_main'
+)
+#serial_bin.explicit = True
+serial = runtarget(serial_bin)
+"""

@@ -1,5 +1,5 @@
-nr-toolbox Changelog
-====================
+c4d-nr-toolbox Changelog
+========================
 
 TimeHide
 --------

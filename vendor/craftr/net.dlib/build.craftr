@@ -1,0 +1,51 @@
+import * from 'craftr'
+import cxx from 'net.craftr.lang.cxx'
+import {get_source_archive} from 'net.craftr.tool.download'
+import {pkg_config} from 'net.craftr.tool.pkg-config'
+
+project('net.dlib', '1.0')
+
+options = module.options
+options.add('version', str, '19.2')
+options.add('nogui', bool, False)
+options.add('isocpp', bool, False)
+
+source_directory = get_source_archive(
+  "http://dlib.net/files/dlib-{}.zip".format(options.version))
+
+target('dlib')
+properties({
+  '@cxx.includes': [source_directory],
+  '@cxx.cppStd': 'c++11',
+  'cxx.srcs': [path.join(source_directory, 'dlib/all/source.cpp')],
+  'cxx.type': 'library',
+  'cxx.preferredLinkage': 'static'
+})
+
+if OS.id == 'win32':
+  properties({
+    '@cxx.systemLibraries+': ['ws2_32', 'winmm']
+  })
+  if not options.nogui:
+    properties({
+      '@cxx.systemLibraries+': ['comctl32', 'gdi32', 'imm32']
+    })
+elif OS.id == 'linux':
+  properties({
+    '@cxx.systemLibraries+': ['pthread', 'm'],
+    '@cxx.cppStd': 'gnu++11'
+  })
+  if not options.nogui:
+    pkg_config('x11', public=True)
+else:
+  print('[{}]: note: disable GUI support on Mac OS'.format(__name__))
+  options.nogui = True
+
+if options.nogui:
+  properties({
+    '@cxx.defines+': ['DLIB_NO_GUI_SUPPORT']
+  })
+if options.isocpp:
+  properties({
+    '@cxx.defines+': ['DLIB_ISO_CPP_ONLY']
+  })

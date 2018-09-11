@@ -1,0 +1,10 @@
+[craftr]
+linkModules = [ "vendor/craftr/net.maxon.c4d",
+                "vendor/craftr/net.dlib" ]
+
+[c4d]
+rtti = true
+
+[dlib]
+nogui = true
+isocpp = true

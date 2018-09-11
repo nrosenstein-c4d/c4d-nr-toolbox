@@ -1,0 +1,4 @@
+ModuleId=com.niklasrosenstein.c4d-nr-toolbox
+C4D=true
+APIS=cinema.framework
+stylecheck=false
