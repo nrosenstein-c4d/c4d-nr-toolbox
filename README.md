@@ -1,40 +1,135 @@
 # c4d-nr-toolbox
 
 This is a collection of Cinema 4D C++ plugins, most of which are prototypes
-that have not been released before.
+that have not been released before. The collection also includes the
+**TimeHide** and **SafeFrame** plugins which I used to sell on my website.
 
-The collection also includes the TimeHide and SafeFrame plugins which I used
-to sell on my website.
+I chose to open source all of it as I'm no longer planning on a commercial
+release on any of these.
 
-__Disclaimer__: Most of this is really, really old code. Don't judge me by it.
+> __Disclaimer__: Most of this is really, really old code! I've made an effort
+> to make it available for R20. If something isn't working or if the plugin
+> destroys your PC, car and house, it may be my fault, but you can not hold me
+> accountable for it!
 
-## Contents
+__Table of Contents__
 
-__Previously Commercial Plugins__
+* [Download & Installation Instructions](#download--install-instructions)
+* [Plugin Contents](#plugin-contents)
+* [Build Instructions](#build-instructions)
+* [Third party libraries](#third-party-libraries)
 
-* nrWorkflow: Contains TimeHide and SafeFrame
+---
 
-__Previously Free Plugins__
+## Download & Installation Instructions
 
-* AutoConnect
-
-__Prototypes__
-
-* Colorpalette
-* Commands (Explode, Resolve Duplicates)
-* Dependency Manager (for MoGraph and Dynamics)
-* Pr1mitive
-* Procedural
-* SmearDeformer
-* TeaPresso
-* XPresso Effector
-* WebP Saver/Loader
-
-## Download
-
-Check the [Releases] page for prebuilt binaries.
+Check the [Releases] page for prebuilt binaries. Unzip the appropriate ZIP
+archive into your Cinema 4D plugins folder.
 
 [Releases]: https://github.com/NiklasRosenstein/c4d-nr-toolbox/releases
+
+---
+
+## Plugin Contents
+
+* [Feature Manager](#feature-manager)
+* [nrWorkflow](#nrworkflow)
+    * [TimeHide](#timehide)
+    * [SafeFrame](#safeframe)
+    * [Swatches](#swatches)
+    * [Viewport](#viewport)
+* [Commands](#commands)
+    * [Explode](#explode)
+    * [Resolve Duplicates](#resolve-duplicates)
+* [Deformers](#deformers)
+    * [SmearDeformer](#smeardeformer)
+* [Effectors](#effectors)
+    * [XPresso Effector](#xpresso-effector)
+    * [CSV Effector](#csv-effector)
+* [XPresso Nodes](#xpresso-nodes)
+    * [MoData Node](#modata-node)
+    * [CSV Node](#csv-node)
+* [Savers/Loaders](#savers-loaders)
+    * [WebP](#webp)
+* [AutoConnect](#autoconnect)
+* [Dependency Manager](#dependency-manager)
+* [Pr1mitive](#pr1mitive)
+* [Procedural](#procedural)
+* [TeaPresso](#teapresso)
+
+### Feature Manager
+
+![](.img/feature_manager.png)
+
+### nrWorkflow
+
+![](.img/workflow.png)
+
+#### TimeHide
+
+#### SafeFrame
+
+#### Swatches
+
+#### Viewport
+
+### Commands
+
+#### Explode
+
+#### Resolve Duplicates
+
+### Deformers
+
+#### SmearDeformer
+
+![](.img/smear_deformer.png)
+
+### Effectors
+
+#### XPresso Effector
+
+![](.img/xpresso_effector.png)
+
+#### CSV Effector
+
+![](.img/csv_effector.png)
+
+### XPresso Nodes
+
+#### MoData Node
+
+#### CSV Node
+
+### Savers/Loaders
+
+#### WebP
+
+### AutoConnect
+
+![](.img/autoconnect.png)
+
+Originally available at https://github.com/NiklasRosenstein/c4d-auto-connect
+
+Create MoGraph connectors on an object hierarchy. This project started
+May 2013 and is now publicly available with source code. It is almost in
+its original state. There is no guarantee that it will be maintained, but
+feel free to create a new Issue if you have problems conpiling the plugin
+or have an idea for improvements.
+
+### Dependency Manager
+
+![](.img/depmanager.png)
+
+### Pr1mitive
+
+### Procedural
+
+### TeaPresso
+
+![](.img/teapresso.png)
+
+---
 
 ## Build Instructions
 
