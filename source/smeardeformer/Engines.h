@@ -8,8 +8,6 @@
 #ifndef NR_SMEARINGENGINES_H
 #define NR_SMEARINGENGINES_H
 
-    #include "misc/legacy.h"
-
     #include "nrUtils/Description.h"
 
     #include "SmearData.h"
@@ -27,22 +25,22 @@
         virtual ~BaseEngine() { }
 
         virtual Bool Construct() {
-            return TRUE;
+            return true;
         }
 
         virtual void Destroy() {
         }
 
         virtual Bool InitParameters(BaseContainer& bc) {
-            return TRUE;
+            return true;
         }
 
         virtual Bool InitData(const BaseContainer& bc, const SmearData& data) {
-            return TRUE;
+            return true;
         }
 
         virtual Bool Init(const SmearData& data, const SmearHistory& history) {
-            return TRUE;
+            return true;
         }
 
         virtual void Free() {
@@ -50,35 +48,35 @@
 
         virtual Bool EnhanceDescription(Description* desc) {
             nr::ExtendDescription(desc, GetId(), GetBase());
-            return TRUE;
+            return true;
         }
 
-        virtual Bool GetEnabling(LONG itemid, const BaseContainer& data, const BaseContainer& itemdesc) {
-            return TRUE;
+        virtual Bool GetEnabling(Int32 itemid, const BaseContainer& data, const BaseContainer& itemdesc) {
+            return true;
         }
 
-        LONG GetId() const {
+        Int32 GetId() const {
             return m_id;
         }
 
-        LONG GetBase() const {
+        Int32 GetBase() const {
             return m_base;
         }
 
-        virtual Bool IsInstanceOf(LONG type) const {
+        virtual Bool IsInstanceOf(Int32 type) const {
             return type == GetId();
         }
 
-        static BaseEngine* Alloc(LONG type, LONG instance_of=0);
+        static BaseEngine* Alloc(Int32 type, Int32 instance_of=0);
 
-        static Bool Realloc(BaseEngine*& engine, LONG type, LONG instance_of=0, Bool* reallocated=NULL);
+        static Bool Realloc(BaseEngine*& engine, Int32 type, Int32 instance_of=0, Bool* reallocated=nullptr);
 
         static void Free(BaseEngine*& engine);
 
     private:
 
-        LONG m_id;
-        LONG m_base;
+        Int32 m_id;
+        Int32 m_base;
 
     };
 
@@ -88,15 +86,15 @@
 
     public:
 
-        virtual Real WeightVertex(LONG vertex_index, const SmearData& data, const SmearHistory& history) = 0;
+        virtual Float WeightVertex(Int32 vertex_index, const SmearData& data, const SmearHistory& history) = 0;
 
         //| BaseEngine Overrides
 
-        virtual Bool IsInstanceOf(LONG type) const {
+        virtual Bool IsInstanceOf(Int32 type) const {
             if (type == ID_WEIGHTINGENGINE) {
-                return TRUE;
+                return true;
             }
-            return FALSE;
+            return false;
         }
 
    };
@@ -105,33 +103,33 @@
 
     public:
 
-        virtual LONG GetMaxHistoryLevel() const = 0;
+        virtual Int32 GetMaxHistoryLevel() const = 0;
 
-        virtual Vector SmearVertex(LONG vertex_index, Real weight, const SmearData& data, const SmearHistory& history) = 0;
+        virtual Vector SmearVertex(Int32 vertex_index, Float weight, const SmearData& data, const SmearHistory& history) = 0;
 
         //| BaseEngine Overrides
 
-        virtual Bool IsInstanceOf(LONG type) const {
+        virtual Bool IsInstanceOf(Int32 type) const {
             if (type == ID_SMEARINGENGINE) {
-                return TRUE;
+                return true;
             }
-            return FALSE;
+            return false;
         }
 
     };
 
     struct EnginePlugin {
-        LONG id;
-        LONG base;
+        Int32 id;
+        Int32 base;
         String name;
         EngineAllocator alloc;
     };
 
-    Bool RegisterEnginePlugin(LONG id, LONG base, const String& name, const String& desc, EngineAllocator alloc);
+    Bool RegisterEnginePlugin(Int32 id, Int32 base, const String& name, const String& desc, EngineAllocator alloc);
 
-    const EnginePlugin* GetFirstEnginePlugin(LONG instance_of);
+    const EnginePlugin* GetFirstEnginePlugin(Int32 instance_of);
 
-    const EnginePlugin* FindEnginePlugin(LONG type);
+    const EnginePlugin* FindEnginePlugin(Int32 type);
 
     class EnginePluginIterator {
 

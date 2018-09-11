@@ -11,12 +11,13 @@
 #include <c4d_baseeffectordata.h>
 #include <lib_activeobjectmanager.h>
 #include <dynrigidbodytag.h>
-#include <Obasemogen.h>
-#include <nr/c4d/util.h>
-#include <nr/c4d/cleanup.h>
+#include <obasemogen.h>
+#include <NiklasRosenstein/c4d/utils.hpp>
+#include <NiklasRosenstein/c4d/cleanup.hpp>
 #include "res/c4d_symbols.h"
 #include "depmanager.h"
 
+namespace nr { using namespace niklasrosenstein; }
 using namespace nr::depmanager;
 
 enum

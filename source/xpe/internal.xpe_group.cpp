@@ -14,35 +14,35 @@
  * language governing permissions and limitations under the License.
  */
 
-#include "misc/legacy.h"
 #include <c4d_graphview.h>
 
-#include <nr/c4d/cleanup.h>
+#include <NiklasRosenstein/c4d/cleanup.hpp>
 #include "internal.xpe_group.h"
 #include "res/c4d_symbols.h"
 
-static String* name = NULL;
+static String* name = nullptr;
 
 const String* XPE_GetName() {
     return name;
 }
 
 BaseBitmap* XPE_GetIcon() {
-    return NULL;
+    return nullptr;
 }
 
 Bool RegisterXPEGroup() {
     static GV_OPGROUP_HANDLER handler;
     ClearMem(&handler, sizeof(handler));
 
-    name = NewObj(String);
-    if (name) *name = GeLoadString(IDC_XPE_NAME);
+    iferr (name = NewObj(String))
+        return false;
+    *name = GeLoadString(IDC_XPE_NAME);
 
     handler.group_id = ID_GV_OPGROUP_TYPE_XPRESSOEFFECTOR;
     handler.GetName = XPE_GetName;
     handler.GetIcon = XPE_GetIcon;
 
-    nr::c4d::cleanup([] {
+    niklasrosenstein::c4d::cleanup([] {
         DeleteObj(name);
     });
 

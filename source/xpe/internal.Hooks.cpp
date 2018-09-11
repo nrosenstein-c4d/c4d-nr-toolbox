@@ -14,7 +14,6 @@
  * language governing permissions and limitations under the License.
  */
 
-#include "misc/legacy.h"
 #include "XPressoEffector.h"
 #include "MoDataNode.h"
 
@@ -22,17 +21,17 @@
     storage = old;\
     old = new;
 /*
-Bool (C4DAtom::*h_C4DAtom_Message)(LONG type, void* data) = NULL;
+Bool (C4DAtom::*h_C4DAtom_Message)(Int32 type, void* data) = nullptr;
 
-Bool C4DAtom_Message(C4DAtom* t, LONG type, void* data) {
+Bool C4DAtom_Message(C4DAtom* t, Int32 type, void* data) {
     if (h_C4DAtom_Message) {
         return (t->*h_C4DAtom_Message)(type, data);
     }
 }
 */
 Bool RegisterHooks() {
-    // EXCHANGE(C4DOS.At->Message, h_C4DAtom_Message, (Bool (C4DAtom::*)(LONG, void*)) C4DAtom_Message);
-    return TRUE;
+    // EXCHANGE(C4DOS.At->Message, h_C4DAtom_Message, (Bool (C4DAtom::*)(Int32, void*)) C4DAtom_Message);
+    return true;
 }
 
 

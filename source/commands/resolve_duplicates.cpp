@@ -9,7 +9,8 @@
 #define PRINT_PREFIX "[nr-toolbox/Resolve Duplicates]: "
 
 #include <c4d.h>
-#include <nr/math/matrix.h>
+#include <c4d_apibridge.h>
+#include <NiklasRosenstein/math/matrix.hpp>
 #include "res/c4d_symbols.h"
 #include "misc/print.h"
 #include "misc/raii.h"
@@ -18,6 +19,8 @@
 
 static Int32 const PLUGIN_ID = 1037480;
 
+namespace nr { using namespace niklasrosenstein; }
+
 namespace resolve_duplicates {
 
 //============================================================================
@@ -25,7 +28,7 @@ namespace resolve_duplicates {
  * A 4x4 matrix we use in the Cinema 4D context.
  */
 //============================================================================
-typedef nr::math::matrix<4, 4, Float> m44;
+typedef nr::matrix<4, 4, Float> m44;
 
 //============================================================================
 /*!
@@ -231,7 +234,7 @@ struct ObjectInfo {
       // The order of the polygons doesn't matter, thus we try to find a
       // matching polygon in the target mesh for each polygon in source mesh.
       maxon::BaseArray<bool> matchedPolys;
-      if (!matchedPolys.Resize(fcnt)) return false;
+      iferr (matchedPolys.Resize(fcnt)) return false;
 
       // Helper function to compare two polygons.
       auto eq = [](CPolygon const& a, CPolygon const& b) -> Bool {
@@ -280,7 +283,11 @@ struct ObjectInfo {
     }
 
     instance->SetParameter(INSTANCEOBJECT_LINK, source.op, DESCFLAGS_SET_0);
-    instance->SetParameter(INSTANCEOBJECT_RENDERINSTANCE, true, DESCFLAGS_SET_0);
+    #if API_VERSION < 20000
+      instance->SetParameter(INSTANCEOBJECT_RENDERINSTANCE, true, DESCFLAGS_SET_0);
+    #else
+      instance->SetParameter(INSTANCEOBJECT_RENDERINSTANCE_MODE, INSTANCEOBJECT_RENDERINSTANCE_MODE, DESCFLAGS_SET_0);
+    #endif
 
     ObjectColorProperties cprops; this->op->GetColorProperties(&cprops);
     instance->SetColorProperties(&cprops);
@@ -416,7 +423,7 @@ Bool ResolveDuplicatesCommand::Execute(BaseDocument* doc) {
     if (targetCount > 0) {
       root->SetEditorMode(MODE_OFF);
       root->SetRenderMode(MODE_OFF);
-      root->SetName("Instance Sources");
+      root->SetName("Instance Sources"_s);
       doc->InsertObject(root, nullptr, nullptr);
       if (undos) doc->AddUndo(UNDOTYPE_NEW, root);
     }
@@ -446,5 +453,11 @@ Bool RegisterResolveDuplicates() {
   Int32 const info = PLUGINFLAG_HIDEPLUGINMENU;
   raii::AutoBitmap const icon("icons/resolve_duplicates.png");
   String const help = GeLoadString(IDS_RESOLVEDUPLICATES_HELP);
-  return RegisterCommandPlugin(PLUGIN_ID, name, info, icon, help, NewObj(ResolveDuplicatesCommand));
+  return RegisterCommandPlugin(
+    PLUGIN_ID,
+    name,
+    info,
+    icon,
+    help,
+    NewObjClear(ResolveDuplicatesCommand));
 }

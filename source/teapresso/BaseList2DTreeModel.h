@@ -8,73 +8,67 @@
 #ifndef BASELIST2D_TREEVIEWMODEL_H
 #define BASELIST2D_TREEVIEWMODEL_H
 
-    #include "misc/legacy.h"
     #include <c4d.h>
+    #include <c4d_apibridge.h>
 
     class BaseList2DTreeModel : public TreeViewFunctions {
 
     protected:
 
         virtual void BitAll(
-                    void* root, void* ud, void* node, LONG bitmask, Bool on);
+                    void* root, void* ud, void* node, Int32 bitmask, Bool on);
 
         virtual void DeleteByBit(
-                    void* root, void* ud, void* node, LONG bitmask,
-                    BaseDocument* doc=NULL);
+                    void* root, void* ud, void* node, Int32 bitmask,
+                    BaseDocument* doc=nullptr);
 
         virtual void CollectByBit(
-                    void* root, void* ud, void* node, LONG bitmask,
-                    AtomArray* arr, Bool includeChildren=TRUE);
+                    void* root, void* ud, void* node, Int32 bitmask,
+                    AtomArray* arr, Bool includeChildren=true);
 
     public:
 
         virtual Bool AllowRemoveNode(void* root, void* ud, BaseList2D* node);
 
-        virtual BaseList2D* AskInsertObject(
-                    void* root, void* ud, BaseList2D* node, void** pd, Bool copy);
+        virtual BaseList2D* AskInsertObject(void* root, void* ud, BaseList2D* node, void** pd, Bool copy);
 
-        virtual void AskInsertObjectDone(
-                    void* root, void* ud, BaseList2D* node, void* pd);
+        virtual void AskInsertObjectDone(void* root, void* ud, BaseList2D* node, void* pd);
 
         /* TreeViewFunctions Overrides */
 
-        virtual void* GetFirst(void* root, void* ud);
+        virtual void* GetFirst(void* root, void* ud) override;
 
-        virtual void* GetNext(void* root, void* ud, void* node);
+        virtual void* GetNext(void* root, void* ud, void* node) override;
 
-        virtual void* GetPred(void* root, void* ud, void* node);
+        virtual void* GetPred(void* root, void* ud, void* node) override;
 
-        virtual void* GetDown(void* root, void* ud, void* node);
+        virtual void* GetDown(void* root, void* ud, void* node) override;
 
-        virtual String GetName(void* root, void* ud, void* node);
+        virtual String GetName(void* root, void* ud, void* node) override;
 
-        virtual void SetName(
-                    void* root, void* ud, void* node, const String& name);
+        virtual void SetName(void* root, void* ud, void* node, const c4d_apibridge::String& name) override;
 
-        virtual Bool IsSelected(void* root, void* ud, void* node);
+        virtual Bool IsSelected(void* root, void* ud, void* node) override;
 
-        virtual Bool IsOpened(void* root, void* ud, void* node);
+        virtual Bool IsOpened(void* root, void* ud, void* node) override;
 
-        virtual void Select(void* root, void* ud, void* node, LONG mode);
+        virtual void Select(void* root, void* ud, void* node, Int32 mode) override;
 
-        virtual void Open(void* root, void* ud, void* node, Bool mode);
+        virtual void Open(void* root, void* ud, void* node, Bool mode) override;
 
-        virtual VLONG GetId(void* root, void* ud, void* node);
+        virtual Int GetId(void* root, void* ud, void* node) override;
 
-        virtual LONG GetDragType(void* root, void* ud, void* node);
+        virtual Int32 GetDragType(void* root, void* ud, void* node) override;
 
-        virtual void GenerateDragArray(
-                    void* root, void* ud, void* node, AtomArray* arr);
+        virtual void GenerateDragArray(void* root, void* ud, void* node, AtomArray* arr) override;
 
-        virtual LONG AcceptDragObject(
-                    void* root, void* ud, void* node, LONG dragtype,
-                    void* dragobject, Bool& allowCopy);
+        virtual Int32 AcceptDragObject(void* root, void* ud, void* node, Int32 dragtype,
+                                       void* dragobject, Bool& allowCopy) override;
 
-        virtual void InsertObject(
-                    void* root, void* ud, void* node, LONG dragtype,
-                    void* dragobject, LONG insertmode, Bool copy);
+        virtual void InsertObject(void* root, void* ud, void* node, Int32 dragtype,
+                                  void* dragobject, Int32 insertmode, Bool copy) override;
 
-        virtual void DeletePressed(void* root, void* ud);
+        virtual void DeletePressed(void* root, void* ud) override;
 
     };
 

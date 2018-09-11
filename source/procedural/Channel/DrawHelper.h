@@ -9,11 +9,8 @@
 
 #include <c4d.h>
 #include <lib_clipmap.h>
-#include <nr/c4d/viewport.h>
+#include <NiklasRosenstein/c4d/viewport.hpp>
 #include <nr/procedural/channel.h>
-
-using nr::procedural::Channel;
-using nr::c4d::MatrixDraw;
 
 //----------------------------------------------------------------------------
 /// This class provides the interface for representing Channel values in
@@ -24,7 +21,7 @@ class I_ChannelDrawHelper
 public:
   struct DrawData
   {
-    Channel* channel;
+    nr::procedural::Channel* channel;
     BaseObject* op;
     BaseDraw* bd;
     BaseDrawHelp* bh;
@@ -53,7 +50,7 @@ public:
 private:
   Bool mIsLocal;
   Int32 mType;
-  MatrixDraw mMatDraw;
+  niklasrosenstein::c4d::MatrixDraw mMatDraw;
 };
 
 //----------------------------------------------------------------------------
@@ -76,9 +73,9 @@ private:
   Int32 mRefType;
   Int32 mRefItemLength;
   Matrix mTranslate;
-  MatrixDraw mMatDraw;
+  niklasrosenstein::c4d::MatrixDraw mMatDraw;
   AutoAlloc<GeClipMap> mMap;
-  Channel* mRef;
+  nr::procedural::Channel* mRef;
 };
 
 #endif // PROCEDURAL_DRAWHELPER_H__

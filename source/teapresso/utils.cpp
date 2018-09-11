@@ -5,10 +5,11 @@
  * All rights reserved.
  */
 
+#include <c4d_apibridge.h>
 #include "utils.h"
 #include "TeaPresso.h"
 
-void TvCollectByBit(LONG bitmask, BaseList2D* root, AtomArray* arr,
+void TvCollectByBit(Int32 bitmask, BaseList2D* root, AtomArray* arr,
                     Bool includeChildren) {
     if (!root) return;
     if (root->GetBit(bitmask)) {
@@ -23,36 +24,36 @@ void TvCollectByBit(LONG bitmask, BaseList2D* root, AtomArray* arr,
 }
 
 Bool TvFindChild(GeListNode* root, GeListNode* node) {
-    if (root == node) return FALSE;
+    if (root == node) return false;
     GeListNode* child = root->GetDown();
     while (child) {
-        if (child == node) return TRUE;
-        if (TvFindChild(child, node)) return TRUE;
+        if (child == node) return true;
+        if (TvFindChild(child, node)) return true;
         child = child->GetNext();
     }
-    return FALSE;
+    return false;
 }
 
 Bool TvFindChildDirect(GeListNode* root, GeListNode* node) {
-    if (root == node) return FALSE;
+    if (root == node) return false;
     GeListNode* child = root->GetDown();
     while (child) {
-        if (child == node) return TRUE;
+        if (child == node) return true;
         child = child->GetNext();
     }
-    return FALSE;
+    return false;
 }
 
-LONG TvGetInputQualifier() {
+Int32 TvGetInputQualifier() {
     BaseContainer state;
     if (!GetInputState(BFM_INPUT_KEYBOARD, BFM_INPUT_QUALIFIER, state)) {
         return 0;
     }
-    return state.GetLong(BFM_INPUT_QUALIFIER);
+    return state.GetInt32(BFM_INPUT_QUALIFIER);
 }
 
-LONG TvGetInsertMode(LONG qual) {
-    LONG mode = INSERT_UNDER;
+Int32 TvGetInsertMode(Int32 qual) {
+    Int32 mode = INSERT_UNDER;
     if (qual & QSHIFT)
         mode = INSERT_BEFORE;
     else if (qual & QCTRL)
@@ -62,17 +63,17 @@ LONG TvGetInsertMode(LONG qual) {
 
 Bool TvGatherPluginList(
             BaseContainer& container, TvNode* contextNode,
-            LONG insertMode, Bool* atLeastOne) {
-    if (atLeastOne) *atLeastOne = FALSE;
+            Int32 insertMode, Bool* atLeastOne) {
+    if (atLeastOne) *atLeastOne = false;
 
     BasePlugin* plugin = GetFirstPlugin();
     for (; plugin; plugin=plugin->GetNext()) {
         if (plugin->GetPluginType() != PLUGINTYPE_NODE) continue;
-        LONG flags = plugin->GetInfo();
+        Int32 flags = plugin->GetInfo();
         if (flags & PLUGINFLAG_HIDEPLUGINMENU) continue;
 
         // Check if the current plugin is a TeaPresso plugin.
-        LONG pluginId = plugin->GetID();
+        Int32 pluginId = plugin->GetID();
         TvNode* node = (TvNode*) AllocListNode(pluginId);
         if (!node) continue;
         if (!node->IsInstanceOf(Tvbase)) {
@@ -90,58 +91,58 @@ Bool TvGatherPluginList(
             if (!TvCheckInsertContext(contextNode, node, insertMode)) {
                 name += "&d&";
             }
-            else if (atLeastOne) *atLeastOne = TRUE;
+            else if (atLeastOne) *atLeastOne = true;
         }
-        else if (atLeastOne) *atLeastOne = TRUE;
+        else if (atLeastOne) *atLeastOne = true;
 
         // Add the icon-id to the name.
-        name += "&i" + LongToString(pluginId);
+        name += "&i" + String::IntToString(pluginId);
         container.SetString(pluginId, name);
         FreeListNode(node);
     }
-    return TRUE;
+    return true;
 }
 
 Bool TvCheckInsertContext(
-            TvNode* contextNode, TvNode* newNode, LONG insertMode,
+            TvNode* contextNode, TvNode* newNode, Int32 insertMode,
             Bool fallback) {
-    if (!contextNode || !newNode) return FALSE;
+    if (!contextNode || !newNode) return false;
     TvNode* parent = contextNode->GetUp();
     switch (insertMode) {
         case INSERT_AFTER:
         case INSERT_BEFORE:
-            if (parent) return newNode->ValidateContextSafety(parent) == NULL;
+            if (parent) return newNode->ValidateContextSafety(parent) == nullptr;
             else return fallback;
         case INSERT_UNDER:
-            return newNode->ValidateContextSafety(contextNode) == NULL;
+            return newNode->ValidateContextSafety(contextNode) == nullptr;
     }
     return fallback;
 }
 
 Bool TvInsertNode(
-            TvNode* contextNode, TvNode* newNode, LONG insertMode,
+            TvNode* contextNode, TvNode* newNode, Int32 insertMode,
             Bool fallback) {
     if (!TvCheckInsertContext(contextNode, newNode, insertMode, fallback)) {
-        return FALSE;
+        return false;
     }
     switch (insertMode) {
         case INSERT_AFTER:
             newNode->InsertAfter(contextNode);
-            return TRUE;
+            return true;
         case INSERT_BEFORE:
             newNode->InsertBefore(contextNode);
-            return TRUE;
+            return true;
         case INSERT_UNDER:
             newNode->InsertUnder(contextNode);
-            return TRUE;
+            return true;
     }
-    return FALSE;
+    return false;
 }
 
 
 Bool TvGetPluginInformation(BasePlugin* plug, String* name) {
-    if (!plug) return FALSE;
-    if (!name) return FALSE;
+    if (!plug) return false;
+    if (!name) return false;
 
     void* data = plug->GetPluginStructure();
     switch (plug->GetPluginType()) {
@@ -155,35 +156,35 @@ Bool TvGetPluginInformation(BasePlugin* plug, String* name) {
         case PLUGINTYPE_CTRACK:
         case PLUGINTYPE_PREFS: {
             NODEPLUGIN* table = (NODEPLUGIN*) data;
-            if (!table) return FALSE;
+            if (!table) return false;
             if (table->name) *name = *table->name;
-            else return FALSE;
+            else return false;
             break;
         }
         default:
-            return FALSE;
+            return false;
         // TODO: Additional plugin-types.
     }
 
-    return TRUE;
+    return true;
 }
 
 void TvFillPopupContainerBasePlugin(
             BaseContainer& dest, const AtomArray& arr, Bool hideHidden) {
-    LONG count = arr.GetCount();
+    Int32 count = arr.GetCount();
     if (count <= 0) return;
 
-    for (LONG i=0; i < count; i++) {
+    for (Int32 i=0; i < count; i++) {
         BasePlugin* plugin = (BasePlugin*) arr.GetIndex(i);
         if (!plugin) continue;
         if (hideHidden && plugin->GetInfo() & PLUGINFLAG_HIDE) continue;
 
-        LONG id = plugin->GetID();
+        Int32 id = plugin->GetID();
         String name = "";
         if (!TvGetPluginInformation(plugin, &name)) continue;
 
-        if (!name.Content()) continue;
-        name += "&i" + LongToString(id);
+        if (c4d_apibridge::IsEmpty(name)) continue;
+        name += "&i" + String::IntToString(id);
         dest.SetString(id, name);
     }
 }

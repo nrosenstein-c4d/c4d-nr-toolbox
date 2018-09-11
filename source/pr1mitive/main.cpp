@@ -6,7 +6,9 @@
 #include <pr1mitive/defines.h>
 #include <pr1mitive/activation.h>
 #include <pr1mitive/help.h>
-#include <nr/c4d/cleanup.h>
+#include <NiklasRosenstein/c4d/cleanup.hpp>
+
+namespace nr { using namespace niklasrosenstein; }
 
 Bool RegisterPr1mitive() {
     nr::c4d::cleanup([] {
@@ -18,6 +20,6 @@ Bool RegisterPr1mitive() {
     return true;
 }
 
-Bool MessagePr1mitive(LONG type, void* ptr) {
+Bool MessagePr1mitive(Int32 type, void* ptr) {
     return pr1mitive::activation::activation_msg(type, ptr);
 }

@@ -79,9 +79,9 @@ namespace serial {
 
         // Convert the C4D License to a prettified Pr1mitive license with respect to multi-license
         // types. The passed buffer must be at least SERIALLENGTH_UNIFIED bytes. The string will
-        // NOT be null terminated. This is left to the user. The length of the string inserted
-        // in `dest` is saved in `length` (can be null).
-        SERIALRESULT convert_unified(char* dest, int* length=null) const;
+        // NOT be nullptr terminated. This is left to the user. The length of the string inserted
+        // in `dest` is saved in `length` (can be nullptr).
+        SERIALRESULT convert_unified(char* dest, int* length=nullptr) const;
 
     };
 

@@ -54,7 +54,7 @@ namespace objects {
 
     static void make_proxy(
                 PolygonObject* op, const Matrix& mgi, Vector* points,
-                CPolygon* polys, LONG offPoints, LONG offPolys,
+                CPolygon* polys, Int32 offPoints, Int32 offPolys,
                 ProxyTuple& tuple) {
 
         BaseObject* src = tuple.op;
@@ -75,7 +75,7 @@ namespace objects {
         points[6] = Vector(-size.x, -size.y, +size.z);
         points[7] = Vector(-size.x, +size.y, +size.z);
 
-        for (LONG i=0; i < 8; i++) {
+        for (Int32 i=0; i < 8; i++) {
             points[i] = mg * (off + points[i]);
         }
 
@@ -87,7 +87,7 @@ namespace objects {
         polys[4] = CPolygon(1, 7, 5, 3);
         polys[5] = CPolygon(6, 0, 2, 4);
 
-        for (LONG i=0; i < 6; i++) {
+        for (Int32 i=0; i < 6; i++) {
             CPolygon& p = polys[i];
             p.a += offPoints;
             p.b += offPoints;
@@ -99,13 +99,13 @@ namespace objects {
         if (tex) {
             // Create a selection tag for the polygons.
             SelectionTag* selTag = SelectionTag::Alloc(Tpolygonselection);
-            BaseSelect* sel = selTag ? selTag->GetBaseSelect() : null;
+            BaseSelect* sel = selTag ? selTag->GetBaseSelect() : nullptr;
             if (sel != nullptr) {
-                selTag->SetName("PROXY-" + LongToString(offPoints / 8));
+                selTag->SetName("PROXY-" + String::IntToString(offPoints / 8));
                 op->InsertTag(selTag);
 
                 // Select the polygons we created.
-                for (LONG index=offPolys; index < offPolys + 6; index++) {
+                for (Int32 index=offPolys; index < offPolys + 6; index++) {
                     sel->Select(index);
                 }
             }
@@ -115,7 +115,7 @@ namespace objects {
             // Create a clone of the texture tag and assign it to the
             // tag name.
             if (selTag) {
-                BaseTag* clone = (BaseTag*) tex->GetClone(COPYFLAGS_0, null);
+                BaseTag* clone = (BaseTag*) tex->GetClone(COPYFLAGS_0, nullptr);
                 if (clone) {
                     GeData value(selTag->GetName());
                     clone->SetParameter(TEXTURETAG_RESTRICTION, value, DESCFLAGS_SET_0);
@@ -126,7 +126,7 @@ namespace objects {
     }
 
     static void update_object(
-                BaseObject* op, c4d_misc::BaseArray<ProxyTuple>& list,
+                BaseObject* op, maxon::BaseArray<ProxyTuple>& list,
                 helpers::DependenceList& dep, Bool detailed, Bool recursive,
                 BaseTag* tex=nullptr) {
 
@@ -141,7 +141,7 @@ namespace objects {
 
         if (detailed) {
             BaseObject* cache = op->GetDeformCache();
-            if (not cache) cache = op->GetCache();
+            if (!cache) cache = op->GetCache();
             if (cache) {
                 update_object(cache, list, dep, false, true, tex);
                 use = false;
@@ -170,7 +170,7 @@ namespace objects {
 
     public:
 
-        static NodeData* alloc() { return gNew(ProxyGenData); }
+        static NodeData* alloc() { return NewObjClear(ProxyGenData); }
 
         virtual ~ProxyGenData() {
         }
@@ -180,36 +180,36 @@ namespace objects {
     //
 
         virtual BaseObject* GetVirtualObjects(BaseObject* op, HierarchyHelp* hh) {
-            if (not op or not hh)
-                return null;
+            if (!op || !hh)
+                return nullptr;
 
             BaseContainer* bc = op->GetDataInstance();
             BaseDocument* doc = hh->GetDocument();
             const InExcludeData* includeList = nullptr;
-            c4d_misc::BaseArray<ProxyTuple> proxies;
+            maxon::BaseArray<ProxyTuple> proxies;
 
-            if (not bc or not doc)
-                return null;
+            if (!bc || !doc)
+                return nullptr;
 
             // Get the object from the InExclude list of the host object.
             includeList = static_cast<const InExcludeData*>(
                     bc->GetCustomDataType(PR1M_PROXYGEN_OBJECTS, CUSTOMDATATYPE_INEXCLUDE_LIST)
             );
-            if (not includeList or includeList->GetObjectCount() <= 0)
+            if (!includeList || includeList->GetObjectCount() <= 0)
                 return BaseObject::Alloc(Onull);
 
             helpers::DependenceList list;
             list.Add(op);
 
             // Put all the objects into a new list.
-            c4d_misc::BaseArray<BaseObject*> objects;
-            for (LONG i=0; i < includeList->GetObjectCount(); i++) {
+            maxon::BaseArray<BaseObject*> objects;
+            for (Int32 i=0; i < includeList->GetObjectCount(); i++) {
 
                 // Get the current object from the InExcludeData.
                 BaseObject* obj = static_cast<BaseObject*>(
                         includeList->ObjectFromIndex(doc, i)
                 );
-                if (not obj or not obj->IsInstanceOf(Obase))
+                if (!obj || !obj->IsInstanceOf(Obase))
                     continue;
 
                 objects.Append(obj);
@@ -219,7 +219,7 @@ namespace objects {
             // the proxies list.
             Bool recursive = bc->GetBool(PR1M_PROXYGEN_HIERARCHY);
             Bool detailed = bc->GetBool(PR1M_PROXYGEN_DETAILED);
-            for (LONG i=0; i < objects.GetCount(); i++) {
+            for (Int32 i=0; i < objects.GetCount(); i++) {
                 BaseObject* op = objects[i];
 
                 // If the detailed mode is enabled, we have to continue
@@ -228,36 +228,36 @@ namespace objects {
             }
 
             // Check if we could actually use the cache of the object.
-            if (not list.Compare(m_dependenceList)) {
+            if (!list.Compare(m_dependenceList)) {
                 BaseObject* cache = op->GetCache(hh);
                 if (cache) return cache;
             }
 
             // Get the number of items that have been collected
             // and create a new PolygonObject from it.
-            LONG count = proxies.GetCount();
+            Int32 count = proxies.GetCount();
             if (count <= 0)
                 return BaseObject::Alloc(Onull);
 
             PolygonObject* poly = PolygonObject::Alloc(count * 8, count * 6);
-            if (not poly)
-                return null;
+            if (!poly)
+                return nullptr;
 
             // Get the point and polygon array from it that we will
             // write the proxy cubes to.
             Vector* points = poly->GetPointW();
             CPolygon* polys = poly->GetPolygonW();
-            if (not points or not polys) {
+            if (!points || !polys) {
                 PolygonObject::Free(poly);
-                return null;
+                return nullptr;
             }
 
             // Create a proxy cube for each gathered object.
-            const Matrix mgi = not op->GetMg();
-            for (LONG index=0; index < count; index++) {
+            const Matrix mgi = c4d_apibridge::Invert(op->GetMg());
+            for (Int32 index=0; index < count; index++) {
 
-                LONG offPoints = 8 * index;
-                LONG offPolys = 6 * index;
+                Int32 offPoints = 8 * index;
+                Int32 offPolys = 6 * index;
                 make_proxy(poly, mgi, points, polys, offPoints, offPolys, proxies[index]);
             }
 
@@ -270,10 +270,10 @@ namespace objects {
       //
 
         virtual Bool Init(GeListNode* node) {
-            if (not super::Init(node) or not node) return false;
+            if (!super::Init(node) || !node) return false;
 
             BaseContainer* bc = ((BaseObject*) node)->GetDataInstance();
-            if (not bc) return false;
+            if (!bc) return false;
 
             bc->SetBool(PR1M_PROXYGEN_HIERARCHY, true);
             bc->SetBool(PR1M_PROXYGEN_DETAILED, true);
@@ -287,7 +287,7 @@ namespace objects {
 
         virtual Bool GetDEnabling(GeListNode* node, const DescID& did, const GeData& t_data,
                     DESCFLAGS_ENABLE flags, const BaseContainer* itemdesc) {
-            /*LONG id = did[0].id;
+            /*Int32 id = did[0].id;
             BaseContainer* bc = ((BaseObject*) node)->GetDataInstance();
             switch (id) {
                 default:
@@ -304,13 +304,13 @@ namespace objects {
     Bool register_proxy_generator() {
         menu::root().AddPlugin(IDS_MENU_OBJECTS, Opr1m_proxygen);
         return RegisterObjectPlugin(
-                Opr1m_proxygen,
-                GeLoadString(IDS_Opr1m_proxygen),
-                PLUGINFLAG_HIDEPLUGINMENU | OBJECT_GENERATOR,
-                ProxyGenData::alloc,
-                "Opr1m_proxygen",
-                PR1MITIVE_ICON("Opr1m_proxygen"),
-                PROXYGEN_VERSION);
+            Opr1m_proxygen,
+            GeLoadString(IDS_Opr1m_proxygen),
+            PLUGINFLAG_HIDEPLUGINMENU | OBJECT_GENERATOR,
+            ProxyGenData::alloc,
+            "Opr1m_proxygen"_s,
+            PR1MITIVE_ICON("Opr1m_proxygen"),
+            PROXYGEN_VERSION);
     }
 
 } // end namespace objects

@@ -8,7 +8,7 @@ project('com.niklasrosenstein.c4d-nr-toolbox', '1.0')
 target('webp')
 properties({
   '@cxx.includes': ['vendor/webp/include'],
-  '@cxx.libpath': ['vendor/webp/lib'],
+  '@cxx.libraryPaths': ['vendor/webp/lib'],
   '@cxx.systemLibraries': ['libwebp']
 })
 
@@ -83,7 +83,7 @@ class ComponentList(object):
     for comp in self:
       if not comp.enabled:
         continue
-      target('Objects_' + comp.name)
+      target('Component_' + comp.name)
       depends(comp.dependencies)
       depends([
         'net.maxon.c4d:addons',
@@ -98,9 +98,12 @@ class ComponentList(object):
         'cxx.includes': include,
         'cxx.defines': comp.defines + defines,
         'cxx.enableExceptions': True,
-        'cxx.cppStd': 'c++14',
+        'cxx.cppStd': 'c++17',
         'c4d.SourceProcessor': False
       })
+      #for x in current_target()['cxx.includes']:
+      #  print('-', x)
+      #error()
       if OS.id == 'darwin':
         properties({
           'cxx.compilerFlags+': ['-Wno-shadow', '-Wno-missing-prototypes']
@@ -124,7 +127,7 @@ def glob_descriptions(pattern):
 
 components = (ComponentList()
   .add("main",
-    sources=['source/main.cpp', 'source/menu.cpp', 'source/config.cpp']
+    sources=['source/main.cpp', 'source/menu.cpp', 'source/config.cpp', 'source/fs.cpp']
   )
   .add("autoconnect",
     sources=['source/autoconnect.cpp'],
@@ -145,7 +148,6 @@ components = (ComponentList()
     defines=['PRMT'],
   )
   .add("procedural",
-    enabled=False,
     sources=glob(['source/procedural/**/*.cpp']),
     descriptions=glob_descriptions('nrprocedural_*')
   )
@@ -154,7 +156,6 @@ components = (ComponentList()
     descriptions=glob_descriptions('W*') + glob_descriptions('S*') + ['Oxpressoeffector']
   )
   .add("teapresso",
-    enabled=False,
     sources=glob(['source/teapresso/*.cpp']),
     descriptions=glob_descriptions('Tv*')
   )
@@ -178,14 +179,26 @@ components = (ComponentList()
 # ============================================================================
 
 objects = components.compile_all(
-  include = ['plugin', 'include', 'source', gitversion_dir]
+  include = [
+    'plugin',
+    'include',
+    'source',
+    'vendor/NiklasRosenstein/nr.c4d/include',
+    'vendor/NiklasRosenstein/nr.mathlib/include',
+    'vendor/NiklasRosenstein/nr.utils/include',
+    path.abs(gitversion_dir)
+  ]
 )
 
 target('plugin')
 depends(objects)
 properties({
   'cxx.productName': 'c4d-nr-toolkit' + c4d.plugin_suffix,
-  'cxx.productDirectory': 'plugin'
+  'cxx.productDirectory': 'plugin',
+  'cxx.srcs': [],
+  'cxx.type': 'library',
+  'cxx.preferredLinkage': 'shared',
+  'c4d.SourceProcessor': True
 })
 c4d.build()
 

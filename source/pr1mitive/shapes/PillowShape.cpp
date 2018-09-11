@@ -27,7 +27,7 @@ namespace shapes {
 
       public:
 
-        static NodeData* alloc() { return gNew(PillowShape); }
+        static NodeData* alloc() { return NewObjClear(PillowShape); }
 
       //
       // BaseComplexShape -------------------------------------------------------------------------
@@ -37,17 +37,17 @@ namespace shapes {
 
         void free_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info);
 
-        Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index);
+        Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index);
 
       //
       // BasePrimitiveData ------------------------------------------------------------------------
       //
 
-        LONG get_handle_count(BaseObject* op);
+        Int32 get_handle_count(BaseObject* op);
 
-        Bool get_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        Bool get_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
-        void set_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        void set_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
       //
       // ObjectData -------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ namespace shapes {
     };
 
     Bool PillowShape::init_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info) {
-        if (not super::init_calculation(op, bc, info)) return false;
+        if (!super::init_calculation(op, bc, info)) return false;
 
         info->umin = 0;
         info->umax = M_PI;
@@ -77,7 +77,7 @@ namespace shapes {
 
         // Allocate and fill the parameters.
         struct PillowData* data = new struct PillowData;
-        if (not data) return false;
+        if (!data) return false;
 
         Vector temp;
         GetDimension(op, &temp, &data->size);
@@ -90,19 +90,19 @@ namespace shapes {
         delete data;
     }
 
-    Vector PillowShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index) {
+    Vector PillowShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index) {
         struct PillowData* data = (struct PillowData*) info->data;
-        Real x = Cos(u) * data->size.x;
-        Real y = Cos(v) * data->size.y;
-        Real z = Sin(u) * Sin(v) * data->size.z;
+        Float x = Cos(u) * data->size.x;
+        Float y = Cos(v) * data->size.y;
+        Float z = Sin(u) * Sin(v) * data->size.z;
         return Vector(x, y, z);
     }
 
-    LONG PillowShape::get_handle_count(BaseObject* op) {
+    Int32 PillowShape::get_handle_count(BaseObject* op) {
         return 3;
     }
 
-    Bool PillowShape::get_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    Bool PillowShape::get_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
         BaseContainer* bc = op->GetDataInstance();
 
         Vector size = bc->GetVector(PR1M_PILLOW_SIZE) * 0.5;
@@ -131,22 +131,22 @@ namespace shapes {
         return true;
     }
 
-    void PillowShape::set_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    void PillowShape::set_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
         BaseContainer* bc = op->GetDataInstance();
 
         Vector point = info->position * 2;
         Vector size = bc->GetVector(PR1M_PILLOW_SIZE);
         switch (handle) {
             case HANDLE_WIDTH:
-                size.x = limit_min<Real>(point.x, 0);
+                size.x = limit_min<Float>(point.x, 0);
                 break;
 
             case HANDLE_HEIGHT:
-                size.y = limit_min<Real>(point.y, 0);
+                size.y = limit_min<Float>(point.y, 0);
                 break;
 
             case HANDLE_DEPTH:
-                size.z = limit_min<Real>(point.z, 0);
+                size.z = limit_min<Float>(point.z, 0);
                 break;
 
             default:
@@ -157,7 +157,7 @@ namespace shapes {
     }
 
     Bool PillowShape::Init(GeListNode* node) {
-        if (not super::Init(node)) return false;
+        if (!super::Init(node)) return false;
         BaseContainer* bc = ((BaseObject*)node)->GetDataInstance();
 
         bc->SetVector(PR1M_PILLOW_SIZE, Vector(200, 200, 100));
@@ -177,7 +177,9 @@ namespace shapes {
             GeLoadString(IDS_Opr1m_pillow),
             PLUGINFLAG_HIDEPLUGINMENU | OBJECT_GENERATOR,
             PillowShape::alloc,
-            "Opr1m_pillow", PR1MITIVE_ICON("Opr1m_pillow"), 0);
+            "Opr1m_pillow"_s,
+            PR1MITIVE_ICON("Opr1m_pillow"),
+            0);
     }
 
 } // end namespace shapes

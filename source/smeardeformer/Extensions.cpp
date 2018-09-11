@@ -8,6 +8,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#include <c4d_apibridge.h>
 #include "Engines.h"
 
 #include "res/c4d_symbols.h"
@@ -21,15 +22,15 @@ class PositionalSmearing : public SmearingEngine {
 
 public:
 
-    static BaseEngine* Alloc() { return gNew(PositionalSmearing); }
+    static BaseEngine* Alloc() { return NewObjClear(PositionalSmearing); }
 
     //| SmearingEngine overrides
 
-    virtual LONG GetMaxHistoryLevel() const {
+    virtual Int32 GetMaxHistoryLevel() const {
         return 1; // We only need the previous position
     }
 
-    virtual Vector SmearVertex(LONG vertex_index, Real weight, const SmearData& data, const SmearHistory& history) {
+    virtual Vector SmearVertex(Int32 vertex_index, Float weight, const SmearData& data, const SmearHistory& history) {
         const SmearState* prev = history.GetState(1);
         const SmearState* curr = history.GetState(0);
         if (!curr) return Vector();
@@ -53,27 +54,27 @@ class HistoricalSmearing : public SmearingEngine {
 
 public:
 
-    static BaseEngine* Alloc() { return gNew(HistoricalSmearing); }
+    static BaseEngine* Alloc() { return NewObjClear(HistoricalSmearing); }
 
     HistoricalSmearing() : SmearingEngine(), m_count(0) { }
 
     //| SmearingEngine overrides
 
-    virtual LONG GetMaxHistoryLevel() const {
+    virtual Int32 GetMaxHistoryLevel() const {
         return m_count;
     }
 
-    virtual Vector SmearVertex(LONG vertex_index, Real weight, const SmearData& data, const SmearHistory& history) {
+    virtual Vector SmearVertex(Int32 vertex_index, Float weight, const SmearData& data, const SmearHistory& history) {
         if (weight < 0.0) weight = 0.0;
         if (weight > 1.0) weight = 1.0;
 
-        LONG count = history.GetHistoryCount();
-        count = c4d_misc::Min<LONG>(count, m_count);
+        Int32 count = history.GetHistoryCount();
+        count = maxon::Min<Int32>(count, m_count);
         if (count <= 0) return Vector();
 
         count -= 1;
-        LONG frame_1 = (count) * weight;
-        LONG frame_2 = frame_1 + 1;
+        Int32 frame_1 = (count) * weight;
+        Int32 frame_2 = frame_1 + 1;
 
         const SmearState* state_1 = history.GetState(frame_1);
         const SmearState* state_2 = history.GetState(frame_2);
@@ -88,7 +89,7 @@ public:
         }
         const Vector& p2 = state_2->original_vertices[vertex_index];
 
-        Real rweight = fmod(count * weight, 1.0);
+        Float rweight = fmod(count * weight, 1.0);
         return p1 * (1.0 - rweight) + p2 * rweight;
     }
 
@@ -96,19 +97,19 @@ public:
 
     virtual Bool InitParameters(BaseContainer& bc) {
         if (bc.GetType(SHISTORICAL_TIMEDELTA) != DA_REAL) {
-            bc.SetReal(SHISTORICAL_TIMEDELTA, 0.1);
+            bc.SetFloat(SHISTORICAL_TIMEDELTA, 0.1);
         }
-        return TRUE;
+        return true;
     }
 
     virtual Bool InitData(const BaseContainer& bc, const SmearData& data) {
-        m_count = data.doc->GetFps() * bc.GetReal(SHISTORICAL_TIMEDELTA);
-        return TRUE;
+        m_count = data.doc->GetFps() * bc.GetFloat(SHISTORICAL_TIMEDELTA);
+        return true;
     }
 
 private:
 
-    LONG m_count;
+    Int32 m_count;
 
 };
 
@@ -117,11 +118,11 @@ class VertexNormalWeighting : public WeightingEngine {
 
 public:
 
-    static BaseEngine* Alloc() { return gNew(VertexNormalWeighting); }
+    static BaseEngine* Alloc() { return NewObjClear(VertexNormalWeighting); }
 
-    VertexNormalWeighting() : WeightingEngine(), m_vertex_based(FALSE) { }
+    VertexNormalWeighting() : WeightingEngine(), m_vertex_based(false) { }
 
-    Vector GetVertexMovement(LONG index, const SmearState* curr, const SmearState* prev) {
+    Vector GetVertexMovement(Int32 index, const SmearState* curr, const SmearState* prev) {
         if (m_vertex_based) {
             if (index >= curr->vertex_count || index >= prev->vertex_count) return Vector();
             return curr->original_vertices[index] - prev->original_vertices[index];
@@ -133,18 +134,18 @@ public:
 
     //| WeightingEngine overrides
 
-    virtual Real WeightVertex(LONG vertex_index, const SmearData& data, const SmearHistory& history) {
+    virtual Float WeightVertex(Int32 vertex_index, const SmearData& data, const SmearHistory& history) {
         const SmearState* curr = history.GetState(0);
         const SmearState* prev = history.GetState(1);
         if (!curr || !prev) return 0.0;
         if (vertex_index >= prev->vertex_count) return 0.0;
 
-        static const Real ellipsis = 0.0000001;
+        static const Float ellipsis = 0.0000001;
 
         // Figure the movement direction. If there was not movement in the last frames,
         // we will check the previous frames until a movement was found.
         Vector mvdir = GetVertexMovement(vertex_index, curr, prev);
-        LONG state_index = 2;
+        Int32 state_index = 2;
         while (mvdir.GetSquaredLength() <= ellipsis && state_index < history.GetHistoryCount()) {
             const SmearState* curr = history.GetState(state_index - 1);
             const SmearState* prev = history.GetState(state_index);
@@ -161,7 +162,7 @@ public:
         // the bounds of the _current_ state.
         const Vector& vxdir = curr->original_normals[vertex_index];
 
-        Real angle = VectorAngle(mvdir, vxdir);
+        Float angle = VectorAngle(mvdir, vxdir);
         return angle / M_PI;
     }
 
@@ -169,14 +170,14 @@ public:
 
     virtual Bool InitParameters(BaseContainer& bc) {
         if (bc.GetType(WVERTEXNORMAL_VERTEXBASEDMOVEMENT) != DA_LONG) {
-            bc.SetBool(WVERTEXNORMAL_VERTEXBASEDMOVEMENT, TRUE);
+            bc.SetBool(WVERTEXNORMAL_VERTEXBASEDMOVEMENT, true);
         }
-        return TRUE;
+        return true;
     }
 
     virtual Bool InitData(const BaseContainer& bc, const SmearData& data) {
         m_vertex_based = bc.GetBool(WVERTEXNORMAL_VERTEXBASEDMOVEMENT);
-        return TRUE;
+        return true;
     }
 
 private:
@@ -205,10 +206,10 @@ Bool RegisterSmearExtensions() {
             GeLoadString(IDC_SMEARING_HISTORICAL),
             "Shistorical",
             HistoricalSmearing::Alloc);
-    return TRUE;
+    return true;
 }
 
 Bool RegisterWeightExtensions() {
-    return TRUE;
+    return true;
 }
 

@@ -12,6 +12,7 @@ options.add('isocpp', bool, False)
 
 source_directory = get_source_archive(
   "http://dlib.net/files/dlib-{}.zip".format(options.version))
+source_directory = path.join(source_directory, 'dlib-{}'.format(options.version))
 
 target('dlib')
 properties({

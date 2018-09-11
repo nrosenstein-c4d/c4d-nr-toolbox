@@ -5,9 +5,10 @@
  * SmearingEngines.h
  */
 
+#include <c4d_apibridge.h>
 #include "Engines.h"
 
-typedef c4d_misc::BlockArray<EnginePlugin> EnginePluginArray;
+typedef maxon::BaseArray<EnginePlugin> EnginePluginArray;
 static EnginePluginArray g_plugins;
 
 class iEnginePluginIterator {
@@ -43,7 +44,7 @@ EnginePluginIterator* EnginePluginIterator::Alloc() {
 void EnginePluginIterator::Free(EnginePluginIterator*& it) {
     if (it) {
         DeleteObj((iEnginePluginIterator*&) it);
-        it = NULL;
+        it = nullptr;
     }
 }
 
@@ -61,7 +62,7 @@ Bool EnginePluginIterator::AtEnd() const {
 
 
 
-const EnginePlugin* GetFirstEnginePlugin(LONG instance_of) {
+const EnginePlugin* GetFirstEnginePlugin(Int32 instance_of) {
     EnginePluginArray::ConstIterator it = g_plugins.Begin();
     for (; it != g_plugins.End(); it++) {
         const EnginePlugin* pl = it.GetPtr();
@@ -69,22 +70,22 @@ const EnginePlugin* GetFirstEnginePlugin(LONG instance_of) {
             return pl;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
-const EnginePlugin* FindEnginePlugin(LONG type) {
+const EnginePlugin* FindEnginePlugin(Int32 type) {
     EnginePluginArray::ConstIterator it = g_plugins.Begin();
     for (; it != g_plugins.End(); it++) {
         if (it->id == type) {
             return it.GetPtr();
         }
     }
-    return NULL;
+    return nullptr;
 }
 
-BaseEngine* BaseEngine::Alloc(LONG type, LONG instance_of) {
+BaseEngine* BaseEngine::Alloc(Int32 type, Int32 instance_of) {
     const EnginePlugin* plugin = FindEnginePlugin(type);
-    BaseEngine* engine = NULL;
+    BaseEngine* engine = nullptr;
     if (plugin) {
         engine = (plugin->alloc)();
     }
@@ -102,35 +103,35 @@ BaseEngine* BaseEngine::Alloc(LONG type, LONG instance_of) {
     return engine;
 }
 
-Bool BaseEngine::Realloc(BaseEngine*& engine, LONG type, LONG instance_of, Bool* reallocated) {
+Bool BaseEngine::Realloc(BaseEngine*& engine, Int32 type, Int32 instance_of, Bool* reallocated) {
     if (engine && engine->GetId() != type) {
         BaseEngine::Free(engine);
     }
     if (!engine) {
         engine = BaseEngine::Alloc(type, instance_of);
-        if (reallocated) *reallocated = engine != NULL;
+        if (reallocated) *reallocated = engine != nullptr;
     }
-    return engine != NULL;
+    return engine != nullptr;
 }
 
 void BaseEngine::Free(BaseEngine*& engine) {
     if (engine) {
         engine->Destroy();
-        GeFree(engine);
-        engine = NULL;
+        DeleteMem(engine);
+        engine = nullptr;
     }
 }
 
 
-Bool RegisterEnginePlugin(LONG id, LONG base, const String& name, const String& desc, EngineAllocator alloc) {
-    if (desc.Content() && !RegisterDescription(id, desc)) {
-        return FALSE;
+Bool RegisterEnginePlugin(Int32 id, Int32 base, const String& name, const String& desc, EngineAllocator alloc) {
+    if (!c4d_apibridge::IsEmpty(desc) && !RegisterDescription(id, desc)) {
+        return false;
     }
 
     const EnginePlugin* p = FindEnginePlugin(id);
     if (p) {
-        GePrint("Engine Plugin ID " + LongToString(id) + " of " + name + " clashes with " + p->name + ".");
-        return FALSE;
+        GePrint("Engine Plugin ID " + String::IntToString(id) + " of " + name + " clashes with " + p->name + ".");
+        return false;
     }
 
     EnginePlugin plugin;
@@ -138,7 +139,9 @@ Bool RegisterEnginePlugin(LONG id, LONG base, const String& name, const String& 
     plugin.base = base;
     plugin.name = name;
     plugin.alloc = alloc;
-    return g_plugins.Append(plugin) != NULL;
+    iferr (g_plugins.Append(plugin))
+        return false;
+    return true;
 }
 
 

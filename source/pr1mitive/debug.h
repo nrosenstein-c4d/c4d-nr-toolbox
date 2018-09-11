@@ -22,7 +22,7 @@ namespace debug {
 
     #ifdef DEBUG
         #define PR1MITIVE_DEBUG(message) \
-            pr1mitive::debug::_debug_message(NULL, __FUNCTION__, __FILE__, __LINE__, message)
+            pr1mitive::debug::_debug_message(nullptr, __FUNCTION__, __FILE__, __LINE__, message)
         #define PR1MITIVE_DEBUG_INFO(message) \
             pr1mitive::debug::_debug_message("INFO", __FUNCTION__, __FILE__, __LINE__, message)
         #define PR1MITIVE_DEBUG_WARNING(message) \

@@ -6,17 +6,18 @@
 
 #define PRINT_PREFIX "[nr-toolbox/Procedural|DrawHelper.cpp]: "
 
-#include <nr/math/math.h>
-#include <nr/c4d/string.h>
-#include <nr/c4d/viewport.h>
+#include <NiklasRosenstein/math.hpp>
+#include <NiklasRosenstein/c4d/string.hpp>
+#include <NiklasRosenstein/c4d/viewport.hpp>
 
 #include "DrawHelper.h"
 #include "misc/print.h"
 #include "res/description/nrprocedural_channel.h"
 
-using nr::math::clamp;
-using nr::c4d::draw_text;
-using nr::c4d::tostr;
+using c4d_apibridge::IsEmpty;
+using niklasrosenstein::clamp;
+using niklasrosenstein::c4d::draw_text;
+using niklasrosenstein::c4d::tostr;
 
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
@@ -202,7 +203,7 @@ void RefChannelDrawHelper::Draw(
       break;
   }
 
-  if (!text.Content())
+  if (IsEmpty(text))
     return;
 
   offset = mTranslate * offset;

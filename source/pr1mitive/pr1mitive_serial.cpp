@@ -156,14 +156,14 @@ C4DLicense::C4DLicense(const char* input) {
 
   invalid:
     type = LICENSETYPE_INVALID;
-    c4dlicense = null;
+    c4dlicense = nullptr;
     return;
 }
 
 C4DLicense::~C4DLicense() {
     if (c4dlicense) {
         delete [] c4dlicense;
-        c4dlicense = null;
+        c4dlicense = nullptr;
     }
 }
 

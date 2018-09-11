@@ -17,7 +17,7 @@ namespace activation {
     Bool activation_start();
 
     // Called when a plugin-message appears.
-    Bool activation_msg(LONG type, void* ptr);
+    Bool activation_msg(Int32 type, void* ptr);
 
     // Performs unloads, cleanups, etc.
     void activation_end();

@@ -43,7 +43,7 @@ namespace objects {
 
       public:
 
-        static NodeData* alloc() { return gNew(RoomPrimitive); }
+        static NodeData* alloc() { return NewObjClear(RoomPrimitive); }
 
         static void static_init() {
             color_handle_thicknessline = GetViewColor(VIEWCOLOR_VERTEXEND);
@@ -51,19 +51,19 @@ namespace objects {
 
         // Set the containers information based on the passed ID and the data passed, limited to
         // the object's information (fillet-radius, thickness, etc.).
-        static void set_information(BaseContainer* bc, LONG id, Vector& size, Vector& thickp, Vector& thickn);
+        static void set_information(BaseContainer* bc, Int32 id, Vector& size, Vector& thickp, Vector& thickn);
 
       //
       // BasePrimitiveData ------------------------------------------------------------------------
       //
 
-        LONG get_handle_count(BaseObject* op);
+        Int32 get_handle_count(BaseObject* op);
 
-        Bool get_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        Bool get_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
-        void set_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        void set_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
-        void draw_handle_customs(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, LONG handle, LONG hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color);
+        void draw_handle_customs(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, Int32 handle, Int32 hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color);
 
       //
       // ObjectData -------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ namespace objects {
 
         BaseObject* GetVirtualObjects(BaseObject* op, HierarchyHelp* hh);
 
-        Bool Message(GeListNode* node, LONG type, void* ptr);
+        Bool Message(GeListNode* node, Int32 type, void* ptr);
 
         void GetDimension(BaseObject* op, Vector* mp, Vector* size);
 
@@ -91,39 +91,39 @@ namespace objects {
     const char* RoomPrimitive::selection_names_extended[] = { "Z-", "X+", "Z+", "X-", "Y+", "Y-", "R1", "R2", "R3" };
     Vector RoomPrimitive::color_handle_thicknessline;
 
-    void RoomPrimitive::set_information(BaseContainer* bc, LONG id, Vector& size, Vector& thickp, Vector& thickn) {
-        Real fillet;
-        if (bc->GetBool(PR1M_ROOM_DOFILLET)) fillet = bc->GetReal(PR1M_ROOM_FILLETRAD) * 2;
+    void RoomPrimitive::set_information(BaseContainer* bc, Int32 id, Vector& size, Vector& thickp, Vector& thickn) {
+        Float fillet;
+        if (bc->GetBool(PR1M_ROOM_DOFILLET)) fillet = bc->GetFloat(PR1M_ROOM_FILLETRAD) * 2;
         else fillet = 0;
 
         // We now handle the three accepted cases seperately.
         switch (id) {
             case PR1M_ROOM_SIZE:
-                size.x = limit_min<Real>(size.x, thickp.x + thickn.x);
-                size.y = limit_min<Real>(size.y, thickp.y + thickn.y);
-                size.z = limit_min<Real>(size.z, thickp.z + thickn.z);
+                size.x = limit_min<Float>(size.x, thickp.x + thickn.x);
+                size.y = limit_min<Float>(size.y, thickp.y + thickn.y);
+                size.z = limit_min<Float>(size.z, thickp.z + thickn.z);
                 bc->SetVector(PR1M_ROOM_SIZE, size);
                 break;
             case PR1M_ROOM_THICKNESSP:
-                thickp.x = limit<Real>(0, thickp.x, size.x - thickn.x - fillet);
-                thickp.y = limit<Real>(0, thickp.y, size.y - thickn.y - fillet);
-                thickp.z = limit<Real>(0, thickp.z, size.z - thickn.z - fillet);
+                thickp.x = limit<Float>(0, thickp.x, size.x - thickn.x - fillet);
+                thickp.y = limit<Float>(0, thickp.y, size.y - thickn.y - fillet);
+                thickp.z = limit<Float>(0, thickp.z, size.z - thickn.z - fillet);
                 bc->SetVector(PR1M_ROOM_THICKNESSP, thickp);
                 break;
             case PR1M_ROOM_THICKNESSN:
-                thickn.x = limit<Real>(0, thickn.x, size.x - thickp.x - fillet);
-                thickn.y = limit<Real>(0, thickn.y, size.y - thickp.y - fillet);
-                thickn.z = limit<Real>(0, thickn.z, size.z - thickp.z - fillet);
+                thickn.x = limit<Float>(0, thickn.x, size.x - thickp.x - fillet);
+                thickn.y = limit<Float>(0, thickn.y, size.y - thickp.y - fillet);
+                thickn.z = limit<Float>(0, thickn.z, size.z - thickp.z - fillet);
                 bc->SetVector(PR1M_ROOM_THICKNESSN, thickn);
                 break;
             case PR1M_ROOM_FILLETRAD:
-                fillet = limit<Real>(0, fillet, size.x - thickp.x - thickn.x);
-                fillet = limit<Real>(0, fillet, size.y - thickp.y - thickn.y);
-                fillet = limit<Real>(0, fillet, size.z - thickp.z - thickn.z);
-                bc->SetReal(PR1M_ROOM_FILLETRAD, fillet / 2);
+                fillet = limit<Float>(0, fillet, size.x - thickp.x - thickn.x);
+                fillet = limit<Float>(0, fillet, size.y - thickp.y - thickn.y);
+                fillet = limit<Float>(0, fillet, size.z - thickp.z - thickn.z);
+                bc->SetFloat(PR1M_ROOM_FILLETRAD, fillet / 2);
                 break;
             default:
-                PR1MITIVE_DEBUG_ERROR("Invalid ID passed: " + LongToString(id));
+                PR1MITIVE_DEBUG_ERROR("Invalid ID passed: " + String::IntToString(id));
                 break;
         }
     }
@@ -132,7 +132,7 @@ namespace objects {
   // RoomPrimitive :: BasePrimitiveData -----------------------------------------------------------
   //
 
-    LONG RoomPrimitive::get_handle_count(BaseObject* op) {
+    Int32 RoomPrimitive::get_handle_count(BaseObject* op) {
         BaseContainer* bc = op->GetDataInstance();
         // Three handles for the room's size when the thickness handles should
         // not be shown. Otherwise, 6 additional handles for the thickness.
@@ -140,7 +140,7 @@ namespace objects {
         else return 3;
     }
 
-    Bool RoomPrimitive::get_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    Bool RoomPrimitive::get_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
         BaseContainer* bc = op->GetDataInstance();
         // Obtain the information needed for the handles.
         Vector size = bc->GetVector(PR1M_ROOM_SIZE) * 0.5;
@@ -203,7 +203,7 @@ namespace objects {
         return true;
     }
 
-    void RoomPrimitive::set_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    void RoomPrimitive::set_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
         BaseContainer* bc = op->GetDataInstance();
         // A reference to the handle's position, to save some writing..
         Vector& point = info->position;
@@ -261,7 +261,7 @@ namespace objects {
         }
     }
 
-    void RoomPrimitive::draw_handle_customs(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, LONG handle, LONG hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color) {
+    void RoomPrimitive::draw_handle_customs(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, Int32 handle, Int32 hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color) {
 
         // Default customs for the Size-handles.
         switch (handle) {
@@ -320,7 +320,7 @@ namespace objects {
   //
 
     Bool RoomPrimitive::Init(GeListNode* node) {
-        if (not node) return false;
+        if (!node) return false;
         BaseObject* op = (BaseObject*) node;
         BaseContainer* bc = op->GetDataInstance();
 
@@ -328,36 +328,36 @@ namespace objects {
         bc->SetVector(PR1M_ROOM_THICKNESSP, Vector(20));
         bc->SetVector(PR1M_ROOM_THICKNESSN, Vector(20));
         bc->SetBool(PR1M_ROOM_DOFILLET, false);
-        bc->SetReal(PR1M_ROOM_FILLETRAD, 3.0);
-        bc->SetLong(PR1M_ROOM_FILLETSUB, 5);
+        bc->SetFloat(PR1M_ROOM_FILLETRAD, 3.0);
+        bc->SetInt32(PR1M_ROOM_FILLETSUB, 5);
         bc->SetBool(PR1M_ROOM_DISPLAYTHICKNESSHANDLES, false);
-        bc->SetLong(PR1M_ROOM_TEXTUREMODE, PR1M_ROOM_TEXTUREMODE_SIMPLE);
+        bc->SetInt32(PR1M_ROOM_TEXTUREMODE, PR1M_ROOM_TEXTUREMODE_SIMPLE);
         return true;
     }
 
     Bool RoomPrimitive::GetDDescription(GeListNode* node, Description* desc, DESCFLAGS_DESC& flags) {
-        if (not desc) return false;
-        if (not desc->LoadDescription(Opr1m_room)) return false;
+        if (!desc) return false;
+        if (!desc->LoadDescription(Opr1m_room)) return false;
 
         BaseContainer* bc;
         bc = desc->GetParameterI(PR1M_ROOM_SIZE, nullptr);
-        if (bc) bc->SetString(DESC_SHORT_NAME, "S");
+        if (bc) bc->SetString(DESC_SHORT_NAME, "S"_s);
         bc = desc->GetParameterI(PR1M_ROOM_THICKNESSP, nullptr);
-        if (bc) bc->SetString(DESC_SHORT_NAME, "P");
+        if (bc) bc->SetString(DESC_SHORT_NAME, "P"_s);
         bc = desc->GetParameterI(PR1M_ROOM_THICKNESSN, nullptr);
-        if (bc) bc->SetString(DESC_SHORT_NAME, "M");
+        if (bc) bc->SetString(DESC_SHORT_NAME, "M"_s);
         flags |= DESCFLAGS_DESC_LOADED;
 
         return true;
     }
 
     Bool RoomPrimitive::GetDEnabling(GeListNode* node, const DescID& id, const GeData& data, DESCFLAGS_ENABLE flags, const BaseContainer* itemdesc) {
-        if (not node) return false;
+        if (!node) return false;
         BaseObject* op = (BaseObject*) node;
         BaseContainer* bc = op->GetDataInstance();
-        if (not bc) return false;
+        if (!bc) return false;
 
-        LONG rid = id[0].id;
+        Int32 rid = id[0].id;
         switch (rid) {
             case PR1M_ROOM_FILLETRAD:
             case PR1M_ROOM_FILLETSUB:
@@ -370,7 +370,7 @@ namespace objects {
     }
 
     BaseObject* RoomPrimitive::GetVirtualObjects(BaseObject* op, HierarchyHelp* hh) {
-        if (not op) return null;
+        if (!op) return nullptr;
 
         // We will not continue if nothing has changed at all.
         BaseObject* cache = optimize_cache(op);
@@ -384,17 +384,17 @@ namespace objects {
         Vector thickp = bc->GetVector(PR1M_ROOM_THICKNESSP);
         Vector thickn = bc->GetVector(PR1M_ROOM_THICKNESSN);
         Bool dofillet = bc->GetBool(PR1M_ROOM_DOFILLET);
-        Real filletrad = bc->GetReal(PR1M_ROOM_FILLETRAD);
-        LONG filletsub = bc->GetLong(PR1M_ROOM_FILLETSUB);
-        LONG texturemode = bc->GetLong(PR1M_ROOM_TEXTUREMODE);
+        Float filletrad = bc->GetFloat(PR1M_ROOM_FILLETRAD);
+        Int32 filletsub = bc->GetInt32(PR1M_ROOM_FILLETSUB);
+        Int32 texturemode = bc->GetInt32(PR1M_ROOM_TEXTUREMODE);
 
         // Now, we're going to create the two cubes.
         BaseObject* o_cube1 = BaseObject::Alloc(Ocube);
-        if (not o_cube1) return null;
+        if (!o_cube1) return nullptr;
         BaseObject* o_cube2 = BaseObject::Alloc(Ocube);
-        if (not o_cube2) {
+        if (!o_cube2) {
             BaseObject::Free(o_cube1);
-            return null;
+            return nullptr;
         }
 
         // Set information that both cubes require.
@@ -405,28 +405,28 @@ namespace objects {
         for (int i=0; i < 2; i++) {
             BaseContainer* bc = containers[i];
             bc->SetVector(PRIM_CUBE_LEN, size);
-            bc->SetLong(PRIM_CUBE_SUBX, 1);
-            bc->SetLong(PRIM_CUBE_SUBY, 1);
-            bc->SetLong(PRIM_CUBE_SUBZ, 1);
+            bc->SetInt32(PRIM_CUBE_SUBX, 1);
+            bc->SetInt32(PRIM_CUBE_SUBY, 1);
+            bc->SetInt32(PRIM_CUBE_SUBZ, 1);
             bc->SetBool(PRIM_CUBE_DOFILLET, false);
         }
 
         // Set the information for the inner cube.
         bcc2->SetVector(PRIM_CUBE_LEN, (size - (thickn + thickp)));
         bcc2->SetBool(PRIM_CUBE_DOFILLET, dofillet);
-        bcc2->SetReal(PRIM_CUBE_FRAD, filletrad);
-        bcc2->SetLong(PRIM_CUBE_SUBF, filletsub);
+        bcc2->SetFloat(PRIM_CUBE_FRAD, filletrad);
+        bcc2->SetInt32(PRIM_CUBE_SUBF, filletsub);
 
         // Convert the inner cube to a polygon-object by calling the cube's
         // ObjectData::GetVirtualObjects() method.
         ObjectData*   cubedata   = o_cube2->GetNodeData<ObjectData>();
         OBJECTPLUGIN* cubeplugin = C4D_RETRIEVETABLE(OBJECTPLUGIN*, cubedata);
         BaseObject*   new_cube   = (cubedata->*(cubeplugin->GetVirtualObjects))(o_cube2, hh);
-        if (not new_cube) {
-            PR1MITIVE_DEBUG_ERROR("Cube ObjectData::GetVirtualObjects() returned null.");
+        if (!new_cube) {
+            PR1MITIVE_DEBUG_ERROR("Cube ObjectData::GetVirtualObjects() returned nullptr.");
             BaseObject::Free(o_cube1);
             BaseObject::Free(o_cube2);
-            return null;
+            return nullptr;
         }
 
         BaseObject::Free(o_cube2);
@@ -440,13 +440,13 @@ namespace objects {
         ModelingCommandData mdata;
         mdata.op = o_cube2;
         Bool success = SendModelingCommand(MCOMMAND_REVERSENORMALS, mdata);
-        if (not success) {
+        if (!success) {
             PR1MITIVE_DEBUG_ERROR("MCOMMAND_REVERSENORMALS failed.");
         }
 
         // Create the selection-sets for the inner cube.
         int selectioncount;
-        if (not dofillet) {
+        if (!dofillet) {
             filletsub = 0;
             selectioncount = 6;
         }
@@ -456,14 +456,14 @@ namespace objects {
         BaseSelect** selections = new BaseSelect*[selectioncount];
         for (int i=0; i < selectioncount; i++) {
             selections[i] = BaseSelect::Alloc();
-            if (not selections[i]) {
+            if (!selections[i]) {
                 PR1MITIVE_DEBUG_ERROR("Could not allocate BaseSelect object.");
                 goto end;
             }
         }
 
         success = make_cube_selections(filletsub, selections);
-        if (not success) {
+        if (!success) {
             PR1MITIVE_DEBUG_ERROR("make_cube_selections() failed.");
             goto end;
         }
@@ -473,17 +473,17 @@ namespace objects {
         const char** names;
 
         // In simple-mode, we need to join some of the selections into one.
-        if (texturemode isnot PR1M_ROOM_TEXTUREMODE_EXTENDED) {
+        if (texturemode != PR1M_ROOM_TEXTUREMODE_EXTENDED) {
             for (int i=1; i < 4; i++) {
                 selections[0]->Merge(selections[i]);
                 BaseSelect::Free(selections[i]);
-                selections[i] = null;
+                selections[i] = nullptr;
             }
 
             if (dofillet) {
                 selections[6]->Merge(selections[7]);
                 BaseSelect::Free(selections[7]);
-                selections[7] = null;
+                selections[7] = nullptr;
             }
 
             names = selection_names_simple;
@@ -494,16 +494,16 @@ namespace objects {
         // Insert the selections on the inner cube so they can be accesed by
         // texture-tags.
         for (int i=0; i < selectioncount; i++) {
-            if (not selections[i]) continue;
+            if (!selections[i]) continue;
 
             SelectionTag* tag = (SelectionTag*) o_cube2->MakeTag(Tpolygonselection);
-            if (not tag) {
+            if (!tag) {
                 PR1MITIVE_DEBUG_ERROR("Tpolygonselection could not be created.");
                 goto end;
             }
 
             selections[i]->CopyTo(tag->GetBaseSelect());
-            tag->SetName(names[i]);
+            tag->SetName(String(names[i]));
         }
 
       end:
@@ -511,14 +511,14 @@ namespace objects {
         for (int i=0; i < selectioncount; i++) {
             if (selections[i]) BaseSelect::Free(selections[i]);
         }
-        delete selections;
+        delete [] selections;
 
         // Search for a Phong-Tag on our Room-Object and insert it onto the inner
         // cube.
         BaseTag* tag = op->GetFirstTag();
         while (tag) {
             if (tag->IsInstanceOf(Tphong)) {
-                o_cube2->InsertTag((BaseTag*) tag->GetClone(COPYFLAGS_0, null));
+                o_cube2->InsertTag((BaseTag*) tag->GetClone(COPYFLAGS_0, nullptr));
                 break;
             }
             tag = tag->GetNext();
@@ -527,21 +527,21 @@ namespace objects {
         // Create a Null-Object to group the cubes under one object, set their
         // names and return them.
         BaseObject* root = BaseObject::Alloc(Onull);
-        if (not root) {
+        if (!root) {
             BaseObject::Free(o_cube1);
             BaseObject::Free(o_cube2);
-            return null;
+            return nullptr;
         }
-        o_cube1->SetName("Outter");
-        o_cube2->SetName("Inner");
+        o_cube1->SetName("Outter"_s);
+        o_cube2->SetName("Inner"_s);
         o_cube1->InsertUnder(root);
         o_cube2->InsertUnder(root);
 
         return root;
     }
 
-    Bool RoomPrimitive::Message(GeListNode* node, LONG type, void* ptr) {
-        if (not node) return false;
+    Bool RoomPrimitive::Message(GeListNode* node, Int32 type, void* ptr) {
+        if (!node) return false;
         BaseObject* op = (BaseObject*) node;
         BaseContainer* bc = op->GetDataInstance();
 
@@ -551,9 +551,9 @@ namespace objects {
                 // Create a Phong-Tag on our object. This phong tag will be retrieve
                 // in GetVirtualObjects() and inserted into the virtual objects.
                 BaseTag* tag = op->MakeTag(Tphong);
-                if (not tag) return false;
+                if (!tag) return false;
                 BaseContainer* tbc = tag->GetDataInstance();
-                if (not tbc) return false;
+                if (!tbc) return false;
                 tbc->SetBool(PHONGTAG_PHONG_ANGLELIMIT, true);
                 return true;
             }
@@ -566,8 +566,8 @@ namespace objects {
 
                 // We will limit the values for the size and thickness using
                 // the set_information() function.
-                if (id is PR1M_ROOM_SIZE or id is PR1M_ROOM_THICKNESSP or
-                    id is PR1M_ROOM_THICKNESSN or id is PR1M_ROOM_FILLETRAD) {
+                if (id == PR1M_ROOM_SIZE || id == PR1M_ROOM_THICKNESSP ||
+                    id == PR1M_ROOM_THICKNESSN || id == PR1M_ROOM_FILLETRAD) {
                     Vector size = bc->GetVector(PR1M_ROOM_SIZE);
                     Vector thickp = bc->GetVector(PR1M_ROOM_THICKNESSP);
                     Vector thickn = bc->GetVector(PR1M_ROOM_THICKNESSN);
@@ -582,7 +582,7 @@ namespace objects {
     }
 
     void RoomPrimitive::GetDimension(BaseObject* op, Vector* mp, Vector* size) {
-        if (not op) return;
+        if (!op) return;
         BaseContainer* bc = op->GetDataInstance();
 
         *mp = Vector(0);
@@ -594,11 +594,13 @@ namespace objects {
         menu::root().AddPlugin(IDS_MENU_OBJECTS, Opr1m_room);
         RoomPrimitive::static_init();
         return RegisterObjectPlugin(
-                Opr1m_room,
-                GeLoadString(IDS_Opr1m_room),
-                PLUGINFLAG_HIDEPLUGINMENU | OBJECT_GENERATOR,
-                RoomPrimitive::alloc,
-                "Opr1m_room", PR1MITIVE_ICON("Opr1m_room"), 0);
+            Opr1m_room,
+            GeLoadString(IDS_Opr1m_room),
+            PLUGINFLAG_HIDEPLUGINMENU | OBJECT_GENERATOR,
+            RoomPrimitive::alloc,
+            "Opr1m_room"_s,
+            PR1MITIVE_ICON("Opr1m_room"),
+            0);
     }
 
 } // end namespace objects

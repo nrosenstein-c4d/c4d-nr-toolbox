@@ -8,3 +8,6 @@ rtti = true
 [dlib]
 nogui = true
 isocpp = true
+
+[msvc]
+version = 140

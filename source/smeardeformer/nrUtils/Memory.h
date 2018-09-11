@@ -11,8 +11,6 @@
 #ifndef NR_UTILS_ALLOCATION_H
 #define NR_UTILS_ALLOCATION_H
 
-    #include "misc/legacy.h"
-
     namespace nr {
     namespace memory {
 
@@ -22,26 +20,30 @@
         }
 
         template <typename T>
-        T* Alloc(LONG count) {
-            return (T*) NewMem(char, sizeof(T) * count);
+        T* Alloc(Int32 count) {
+            iferr (auto&& res = NewMem(char, sizeof(T) * count))
+                return nullptr;
+            return (T*) res;
         }
 
         template <typename T>
-        Bool Realloc(T*& ptr, LONG count) {
+        Bool Realloc(T*& ptr, Int32 count) {
             if (ptr) {
-                ptr = (T*) ReallocMem(ptr, sizeof(T) * count);
+                iferr (auto&& res = ReallocMem(ptr, sizeof(T) * count))
+                    return false;
+                ptr = (T*) res;
             }
             else {
                 ptr = (T*) nr::memory::Alloc<T>(count);
             }
-            return ptr != NULL;
+            return ptr != nullptr;
         }
 
         template <typename T>
         void Free(T*& ptr) {
             if (ptr) {
                 DeleteMem((void*&) ptr);
-                ptr = NULL;
+                ptr = nullptr;
             }
         }
 
@@ -90,16 +92,16 @@
 
         protected:
 
-            LONG m_alloc;
-            LONG m_dealloc;
+            Int32 m_alloc;
+            Int32 m_dealloc;
 
         public:
 
-            inline LONG GetAllocationCount() const { return m_alloc; }
+            inline Int32 GetAllocationCount() const { return m_alloc; }
 
-            inline LONG GetDeallocationCount() const { return m_dealloc; }
+            inline Int32 GetDeallocationCount() const { return m_dealloc; }
 
-            inline LONG GetAliveCount() const { return m_alloc - m_dealloc; }
+            inline Int32 GetAliveCount() const { return m_alloc - m_dealloc; }
 
         };
 

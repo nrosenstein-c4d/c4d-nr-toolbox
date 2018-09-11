@@ -82,25 +82,25 @@ namespace helpers {
 
     UVWTag* make_planar_uvw(int useg, int vseg, Bool inverse_normals, Bool flipx, Bool flipy) {
         int polys = useg * vseg;
-        if (polys <= 0 or useg <= 0 or vseg <= 0) return null;
+        if (polys <= 0 || useg <= 0 || vseg <= 0) return nullptr;
 
         UVWTag* tag = UVWTag::Alloc(polys);
-        if (not tag) {
+        if (!tag) {
             PR1MITIVE_DEBUG_ERROR("Could not allocated UVW-Tag. End of procedure");
-            return null;
+            return nullptr;
         }
         UVWHandle uvwhandle = tag->GetDataAddressW();
 
         int poly_i = 0;
-        Real inv_u = 1.0 / useg;
-        Real inv_v = 1.0 / vseg;
+        Float inv_u = 1.0 / useg;
+        Float inv_v = 1.0 / vseg;
         UVWStruct uvw;
         for (int i=0; i < useg; i++) {
             for (int j=0; j < vseg; j++, poly_i++) {
-                Real a = (Real) i;
-                Real b = (Real) j;
-                Real c = (Real) i + 1;
-                Real d = (Real) j + 1;
+                Float a = (Float) i;
+                Float b = (Float) j;
+                Float c = (Float) i + 1;
+                Float d = (Float) j + 1;
 
                 if (inverse_normals) {
                     uvw.a = Vector((c * inv_u), (b * inv_v), 0);
@@ -135,10 +135,10 @@ namespace helpers {
         return tag;
     }
 
-    Bool optimize_object(BaseObject* op, Real treshold) {
+    Bool optimize_object(BaseObject* op, Float treshold) {
         // Allocate a container to fill in the information.
         BaseContainer bc;
-        bc.SetReal(MDATA_OPTIMIZE_TOLERANCE, treshold);
+        bc.SetFloat(MDATA_OPTIMIZE_TOLERANCE, treshold);
         bc.SetBool(MDATA_OPTIMIZE_POINTS, true);
         bc.SetBool(MDATA_OPTIMIZE_POLYGONS, true);
         bc.SetBool(MDATA_OPTIMIZE_UNUSEDPOINTS, true);
@@ -151,10 +151,10 @@ namespace helpers {
     }
 
     BaseContainer* find_submenu(BaseContainer* menu, const String& ident) {
-        if (!menu) return NULL;
-        LONG i = 0;
-        while (TRUE) {
-            LONG idx = menu->GetIndexId(i);
+        if (!menu) return nullptr;
+        Int32 i = 0;
+        while (true) {
+            Int32 idx = menu->GetIndexId(i);
             if (idx == NOTOK) break;
 
             GeData* data = menu->GetIndexData(i++);
@@ -164,7 +164,7 @@ namespace helpers {
             if (!sub) continue;
             if (sub->GetString(MENURESOURCE_SUBTITLE) == ident) return sub;
         }
-        return NULL;
+        return nullptr;
     }
 
 } // end namespace helpers

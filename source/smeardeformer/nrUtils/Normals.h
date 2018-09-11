@@ -11,34 +11,34 @@
 #ifndef NR_UTILS_NORMALS_H
 #define NR_UTILS_NORMALS_H
 
-    #include "misc/legacy.h"
+    #include <c4d.h>
 
     namespace nr {
 
     void ComputeFaceNormals(
             const Vector* vertices, const CPolygon* faces,
-            Vector* normals, LONG face_count);
+            Vector* normals, Int32 face_count);
 
     Vector* ComputeFaceNormals(
-            const Vector* vertices, LONG vertex_count,
-            const CPolygon* faces,  LONG face_count);
+            const Vector* vertices, Int32 vertex_count,
+            const CPolygon* faces,  Int32 face_count);
 
     Bool ComputeVertexNormals(
-            const CPolygon* faces, const Vector* face_normals, LONG face_count,
-            Vector* vertex_normals, LONG vertex_count);
+            const CPolygon* faces, const Vector* face_normals, Int32 face_count,
+            Vector* vertex_normals, Int32 vertex_count);
 
     Bool ComputeVertexNormals(
-            const Vector* vertices, LONG vertex_count,
-            const CPolygon* faces, LONG face_count,
+            const Vector* vertices, Int32 vertex_count,
+            const CPolygon* faces, Int32 face_count,
             Vector* vertex_normals);
 
     Vector* ComputeVertexNormals(
-            const CPolygon* faces, const Vector* face_normals, LONG face_count,
-            LONG vertex_count);
+            const CPolygon* faces, const Vector* face_normals, Int32 face_count,
+            Int32 vertex_count);
 
     Vector* ComputeVertexNormals(
-            const Vector* vertices, LONG vertex_count,
-            const CPolygon* faces, LONG face_count);
+            const Vector* vertices, Int32 vertex_count,
+            const CPolygon* faces, Int32 face_count);
 
     } // namespace nr
 

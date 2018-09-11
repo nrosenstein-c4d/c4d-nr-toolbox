@@ -49,7 +49,9 @@ struct Swatch : SwatchBase
   // TODO: Why are these not generated implicitly?
   Swatch(Swatch const& that) : SwatchBase(that), color(that.color), selected(that.selected) { }
   Swatch(Swatch&& that) : SwatchBase(that), color(std::move(that.color)), selected(that.selected) { }
-  MAXON_OPERATOR_MOVE_ASSIGNMENT(Swatch);
+
+  NR_OPERATOR_MOVE_ASSIGNMENT(Swatch);
+
   virtual Bool Write(HyperFile* hf) const override
   {
     if (!SwatchBase::Write(hf)) return false;
@@ -64,7 +66,7 @@ struct Swatch : SwatchBase
   }
   virtual String GetName() const override
   {
-    if (!this->name.Content())
+    if (c4d_apibridge::IsEmpty(this->name))
       return "Swatch#" + String::IntToString(this->index);
     return this->name;
   }
@@ -76,7 +78,7 @@ struct SwatchFolder : SwatchBase
   SwatchFolder() : SwatchBase(), swatches() { }
   SwatchFolder(Int32 index, String const& name) : SwatchBase(index, name) { }
   SwatchFolder(SwatchFolder const& that)
-    : SwatchBase(that) { swatches.CopyFrom(that.swatches); }
+    : SwatchBase(that) { (void) swatches.CopyFrom(that.swatches); }
   NR_OPERATOR_COPY_ASSIGNMENT(SwatchFolder);
   virtual Bool Write(HyperFile* hf) const override
   {
@@ -92,11 +94,11 @@ struct SwatchFolder : SwatchBase
     Int32 count;
     if (!hf->ReadInt32(&count)) return false;
     this->swatches.Flush();
-    if (!this->swatches.EnsureCapacity(count)) return false;
+    iferr (this->swatches.EnsureCapacity(count)) return false;
     for (Int32 i = 0; i < count; ++i) {
       Swatch swatch;
       if (!swatch.Read(hf, disklevel)) return false;
-      this->swatches.Append(std::move(swatch));
+      (void) this->swatches.Append(std::move(swatch));
     }
     return true;
   }
@@ -109,12 +111,12 @@ public:
   Bool show_chooser = true;
   maxon::BaseArray<SwatchFolder> folders;
 
-  ColorPaletteData() { folders.Append({this->GetNextIndex(), "<root>"}); }
+  ColorPaletteData() { (void) folders.Append({this->GetNextIndex(), "<root>"}); }
 
   ColorPaletteData(ColorPaletteData const& that)
     : next_idx(that.next_idx), show_chooser(that.show_chooser)
   {
-    folders.CopyFrom(that.folders);
+    (void) folders.CopyFrom(that.folders);
   }
 
   NR_OPERATOR_COPY_ASSIGNMENT(ColorPaletteData);
@@ -168,7 +170,10 @@ public:
 
   inline SwatchFolder* NewFolder(String const& name)
   {
-    return this->folders.Append(SwatchFolder{this->GetNextIndex(), name});
+    iferr (SwatchFolder& folder =
+           this->folders.Append(SwatchFolder{this->GetNextIndex(), name}))
+      return nullptr;
+    return &folder;
   }
 
   inline SwatchFolder* AskNewFolder()
@@ -182,12 +187,11 @@ public:
   inline Swatch* NewSwatch(SwatchFolder* folder, Vector const& color, Int32 index=NOTOK)
   {
     if (!folder) return nullptr;
-    Swatch* res = index==NOTOK? folder->swatches.Append() :folder->swatches.Insert(index);
-    if (res) {
-      res->index = this->GetNextIndex();
-      res->color = color;
-    }
-    return res;
+    iferr (Swatch& res = (index==NOTOK? folder->swatches.Append() :folder->swatches.Insert(index)))
+      return nullptr;
+    res.index = this->GetNextIndex();
+    res.color = color;
+    return &res;
   }
 
   inline void SelectAll(Bool state=true)
@@ -282,7 +286,7 @@ public: // static members
       }
     }
     // Then downsize.
-    array.Resize(count);
+    (void) array.Resize(count);
   }
 };
 

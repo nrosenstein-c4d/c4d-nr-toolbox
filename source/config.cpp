@@ -6,15 +6,16 @@
 
 #include <c4d.h>
 #include <dlib/config_reader.h>
-#include <nr/c4d/cleanup.h>
-#include <nr/c4d/raii.h>
+#include <NiklasRosenstein/c4d/cleanup.hpp>
+#include <NiklasRosenstein/c4d/raii.hpp>
 
 #include "config.h"
 #include "menu.h"
 
 using config_reader = dlib::config_reader;
 using config_reader_access_error = config_reader::config_reader_access_error;
-using nr::c4d::auto_string;
+using niklasrosenstein::c4d::auto_string;
+using niklasrosenstein::c4d::auto_bitmap;
 
 static std::string filename;
 static config_reader cfg;
@@ -35,7 +36,7 @@ bool nr::config::init_config(Filename const& fn, String* error) {
 
 
 bool nr::config::check_feature(String const& feature_name) {
-  std::string const name = auto_string(feature_name);
+  std::string const name = auto_string(feature_name).get();
   try {
     return ::features.at(name);
   }
@@ -57,7 +58,7 @@ bool nr::config::check_feature(String const& feature_name) {
 
 
 void nr::config::enable_feature(String const& feature_name, Bool enabled) {
-  std::string const name = auto_string(feature_name);
+  std::string const name = auto_string(feature_name).get();
   features[name] = enabled;
 }
 
@@ -88,9 +89,9 @@ enum {
 struct dialog : public GeDialog {
 
   Bool CreateLayout() override {
-    SetTitle("Feature Manager");
-    GroupBegin(0, BFH_SCALEFIT | BFV_SCALEFIT, 1, 0, "", 0); {
-      AddStaticText(0, BFH_CENTER, 0, 0, "Cinema 4D needs to be restarted for changes to take effect.", 0);
+    SetTitle("Feature Manager"_s);
+    GroupBegin(0, BFH_SCALEFIT | BFV_SCALEFIT, 1, 0, ""_s, 0); {
+      AddStaticText(0, BFH_CENTER, 0, 0, "Cinema 4D needs to be restarted for changes to take effect."_s, 0);
       GroupBorderSpace(4, 4, 4, 4);
       GroupBorderSpace(4, 4, 4, 4);
 
@@ -112,7 +113,7 @@ struct dialog : public GeDialog {
     return true;
   }
 
-  Bool Command(Int32 param, BaseContainer const& bc) {
+  Bool Command(Int32 param, BaseContainer const& bc) override {
     switch (param) {
       case DLG_OK:
         this->save();
@@ -156,8 +157,13 @@ struct command : public CommandData {
 Bool RegisterFeatureManager() {
   menu::root().AddPlugin(PLUGIN_ID);
   Int32 const info = PLUGINFLAG_HIDEPLUGINMENU;
-  nr::c4d::auto_bitmap icon("res/icons/feature_manager.png");
+  auto_bitmap icon("res/icons/feature_manager.png");
   String const help = "";
   return RegisterCommandPlugin(
-    PLUGIN_ID, "Feature Manager", info, icon, help, NewObjClear(command));
+    PLUGIN_ID,
+    "Feature Manager"_s,
+    info,
+    icon,
+    help,
+    NewObjClear(command));
 }

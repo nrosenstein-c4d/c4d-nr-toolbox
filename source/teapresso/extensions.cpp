@@ -5,10 +5,13 @@
  * All rights reserved.
  */
 
+#include <c4d_apibridge.h>
 #include "extensions.h"
 #include "TeaPresso.h"
 #include "utils.h"
 #include "res/c4d_symbols.h"
+
+using c4d_apibridge::GetDescriptionID;
 
 // ===========================================================================
 // ===== Data Class Definitions ==============================================
@@ -18,7 +21,7 @@ class TvContainerData : public TvOperatorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TvContainerData); }
+    static NodeData* Alloc() { return NewObjClear(TvContainerData); }
 
     /* TvOperatorData Overrides */
 
@@ -26,7 +29,7 @@ public:
 
     virtual Bool AskCondition(TvNode* host, TvNode* root, BaseList2D* context);
 
-    virtual Bool PredictContextType(TvNode* host, LONG type);
+    virtual Bool PredictContextType(TvNode* host, Int32 type);
 
     virtual Bool AcceptChild(TvNode* host, TvNode* other);
 
@@ -36,7 +39,7 @@ public:
 };
 
 BaseList2D* TvContainerData::Execute(TvNode* host, TvNode* root, BaseList2D* context) {
-    if (!host) return NULL;
+    if (!host) return nullptr;
     if (!host->IsEnabled()) return context;
 
     TvNode* child = host->GetDown();
@@ -48,14 +51,14 @@ BaseList2D* TvContainerData::Execute(TvNode* host, TvNode* root, BaseList2D* con
 }
 
 Bool TvContainerData::AskCondition(TvNode* host, TvNode* root, BaseList2D* context) {
-    if (!host) return FALSE;
-    if (!host->IsEnabled()) return TRUE;
+    if (!host) return false;
+    if (!host->IsEnabled()) return true;
 
     BaseContainer* data = host->GetDataInstance();
-    if (!data) return FALSE;
+    if (!data) return false;
 
     Bool result = data->GetBool(TVCONTAINER_DEFAULT);
-    LONG mode = data->GetLong(TVCONTAINER_CONDITIONMODE);
+    Int32 mode = data->GetInt32(TVCONTAINER_CONDITIONMODE);
 
     TvNode* child = host->GetDown();
     if (!child) return result;
@@ -78,28 +81,28 @@ Bool TvContainerData::AskCondition(TvNode* host, TvNode* root, BaseList2D* conte
     return result;
 }
 
-Bool TvContainerData::PredictContextType(TvNode* host, LONG type) {
-    if (!host) return FALSE;
+Bool TvContainerData::PredictContextType(TvNode* host, Int32 type) {
+    if (!host) return false;
     TvNode* parent = host->GetUp();
-    if (!parent) return FALSE;
+    if (!parent) return false;
     else return parent->PredictContextType(type);
 }
 
 Bool TvContainerData::AcceptChild(TvNode* host, TvNode* other) {
-    if (!host || !other) return FALSE;
+    if (!host || !other) return false;
     TvNode* parent = host->GetUp();
-    if (!parent) return TRUE;
+    if (!parent) return true;
     else return parent->AcceptChild(other);
 }
 
 Bool TvContainerData::Init(GeListNode* gNode) {
-    if (!gNode || !TvOperatorData::Init(gNode)) return FALSE;
+    if (!gNode || !TvOperatorData::Init(gNode)) return false;
     TvNode* node = (TvNode*) gNode;
     BaseContainer* data = node->GetDataInstance();
-    if (!data) return FALSE;
-    data->SetBool(TVCONTAINER_DEFAULT, TRUE);
-    data->SetLong(TVCONTAINER_CONDITIONMODE, TVCONTAINER_CONDITIONMODE_AND);
-    return TRUE;
+    if (!data) return false;
+    data->SetBool(TVCONTAINER_DEFAULT, true);
+    data->SetInt32(TVCONTAINER_CONDITIONMODE, TVCONTAINER_CONDITIONMODE_AND);
+    return true;
 }
 
 
@@ -114,7 +117,7 @@ public:
 };
 
 Bool TvIteratorData::AcceptChild(TvNode* host, TvNode* other) {
-    if (!host || !other) return FALSE;
+    if (!host || !other) return false;
     TVPLUGIN* plug = TvRetrieveTableX<TVPLUGIN>(other);
     return plug->info & TVPLUGIN_EXPRESSION;
 }
@@ -124,18 +127,18 @@ class TvEachDocumentData : public TvIteratorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TvEachDocumentData); }
+    static NodeData* Alloc() { return NewObjClear(TvEachDocumentData); }
 
     /* TvOperatorData Overrides */
 
     virtual BaseList2D* Execute(TvNode* host, TvNode* root, BaseList2D* context);
 
-    virtual Bool PredictContextType(TvNode* host, LONG type);
+    virtual Bool PredictContextType(TvNode* host, Int32 type);
 
 };
 
 BaseList2D* TvEachDocumentData::Execute(TvNode* host, TvNode* root, BaseList2D* context) {
-    if (!host) return NULL;
+    if (!host) return nullptr;
     BaseDocument* doc = GetFirstDocument();
     TvNode* child = host->GetDown();
     while (doc) {
@@ -150,8 +153,8 @@ BaseList2D* TvEachDocumentData::Execute(TvNode* host, TvNode* root, BaseList2D* 
     return context;
 }
 
-Bool TvEachDocumentData::PredictContextType(TvNode* host, LONG type) {
-    if (!host) return FALSE;
+Bool TvEachDocumentData::PredictContextType(TvNode* host, Int32 type) {
+    if (!host) return false;
     return type == Tbasedocument;
 }
 
@@ -162,7 +165,7 @@ class TvEachObjectData : public TvIteratorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TvEachObjectData); }
+    static NodeData* Alloc() { return NewObjClear(TvEachObjectData); }
 
     /* TvOperatorData Overrides */
 
@@ -170,12 +173,12 @@ public:
 
     virtual Bool AcceptParent(TvNode* host, TvNode* newParent);
 
-    virtual Bool PredictContextType(TvNode* host, LONG type);
+    virtual Bool PredictContextType(TvNode* host, Int32 type);
 
 };
 
 BaseObject* TvEachObjectData::Apply(TvNode* host, TvNode* root, BaseObject* obj) {
-    if (!obj) return NULL;
+    if (!obj) return nullptr;
     BaseList2D* child;
 
     child = host->GetDown();
@@ -195,7 +198,7 @@ BaseObject* TvEachObjectData::Apply(TvNode* host, TvNode* root, BaseObject* obj)
 }
 
 BaseList2D* TvEachObjectData::Execute(TvNode* host, TvNode* root, BaseList2D* context) {
-    if (!host || !context) return NULL;
+    if (!host || !context) return nullptr;
     if (!host->IsEnabled() || !host->GetDown()) return context;
     if (!context->IsInstanceOf(Tbasedocument)) return context;
     BaseDocument* doc = (BaseDocument*) context;
@@ -210,12 +213,12 @@ BaseList2D* TvEachObjectData::Execute(TvNode* host, TvNode* root, BaseList2D* co
 }
 
 Bool TvEachObjectData::AcceptParent(TvNode* host, TvNode* newParent) {
-    if (!host || !newParent) return FALSE;
+    if (!host || !newParent) return false;
     return newParent->PredictContextType(Tbasedocument);
 }
 
-Bool TvEachObjectData::PredictContextType(TvNode* host, LONG type) {
-    if (!host) return FALSE;
+Bool TvEachObjectData::PredictContextType(TvNode* host, Int32 type) {
+    if (!host) return false;
     return type == Obase;
 }
 
@@ -224,7 +227,7 @@ class TvEachTagData : public TvIteratorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TvEachTagData); }
+    static NodeData* Alloc() { return NewObjClear(TvEachTagData); }
 
     /* TvOperatorData Overrides */
 
@@ -232,12 +235,12 @@ public:
 
     virtual Bool AcceptParent(TvNode* host, TvNode* newParent);
 
-    virtual Bool PredictContextType(TvNode* host, LONG type);
+    virtual Bool PredictContextType(TvNode* host, Int32 type);
 
 };
 
 BaseList2D* TvEachTagData::Execute(TvNode* host, TvNode* root, BaseList2D* context) {
-    if (!host || !context) return NULL;
+    if (!host || !context) return nullptr;
     if (!host->IsEnabled() || !host->GetDown()) return context;
     if (!context->IsInstanceOf(Obase)) return context;
     BaseObject* op = (BaseObject*) context;
@@ -257,12 +260,12 @@ BaseList2D* TvEachTagData::Execute(TvNode* host, TvNode* root, BaseList2D* conte
 }
 
 Bool TvEachTagData::AcceptParent(TvNode* host, TvNode* newParent) {
-    if (!host || !newParent) return FALSE;
+    if (!host || !newParent) return false;
     return newParent->PredictContextType(Obase);
 }
 
-Bool TvEachTagData::PredictContextType(TvNode* host, LONG type) {
-    if (!host) return FALSE;
+Bool TvEachTagData::PredictContextType(TvNode* host, Int32 type) {
+    if (!host) return false;
     return type == Tbase;
 }
 
@@ -272,13 +275,13 @@ class TvConditionData : public TvOperatorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TvConditionData); }
+    static NodeData* Alloc() { return NewObjClear(TvConditionData); }
 
     /* TvOperatorData Overrides */
 
     virtual BaseList2D* Execute(TvNode* host, TvNode* root, BaseList2D* context);
 
-    virtual Bool PredictContextType(TvNode* host, LONG type);
+    virtual Bool PredictContextType(TvNode* host, Int32 type);
 
     virtual Bool AcceptChild(TvNode* host, TvNode* other);
 
@@ -288,12 +291,12 @@ public:
 
     virtual Bool Init(GeListNode* node);
 
-    virtual Bool Message(GeListNode* gNode, LONG type, void* pData);
+    virtual Bool Message(GeListNode* gNode, Int32 type, void* pData);
 
 };
 
 BaseList2D* TvConditionData::Execute(TvNode* host, TvNode* root, BaseList2D* context) {
-    if (!host || !context) return NULL;
+    if (!host || !context) return nullptr;
     if (!host->IsEnabled()) return context;
 
     TvNode* ifNode = host->GetDown();
@@ -310,10 +313,10 @@ BaseList2D* TvConditionData::Execute(TvNode* host, TvNode* root, BaseList2D* con
     }
 }
 
-Bool TvConditionData::PredictContextType(TvNode* host, LONG type) {
-    if (!host) return FALSE;
+Bool TvConditionData::PredictContextType(TvNode* host, Int32 type) {
+    if (!host) return false;
     TvNode* parent = host->GetUp();
-    if (!parent) return FALSE;
+    if (!parent) return false;
     else return parent->PredictContextType(type);
 }
 
@@ -322,11 +325,11 @@ Bool TvConditionData::AcceptChild(TvNode* host, TvNode* other) {
 }
 
 Bool TvConditionData::AllowRemoveChild(TvNode* host, TvNode* child) {
-    return FALSE;
+    return false;
 }
 
-Bool TvConditionData::Message(GeListNode* gNode, LONG type, void* pData) {
-    if (!gNode) return FALSE;
+Bool TvConditionData::Message(GeListNode* gNode, Int32 type, void* pData) {
+    if (!gNode) return false;
     TvNode* host = (TvNode*) gNode;
     switch (type) {
         case MSG_TEAPRESSO_SETUP: {
@@ -338,20 +341,20 @@ Bool TvConditionData::Message(GeListNode* gNode, LONG type, void* pData) {
                 thenNode->InsertUnderLast(host);
                 elseNode->InsertUnderLast(host);
             }
-            return TRUE;
+            return true;
         }
     }
     return TvOperatorData::Message(gNode, type, pData);
 }
 
 Bool TvConditionData::Init(GeListNode* gNode) {
-    if (!gNode || !TvOperatorData::Init(gNode)) return FALSE;
+    if (!gNode || !TvOperatorData::Init(gNode)) return false;
     /*
     TvNode* node = (TvNode*) gNode;
     BaseContainer* data = node->GetDataInstance();
-    if (!data) return FALSE;
+    if (!data) return false;
     */
-    return TRUE;
+    return true;
 }
 
 
@@ -359,7 +362,7 @@ class TvIfData : public TvContainerData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TvIfData); }
+    static NodeData* Alloc() { return NewObjClear(TvIfData); }
 
     /* TvOperatorData Overrides */
 
@@ -368,7 +371,7 @@ public:
 };
 
 Bool TvIfData::AcceptChild(TvNode* host, TvNode* other) {
-    if (!host || !other) return FALSE;
+    if (!host || !other) return false;
     TVPLUGIN* plug = TvRetrieveTableX<TVPLUGIN>(other);
     return plug->info & TVPLUGIN_CONDITION;
 }
@@ -378,7 +381,7 @@ class TvThenElseData : public TvContainerData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TvThenElseData); }
+    static NodeData* Alloc() { return NewObjClear(TvThenElseData); }
 
     /* TvOperatorData Overrides */
 
@@ -386,7 +389,7 @@ public:
 };
 
 Bool TvThenElseData::AcceptChild(TvNode* host, TvNode* other) {
-    if (!host || !other) return FALSE;
+    if (!host || !other) return false;
     TVPLUGIN* plug = TvRetrieveTableX<TVPLUGIN>(other);
     return plug->info & TVPLUGIN_EXPRESSION;
 }
@@ -400,7 +403,7 @@ class TvPrintContextData : public TvOperatorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TvPrintContextData); }
+    static NodeData* Alloc() { return NewObjClear(TvPrintContextData); }
 
     /* TvOperatorData Overrides */
 
@@ -443,7 +446,7 @@ String TvPrintContextData::GetText(TvNode* host, BaseList2D* context, String typ
 
     String customText = data->GetString(TVPRINTCONTEXT_CUSTOMTEXT);
 
-    switch (data->GetLong(TVPRINTCONTEXT_MODE)) {
+    switch (data->GetInt32(TVPRINTCONTEXT_MODE)) {
         case TVPRINTCONTEXT_MODE_CONTEXTNAME:
             line += contextName;
             break;
@@ -459,7 +462,7 @@ String TvPrintContextData::GetText(TvNode* host, BaseList2D* context, String typ
 }
 
 BaseList2D* TvPrintContextData::Execute(TvNode* host, TvNode* root, BaseList2D* context) {
-    if (!host) return NULL;
+    if (!host) return nullptr;
     if (!host->IsEnabled()) return context;
 
     GePrint(GetText(host, context, GeLoadString(IDC_TEXT_INEXPRESSION)));
@@ -467,35 +470,35 @@ BaseList2D* TvPrintContextData::Execute(TvNode* host, TvNode* root, BaseList2D* 
 }
 
 Bool TvPrintContextData::AskCondition(TvNode* host, TvNode* root, BaseList2D* context) {
-    if (!host) return FALSE;
-    if (!host->IsEnabled()) return FALSE;
+    if (!host) return false;
+    if (!host->IsEnabled()) return false;
 
     GePrint(GetText(host, context, GeLoadString(IDC_TEXT_INCONDITION)));
-    return FALSE;
+    return false;
 }
 
 Bool TvPrintContextData::Init(GeListNode* node) {
-    if (!node || !super::Init(node)) return FALSE;
+    if (!node || !super::Init(node)) return false;
     BaseContainer* data = ((TvNode*) node)->GetDataInstance();
-    if (!data) return FALSE;
+    if (!data) return false;
 
-    data->SetBool(TVPRINTCONTEXT_PRINTNAME, TRUE);
-    data->SetLong(TVPRINTCONTEXT_MODE, TVPRINTCONTEXT_MODE_CONTEXTNAME);
-    data->SetString(TVPRINTCONTEXT_CUSTOMTEXT, "");
-    return TRUE;
+    data->SetBool(TVPRINTCONTEXT_PRINTNAME, true);
+    data->SetInt32(TVPRINTCONTEXT_MODE, TVPRINTCONTEXT_MODE_CONTEXTNAME);
+    data->SetString(TVPRINTCONTEXT_CUSTOMTEXT, ""_s);
+    return true;
 }
 
 Bool TvPrintContextData::GetDEnabling(
         GeListNode* node, const DescID& descid, const GeData& tData,
         DESCFLAGS_ENABLE flags, const BaseContainer* itemdesc) {
-    if (!node) return FALSE;
+    if (!node) return false;
     BaseContainer* data = ((TvNode*) node)->GetDataInstance();
-    if (!data) return FALSE;
+    if (!data) return false;
 
-    LONG id = TvDescIDLong(descid);
+    Int32 id = TvDescIDLong(descid);
     switch (id) {
         case TVPRINTCONTEXT_CUSTOMTEXT: {
-            LONG mode = data->GetBool(TVPRINTCONTEXT_MODE);
+            Int32 mode = data->GetBool(TVPRINTCONTEXT_MODE);
             return mode != TVPRINTCONTEXT_MODE_CONTEXTNAME;
         }
     }
@@ -508,7 +511,7 @@ class TvCheckTypeData : public TvOperatorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TvCheckTypeData); }
+    static NodeData* Alloc() { return NewObjClear(TvCheckTypeData); }
 
     /* TvOperatorData Overrides */
 
@@ -523,24 +526,24 @@ public:
 };
 
 Bool TvCheckTypeData::AskCondition(TvNode* host, TvNode* root, BaseList2D* context) {
-    if (!host || !context) return FALSE;
-    if (!host->IsEnabled()) return FALSE;
+    if (!host || !context) return false;
+    if (!host->IsEnabled()) return false;
     BaseContainer* data = host->GetDataInstance();
-    if (!data) return FALSE;
-    Bool result = context->IsInstanceOf(data->GetLong(TVCHECKTYPE_TYPEID));
+    if (!data) return false;
+    Bool result = context->IsInstanceOf(data->GetInt32(TVCHECKTYPE_TYPEID));
     if (host->IsInverted()) result = !result;
     return result;
 }
 
 Bool TvCheckTypeData::OnDescriptionCommand(TvNode* node, const DescriptionCommand& data) {
-    LONG id = TvDescIDLong(data.id);
+    Int32 id = TvDescIDLong(GetDescriptionID(&data));
     BaseContainer* bc = node->GetDataInstance();
-    if (!bc) return FALSE;
+    if (!bc) return false;
 
     switch (id) {
         case TVCHECKTYPE_BTN_CHOOSE: {
             AutoAlloc<AtomArray> arr;
-            if (!arr) return FALSE;
+            if (!arr) return false;
 
             BaseContainer popup;
             BaseContainer nodes;
@@ -551,32 +554,32 @@ Bool TvCheckTypeData::OnDescriptionCommand(TvNode* node, const DescriptionComman
             BaseContainer scenehooks;
 
             nodes.SetString(1, GeLoadString(IDC_NODES));
-            FilterPluginList(arr, PLUGINTYPE_NODE, TRUE);
+            FilterPluginList(arr, PLUGINTYPE_NODE, true);
             TvFillPopupContainerBasePlugin(nodes, arr);
             arr->Flush();
 
             objects.SetString(1, GeLoadString(IDC_OBJECTS));
-            FilterPluginList(arr, PLUGINTYPE_OBJECT, TRUE);
+            FilterPluginList(arr, PLUGINTYPE_OBJECT, true);
             TvFillPopupContainerBasePlugin(objects, arr);
             arr->Flush();
 
             tags.SetString(1, GeLoadString(IDC_TAGS));
-            FilterPluginList(arr, PLUGINTYPE_TAG, TRUE);
+            FilterPluginList(arr, PLUGINTYPE_TAG, true);
             TvFillPopupContainerBasePlugin(tags, arr);
             arr->Flush();
 
             shaders.SetString(1, GeLoadString(IDC_SHADERS));
-            FilterPluginList(arr, PLUGINTYPE_SHADER, TRUE);
+            FilterPluginList(arr, PLUGINTYPE_SHADER, true);
             TvFillPopupContainerBasePlugin(shaders, arr);
             arr->Flush();
 
             materials.SetString(1, GeLoadString(IDC_MATERIALS));
-            FilterPluginList(arr, PLUGINTYPE_MATERIAL, TRUE);
+            FilterPluginList(arr, PLUGINTYPE_MATERIAL, true);
             TvFillPopupContainerBasePlugin(materials, arr);
             arr->Flush();
 
             scenehooks.SetString(1, GeLoadString(IDC_SCENEHOOKS));
-            FilterPluginList(arr, PLUGINTYPE_SCENEHOOK, TRUE);
+            FilterPluginList(arr, PLUGINTYPE_SCENEHOOK, true);
             TvFillPopupContainerBasePlugin(scenehooks, arr);
             arr->Flush();
 
@@ -586,24 +589,24 @@ Bool TvCheckTypeData::OnDescriptionCommand(TvNode* node, const DescriptionComman
             popup.SetContainer(13, shaders);
             popup.SetContainer(14, materials);
             popup.SetContainer(15, scenehooks);
-            LONG id = ShowPopupMenu(NULL, MOUSEPOS, MOUSEPOS, popup);
+            Int32 id = ShowPopupMenu(nullptr, MOUSEPOS, MOUSEPOS, popup);
 
             if (id > 100) {
-                bc->SetLong(TVCHECKTYPE_TYPEID, id);
+                bc->SetInt32(TVCHECKTYPE_TYPEID, id);
                 TvUpdateTreeViews();
             }
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 Bool TvCheckTypeData::Init(GeListNode* gNode) {
-    if (!gNode || !TvOperatorData::Init(gNode)) return FALSE;
+    if (!gNode || !TvOperatorData::Init(gNode)) return false;
     TvNode* node = (TvNode*) gNode;
     BaseContainer* data = node->GetDataInstance();
-    if (!data) return FALSE;
-    return TRUE;
+    if (!data) return false;
+    return true;
 }
 
 
@@ -611,7 +614,7 @@ class TvIsSelectedData : public TvOperatorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TvIsSelectedData); }
+    static NodeData* Alloc() { return NewObjClear(TvIsSelectedData); }
 
     /* TvOperatorData Overrides */
 
@@ -620,7 +623,7 @@ public:
 };
 
 Bool TvIsSelectedData::AskCondition(TvNode* host, TvNode* root, BaseList2D* context) {
-    if (!host || !context) return FALSE;
+    if (!host || !context) return false;
     Bool result = context->GetBit(BIT_ACTIVE);
     if (host->IsInverted()) result = !result;
     return result;
@@ -633,7 +636,7 @@ class TvSelectData : public TvOperatorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TvSelectData); }
+    static NodeData* Alloc() { return NewObjClear(TvSelectData); }
 
     /* TvOperatorData Overrides */
 
@@ -646,12 +649,12 @@ public:
 };
 
 BaseList2D* TvSelectData::Execute(TvNode* host, TvNode* root, BaseList2D* context) {
-    if (!host) return NULL;
+    if (!host) return nullptr;
     if (!root || !context || !host->IsEnabled()) return context;
 
     BaseContainer* rData = root->GetDataInstance();
     BaseContainer* hData = host->GetDataInstance();
-    if (!rData || !hData) return FALSE;
+    if (!rData || !hData) return nullptr;
 
     // Add undo if desired.
     if (rData->GetBool(TVROOT_ADDUNDOS)) {
@@ -672,12 +675,12 @@ BaseList2D* TvSelectData::Execute(TvNode* host, TvNode* root, BaseList2D* contex
 }
 
 Bool TvSelectData::Init(GeListNode* node) {
-    if (!node || !super::Init(node)) return FALSE;
+    if (!node || !super::Init(node)) return false;
     BaseContainer* data = ((TvNode*) node)->GetDataInstance();
-    if (!data) return FALSE;
+    if (!data) return false;
 
-    data->SetBool(TVSELECT_STATUS, TRUE);
-    return TRUE;
+    data->SetBool(TVSELECT_STATUS, true);
+    return true;
 }
 
 
@@ -689,9 +692,9 @@ class TvCurrentDocumentData : public TvThenElseData {
 
 public:
 
-    static NodeData* AllocRoot() { return gNew(TvCurrentDocumentData, TRUE); }
+    static NodeData* AllocRoot() { return NewObjClear(TvCurrentDocumentData, true); }
 
-    static NodeData* Alloc() { return gNew(TvCurrentDocumentData, FALSE); }
+    static NodeData* Alloc() { return NewObjClear(TvCurrentDocumentData, false); }
 
     TvCurrentDocumentData(Bool isRoot) : super(), isRoot(isRoot) {}
 
@@ -699,7 +702,7 @@ public:
 
     virtual BaseList2D* Execute(TvNode* host, TvNode* root, BaseList2D* context);
 
-    virtual Bool PredictContextType(TvNode* host, LONG type);
+    virtual Bool PredictContextType(TvNode* host, Int32 type);
 
     /* NodeData Overrides */
 
@@ -708,7 +711,7 @@ public:
 };
 
 BaseList2D* TvCurrentDocumentData::Execute(TvNode* host, TvNode* root, BaseList2D* context) {
-    if (!host) return NULL;
+    if (!host) return nullptr;
     BaseDocument* doc = GetActiveDocument();
     if (isRoot) root = host;
     if (doc) {
@@ -717,18 +720,18 @@ BaseList2D* TvCurrentDocumentData::Execute(TvNode* host, TvNode* root, BaseList2
     return context;
 }
 
-Bool TvCurrentDocumentData::PredictContextType(TvNode* host, LONG type) {
-    if (!host) return FALSE;
+Bool TvCurrentDocumentData::PredictContextType(TvNode* host, Int32 type) {
+    if (!host) return false;
     return type == Tbasedocument;
 }
 
 Bool TvCurrentDocumentData::Init(GeListNode* node) {
-    if (!node || !super::Init(node)) return FALSE;
+    if (!node || !super::Init(node)) return false;
     BaseContainer* data = ((BaseList2D*) node)->GetDataInstance();
-    if (!data) return FALSE;
+    if (!data) return false;
 
-    data->SetBool(TVROOT_ADDUNDOS, TRUE);
-    return TRUE;
+    data->SetBool(TVROOT_ADDUNDOS, true);
+    return true;
 }
 
 
@@ -739,104 +742,161 @@ Bool TvCurrentDocumentData::Init(GeListNode* node) {
 
 static Bool RegisterTvRoot() {
     return TvRegisterOperatorPlugin(
-            Tvroot, GeLoadString(IDC_TVROOT),
-            TVPLUGIN_EXPRESSION, TvCurrentDocumentData::AllocRoot,
-            "Tvroot", AutoBitmap("Tvroot.png"), 0, TEAPRESSO_FOLDER_CONTEXTS);
+        Tvroot,
+        GeLoadString(IDC_TVROOT),
+        TVPLUGIN_EXPRESSION,
+        TvCurrentDocumentData::AllocRoot,
+        "Tvroot"_s,
+        AutoBitmap("Tvroot.png"_s),
+        0,
+        TEAPRESSO_FOLDER_CONTEXTS);
 }
 
 static Bool RegisterTvCurrentDocument() {
     return TvRegisterOperatorPlugin(
-            Tvcurrentdocument, GeLoadString(IDC_TVCURRENTDOCUMENT),
-            TVPLUGIN_EXPRESSION, TvCurrentDocumentData::Alloc, "Tvcurrentdocument",
-            AutoBitmap("Tvcurrentdocument.png"), 0, TEAPRESSO_FOLDER_CONTEXTS);
+        Tvcurrentdocument,
+        GeLoadString(IDC_TVCURRENTDOCUMENT),
+        TVPLUGIN_EXPRESSION,
+        TvCurrentDocumentData::Alloc,
+        "Tvcurrentdocument"_s,
+        AutoBitmap("Tvcurrentdocument.png"_s),
+        0,
+        TEAPRESSO_FOLDER_CONTEXTS);
 }
 
 static Bool RegisterTvContainer() {
     return TvRegisterOperatorPlugin(
-            Tvcontainer, GeLoadString(IDC_TVCONTAINER),
-            TVPLUGIN_EXPRESSION | TVPLUGIN_CONDITION, TvContainerData::Alloc,
-            "Tvcontainer", AutoBitmap("Tvcontainer.png"), 0);
+        Tvcontainer,
+        GeLoadString(IDC_TVCONTAINER),
+        TVPLUGIN_EXPRESSION | TVPLUGIN_CONDITION,
+        TvContainerData::Alloc,
+        "Tvcontainer"_s,
+        AutoBitmap("Tvcontainer.png"_s),
+        0);
 }
 
 static Bool RegisterTvEachDocument() {
     return TvRegisterOperatorPlugin(
-        Tveachdocument, GeLoadString(IDC_TVEACHDOCUMENT),
-        TVPLUGIN_EXPRESSION, TvEachDocumentData::Alloc,
-        "Tveachdocument", AutoBitmap("Tveachdocument.png"), 0,
+        Tveachdocument,
+        GeLoadString(IDC_TVEACHDOCUMENT),
+        TVPLUGIN_EXPRESSION,
+        TvEachDocumentData::Alloc,
+        "Tveachdocument"_s,
+        AutoBitmap("Tveachdocument.png"_s),
+        0,
         TEAPRESSO_FOLDER_ITERATORS);
 }
 
 static Bool RegisterTvEachObject() {
     return TvRegisterOperatorPlugin(
-        Tveachobject, GeLoadString(IDC_TVEACHOBJECT),
-        TVPLUGIN_EXPRESSION, TvEachObjectData::Alloc,
-        "Tveachobject", AutoBitmap("Tveachobject.png"), 0,
+        Tveachobject,
+        GeLoadString(IDC_TVEACHOBJECT),
+        TVPLUGIN_EXPRESSION,
+        TvEachObjectData::Alloc,
+        "Tveachobject"_s,
+        AutoBitmap("Tveachobject.png"_s),
+        0,
         TEAPRESSO_FOLDER_ITERATORS);
 }
 
 static Bool RegisterTvEachTag() {
     return TvRegisterOperatorPlugin(
-        Tveachtag, GeLoadString(IDC_TVEACHTAG),
-        TVPLUGIN_EXPRESSION, TvEachTagData::Alloc,
-        "Tveachtag", AutoBitmap("Tveachtag.png"), 0,
+        Tveachtag,
+        GeLoadString(IDC_TVEACHTAG),
+        TVPLUGIN_EXPRESSION,
+        TvEachTagData::Alloc,
+        "Tveachtag"_s,
+        AutoBitmap("Tveachtag.png"_s),
+        0,
         TEAPRESSO_FOLDER_ITERATORS);
 }
 
 static Bool RegisterTvCondition() {
     return TvRegisterOperatorPlugin(
-        Tvcondition, GeLoadString(IDC_TVCONDITION),
-        TVPLUGIN_EXPRESSION, TvConditionData::Alloc,
-        "Tvcondition", AutoBitmap("Tvcondition.png"), 0);
+        Tvcondition,
+        GeLoadString(IDC_TVCONDITION),
+        TVPLUGIN_EXPRESSION,
+        TvConditionData::Alloc,
+        "Tvcondition"_s,
+        AutoBitmap("Tvcondition.png"_s),
+        0);
 }
 
 static Bool RegisterIf() {
     return TvRegisterOperatorPlugin(
-        Tvif, GeLoadString(IDC_TVIF),
+        Tvif,
+        GeLoadString(IDC_TVIF),
         TVPLUGIN_CONDITION | PLUGINFLAG_HIDEPLUGINMENU,
-        TvIfData::Alloc, "Tvif", AutoBitmap("Tvif.png"), 0);
+        TvIfData::Alloc,
+        "Tvif"_s,
+        AutoBitmap("Tvif.png"_s),
+        0);
 }
 
 static Bool RegisterThen() {
     return TvRegisterOperatorPlugin(
-        Tvthen, GeLoadString(IDC_TVTHEN),
+        Tvthen,
+        GeLoadString(IDC_TVTHEN),
         TVPLUGIN_EXPRESSION | PLUGINFLAG_HIDEPLUGINMENU,
-        TvThenElseData::Alloc, "Tvthen", AutoBitmap("Tvthen.png"), 0);
+        TvThenElseData::Alloc,
+        "Tvthen"_s,
+        AutoBitmap("Tvthen.png"_s),
+        0);
 }
 
 static Bool RegisterElse() {
     return TvRegisterOperatorPlugin(
-        Tvelse, GeLoadString(IDC_TVELSE),
+        Tvelse,
+        GeLoadString(IDC_TVELSE),
         TVPLUGIN_EXPRESSION | PLUGINFLAG_HIDEPLUGINMENU,
-        TvThenElseData::Alloc, "Tvelse", AutoBitmap("Tvelse.png"), 0);
+        TvThenElseData::Alloc,
+        "Tvelse"_s,
+        AutoBitmap("Tvelse.png"_s),
+        0);
 }
 
 static Bool RegisterTvPrintContext() {
     return TvRegisterOperatorPlugin(
-        Tvprintcontext, GeLoadString(IDC_TVPRINTCONTEXT),
+        Tvprintcontext,
+        GeLoadString(IDC_TVPRINTCONTEXT),
         TVPLUGIN_EXPRESSION | TVPLUGIN_CONDITION,
-        TvPrintContextData::Alloc, "Tvprintcontext",
-        AutoBitmap("Tvprintcontext.png"), 0);
+        TvPrintContextData::Alloc,
+        "Tvprintcontext"_s,
+        AutoBitmap("Tvprintcontext.png"_s),
+        0);
 }
 
 static Bool RegisterTvCheckType() {
     return TvRegisterOperatorPlugin(
-        Tvchecktype, GeLoadString(IDC_TVCHECKTYPE),
-        TVPLUGIN_CONDITION, TvCheckTypeData::Alloc, "Tvchecktype",
-        AutoBitmap("Tvchecktype.png"), 0);
+        Tvchecktype,
+        GeLoadString(IDC_TVCHECKTYPE),
+        TVPLUGIN_CONDITION,
+        TvCheckTypeData::Alloc,
+        "Tvchecktype"_s,
+        AutoBitmap("Tvchecktype.png"_s),
+        0);
 }
 
 static Bool RegisterTvIsSelected() {
     return TvRegisterOperatorPlugin(
-        Tvisselected, GeLoadString(IDC_TVISSELECTED),
-        TVPLUGIN_CONDITION, TvIsSelectedData::Alloc, "Tvisselected",
-        AutoBitmap("Tvisselected.png"), 0);
+        Tvisselected,
+        GeLoadString(IDC_TVISSELECTED),
+        TVPLUGIN_CONDITION,
+        TvIsSelectedData::Alloc,
+        "Tvisselected"_s,
+        AutoBitmap("Tvisselected.png"_s),
+        0);
 }
 
 static Bool RegisterTvSelect() {
     return TvRegisterOperatorPlugin(
-        Tvselect, GeLoadString(IDC_TVSELECT),
-        TVPLUGIN_EXPRESSION, TvSelectData::Alloc, "Tvselect",
-        AutoBitmap("Tvselect.png"), 0);
+        Tvselect,
+        GeLoadString(IDC_TVSELECT),
+        TVPLUGIN_EXPRESSION,
+        TvSelectData::Alloc,
+        "Tvselect"_s,
+        AutoBitmap("Tvselect.png"_s),
+        0);
 }
 
 Bool RegisterTvExtensions() {
@@ -856,7 +916,7 @@ Bool RegisterTvExtensions() {
         RegisterTvIsSelected();
         RegisterTvSelect();
     }
-    return TRUE;
+    return true;
 }
 
 

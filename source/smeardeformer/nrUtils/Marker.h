@@ -11,7 +11,7 @@
 #ifndef NR_UTILS_MARKER_H
 #define NR_UTILS_MARKER_H
 
-    #include "misc/legacy.h"
+    #include <c4d.h>
 
     namespace nr {
 

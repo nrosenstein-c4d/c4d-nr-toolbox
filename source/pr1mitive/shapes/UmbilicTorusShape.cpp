@@ -24,7 +24,7 @@ namespace shapes {
 
       public:
 
-        static NodeData* alloc() { return gNew(UmbilicTorusShape); }
+        static NodeData* alloc() { return NewObjClear(UmbilicTorusShape); }
 
       //
       // BaseComplexShape --------------------------------------------------------------------------
@@ -34,17 +34,17 @@ namespace shapes {
 
         void free_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info);
 
-        Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index);
+        Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index);
 
       //
       // BasePrimitiveData -------------------------------------------------------------------------
       //
 
-        LONG get_handle_count(BaseObject* op);
+        Int32 get_handle_count(BaseObject* op);
 
-        Bool get_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        Bool get_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
-        void set_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        void set_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
       //
       // ObjectData --------------------------------------------------------------------------------
@@ -60,28 +60,28 @@ namespace shapes {
     };
 
     struct UmbilicData {
-        Real radius;
-        Real iradius;
-        Real smooth;
+        Float radius;
+        Float iradius;
+        Float smooth;
         Bool slice;
-        Real dmin;
-        Real dmax;
-        Real inv_s;
+        Float dmin;
+        Float dmax;
+        Float inv_s;
     };
 
     Bool UmbilicTorusShape::init_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info) {
-        if (not super::init_calculation(op, bc, info)) return false;
+        if (!super::init_calculation(op, bc, info)) return false;
         auto data = new struct UmbilicData;
-        if (not data) return false;
+        if (!data) return false;
         info->data = (void*) data;
 
-        data->radius = bc->GetReal(PR1M_UMBILICTORUS_RADIUS);
-        data->iradius = bc->GetReal(PR1M_UMBILICTORUS_PIPERADIUS) * 0.785;
-        data->smooth = bc->GetReal(PR1M_UMBILICTORUS_SMOOTHNESS);
-        data->smooth = helpers::limit_min<Real>(data->smooth, 1.0);
+        data->radius = bc->GetFloat(PR1M_UMBILICTORUS_RADIUS);
+        data->iradius = bc->GetFloat(PR1M_UMBILICTORUS_PIPERADIUS) * 0.785;
+        data->smooth = bc->GetFloat(PR1M_UMBILICTORUS_SMOOTHNESS);
+        data->smooth = helpers::limit_min<Float>(data->smooth, 1.0);
         data->slice = bc->GetBool(PR1M_UMBILICTORUS_DOSLICE);
-        data->dmin = bc->GetReal(PR1M_UMBILICTORUS_DEGREEMIN);
-        data->dmax = bc->GetReal(PR1M_UMBILICTORUS_DEGREEMAX);
+        data->dmin = bc->GetFloat(PR1M_UMBILICTORUS_DEGREEMIN);
+        data->dmax = bc->GetFloat(PR1M_UMBILICTORUS_DEGREEMAX);
         data->inv_s = data->iradius / data->smooth;
 
         if (data->slice) {
@@ -103,35 +103,35 @@ namespace shapes {
         delete data;
     }
 
-    Vector UmbilicTorusShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index) {
+    Vector UmbilicTorusShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index) {
         auto data = (struct UmbilicData*) info->data;
 
-        Real u_3 = u / 3.0;
-        Real v2_ = v * 2.0;
-        Real x = Sin(u) * (data->radius + data->iradius + Cos(u_3 - v2_) * data->inv_s + data->iradius * Cos(u_3 + v));
-        Real y = Cos(u) * (data->radius + data->iradius + Cos(u_3 - v2_) * data->inv_s + data->iradius * Cos(u_3 + v));
-        Real z = Sin(u_3 - v2_) * data->inv_s + data->iradius * Sin(u_3 + v);
+        Float u_3 = u / 3.0;
+        Float v2_ = v * 2.0;
+        Float x = Sin(u) * (data->radius + data->iradius + Cos(u_3 - v2_) * data->inv_s + data->iradius * Cos(u_3 + v));
+        Float y = Cos(u) * (data->radius + data->iradius + Cos(u_3 - v2_) * data->inv_s + data->iradius * Cos(u_3 + v));
+        Float z = Sin(u_3 - v2_) * data->inv_s + data->iradius * Sin(u_3 + v);
 
         return Vector(x, -z, y);
     }
 
-    LONG UmbilicTorusShape::get_handle_count(BaseObject* op) {
+    Int32 UmbilicTorusShape::get_handle_count(BaseObject* op) {
         return 2;
     }
 
-    Bool UmbilicTorusShape::get_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    Bool UmbilicTorusShape::get_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
         BaseContainer* bc = op->GetDataInstance();
         Vector& point = info->position;
         Vector& diret = info->direction;
 
-        Real radius = bc->GetReal(PR1M_UMBILICTORUS_RADIUS);
+        Float radius = bc->GetFloat(PR1M_UMBILICTORUS_RADIUS);
         switch (handle) {
             case HANDLE_RADIUS:
                 point.x = radius;
                 diret.x = 1;
                 break;
             case HANDLE_PIPERADIUS:
-                point.x = radius + bc->GetReal(PR1M_UMBILICTORUS_PIPERADIUS) * 2;
+                point.x = radius + bc->GetFloat(PR1M_UMBILICTORUS_PIPERADIUS) * 2;
                 diret.x = 1;
                 break;
 
@@ -141,19 +141,19 @@ namespace shapes {
         return true;
     }
 
-    void UmbilicTorusShape::set_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    void UmbilicTorusShape::set_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
         BaseContainer* bc = op->GetDataInstance();
         Vector point = info->position;
 
         switch (handle) {
             case HANDLE_RADIUS:
-                point.x = helpers::limit_min<Real>(point.x, 0);
-                bc->SetReal(PR1M_UMBILICTORUS_RADIUS, point.x);
+                point.x = helpers::limit_min<Float>(point.x, 0);
+                bc->SetFloat(PR1M_UMBILICTORUS_RADIUS, point.x);
                 break;
             case HANDLE_PIPERADIUS: {
-                Real radius = bc->GetReal(PR1M_UMBILICTORUS_RADIUS);
-                point.x = helpers::limit_min<Real>(point.x - radius, 0);
-                bc->SetReal(PR1M_UMBILICTORUS_PIPERADIUS, point.x * 0.5);
+                Float radius = bc->GetFloat(PR1M_UMBILICTORUS_RADIUS);
+                point.x = helpers::limit_min<Float>(point.x - radius, 0);
+                bc->SetFloat(PR1M_UMBILICTORUS_PIPERADIUS, point.x * 0.5);
                 break;
             }
 
@@ -175,18 +175,18 @@ namespace shapes {
     }
 
     Bool UmbilicTorusShape::Init(GeListNode* node) {
-        if (not super::Init(node)) return false;
+        if (!super::Init(node)) return false;
         BaseObject* op = (BaseObject*) node;
         BaseContainer* bc = op->GetDataInstance();
 
-        bc->SetLong(PR1M_COMPLEXSHAPE_USEGMENTS, 40);
-        bc->SetLong(PR1M_COMPLEXSHAPE_VSEGMENTS, 21);
-        bc->SetReal(PR1M_UMBILICTORUS_RADIUS, 100);
-        bc->SetReal(PR1M_UMBILICTORUS_PIPERADIUS, 25);
-        bc->SetReal(PR1M_UMBILICTORUS_SMOOTHNESS, 2.0);
+        bc->SetInt32(PR1M_COMPLEXSHAPE_USEGMENTS, 40);
+        bc->SetInt32(PR1M_COMPLEXSHAPE_VSEGMENTS, 21);
+        bc->SetFloat(PR1M_UMBILICTORUS_RADIUS, 100);
+        bc->SetFloat(PR1M_UMBILICTORUS_PIPERADIUS, 25);
+        bc->SetFloat(PR1M_UMBILICTORUS_SMOOTHNESS, 2.0);
         bc->SetBool(PR1M_UMBILICTORUS_DOSLICE, false);
-        bc->SetReal(PR1M_UMBILICTORUS_DEGREEMAX, 0);
-        bc->SetReal(PR1M_UMBILICTORUS_DEGREEMAX, M_PI * 2);
+        bc->SetFloat(PR1M_UMBILICTORUS_DEGREEMAX, 0);
+        bc->SetFloat(PR1M_UMBILICTORUS_DEGREEMAX, M_PI * 2);
         return true;
     }
 
@@ -197,7 +197,9 @@ namespace shapes {
             GeLoadString(IDS_Opr1m_umbilictorus),
             PLUGINFLAG_HIDEPLUGINMENU | OBJECT_GENERATOR,
             UmbilicTorusShape::alloc,
-            "Opr1m_umbilictorus", PR1MITIVE_ICON("Opr1m_umbilictorus"), 0);
+            "Opr1m_umbilictorus"_s,
+            PR1MITIVE_ICON("Opr1m_umbilictorus"),
+            0);
     }
 
 } // end namespace shapes

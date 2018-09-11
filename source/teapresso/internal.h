@@ -8,7 +8,7 @@
 #ifndef TV_INTERNAL_H
 #define TV_INTERNAL_H
 
-    #include "misc/legacy.h"
+    #include <c4d.h>
 
     #define TEAPRESSO_LIB_ID        1030265
     #define TEAPRESSO_LIB_VERSION   1000
@@ -20,14 +20,14 @@
      */
     struct TvLibrary : public C4DLibrary {
         Bool (*TvRegisterOperatorPlugin)(
-                LONG id, const String& name, LONG info, DataAllocator* alloc,
-                const String& desc, BaseBitmap* icon, LONG disklevel,
-                LONG destFolder);
+                Int32 id, const String& name, Int32 info, DataAllocator* alloc,
+                const String& desc, BaseBitmap* icon, Int32 disklevel,
+                Int32 destFolder);
         TvNode* (*TvGetActiveRoot)();
         BaseContainer* (*TvGetFolderContainer)();
         TvNode* (*TvCreatePluginsHierarchy)(const BaseContainer* bc);
 
-        static TvLibrary* Get(LONG offset);
+        static TvLibrary* Get(Int32 offset);
     };
 
     Bool RegisterTvLibrary();

@@ -6,10 +6,10 @@
 #include <pr1mitive/debug.h>
 #include <pr1mitive/helpers.h>
 #include <pr1mitive/shapes/BaseComplexShape.h>
-#include <nr/c4d/thread.h>
+#include <NiklasRosenstein/c4d/thread.hpp>
 #include <mutex>
 
-using nr::c4d::thread;
+using niklasrosenstein::c4d::thread;
 
 #ifdef PRMT
     #define BASECOMPLEXSHAPE_MULTITHREADING
@@ -28,35 +28,35 @@ namespace shapes {
         BaseComplexShape* shape;
         ComplexShapeInfo* info;
         Vector* points;
-        LONG count;
+        Int32 count;
 
         // Writable (lock by a mutex)
         std::mutex mutex;
-        LONG pindex;
+        Int32 pindex;
     };
 
-    void generate_points(ThreadingInfo& data, LONG thread_index) {
-        LONG const vdiv = data.info->vseg + 1;
-        Real const umin = data.info->umin;
-        Real const vmin = data.info->vmin;
-        Real const udelta = data.info->udelta;
-        Real const vdelta = data.info->vdelta;
-        LONG const count = data.count;
+    void generate_points(ThreadingInfo& data, Int32 thread_index) {
+        Int32 const vdiv = data.info->vseg + 1;
+        Float const umin = data.info->umin;
+        Float const vmin = data.info->vmin;
+        Float const udelta = data.info->udelta;
+        Float const vdelta = data.info->vdelta;
+        Int32 const count = data.count;
         Vector* const points = data.points;
 
         while (true) { //!data.bt || !data.bt->TestBreak()) {
             data.mutex.lock();
-            LONG const start = data.pindex;
+            Int32 const start = data.pindex;
             if (start >= count) {
                 data.mutex.unlock();
                 break;
             }
-            LONG const end = maxon::Min(count, start + BASECOMPLEXSHAPE_THREADINGCHUNKSIZE);
+            Int32 const end = maxon::Min(count, start + BASECOMPLEXSHAPE_THREADINGCHUNKSIZE);
             data.pindex = end;
             data.mutex.unlock();
 
-            LONG x, i, j;
-            Real u, v;
+            Int32 x, i, j;
+            Float u, v;
             for (x=start; x <= end; ++x) {
                 i = x / vdiv;
                 j = x % vdiv;
@@ -68,19 +68,19 @@ namespace shapes {
     }
 
     Bool BaseComplexShape::init_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info) {
-        info->useg = bc->GetLong(PR1M_COMPLEXSHAPE_USEGMENTS);
-        info->vseg = bc->GetLong(PR1M_COMPLEXSHAPE_VSEGMENTS);
+        info->useg = bc->GetInt32(PR1M_COMPLEXSHAPE_USEGMENTS);
+        info->vseg = bc->GetInt32(PR1M_COMPLEXSHAPE_VSEGMENTS);
         info->optimize = bc->GetBool(PR1M_COMPLEXSHAPE_OPTIMIZE);
         info->optimize_passes = 1;
         info->multithreading = bc->GetBool(PR1M_COMPLEXSHAPE_MULTITHREADING);
         return true;
     }
 
-    Bool BaseComplexShape::init_thread_activity(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info, LONG thread_count) {
+    Bool BaseComplexShape::init_thread_activity(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info, Int32 thread_count) {
         return true;
     }
 
-    void BaseComplexShape::free_thread_activity(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info, LONG thread_count) {
+    void BaseComplexShape::free_thread_activity(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info, Int32 thread_count) {
     }
 
     void BaseComplexShape::post_process_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info) {
@@ -89,19 +89,19 @@ namespace shapes {
     void BaseComplexShape::free_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info) {
     }
 
-    Vector BaseComplexShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index) {
+    Vector BaseComplexShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index) {
         return Vector(0);
     }
 
     Bool BaseComplexShape::Init(GeListNode* node) {
-        if (not node) return false;
+        if (!node) return false;
         BaseObject* op = (BaseObject*) node;
         BaseContainer* bc = op->GetDataInstance();
 
         // Initialize the object's parameters assuming it is implementing the
         // default description for complex shapes.
-        bc->SetReal(PR1M_COMPLEXSHAPE_USEGMENTS, 20);
-        bc->SetReal(PR1M_COMPLEXSHAPE_VSEGMENTS, 20);
+        bc->SetFloat(PR1M_COMPLEXSHAPE_USEGMENTS, 20);
+        bc->SetFloat(PR1M_COMPLEXSHAPE_VSEGMENTS, 20);
         bc->SetBool(PR1M_COMPLEXSHAPE_OPTIMIZE, false);
         bc->SetBool(PR1M_COMPLEXSHAPE_MULTITHREADING, true);
 
@@ -109,7 +109,7 @@ namespace shapes {
     }
 
     BaseObject* BaseComplexShape::GetVirtualObjects(BaseObject* op, HierarchyHelp* hh) {
-        if (not op) return null;
+        if (!op) return nullptr;
         BaseContainer* bc = op->GetDataInstance();
 
         // Check if actually anything has changed and return the cache if
@@ -121,27 +121,27 @@ namespace shapes {
 
         // Initialize calculation.
         ComplexShapeInfo info;
-        if (not init_calculation(op, bc, &info)) return null;
+        if (!init_calculation(op, bc, &info)) return nullptr;
 
         // Perform some important checks for the info-structure.
-        if (info.useg <= 0 or info.vseg <= 0) {
+        if (info.useg <= 0 || info.vseg <= 0) {
             PR1MITIVE_DEBUG_ERROR("ComplexShapeInfo was not initialized to a valid state in init_calculation(). End");
-            return null;
+            return nullptr;
         }
 
         // Compute the mesh-requirements.
-        LONG n_points = (info.useg + 1) * (info.vseg + 1);
-        LONG n_polys = info.useg * info.vseg;
+        Int32 n_points = (info.useg + 1) * (info.vseg + 1);
+        Int32 n_polys = info.useg * info.vseg;
         info.target = PolygonObject::Alloc(n_points, n_polys);
 
         // Emergency-break if the PolygonObject could not be allocated.
-        if (not info.target) {
+        if (!info.target) {
             PR1MITIVE_DEBUG_ERROR("PolygonObject could not be allocated. End");
-            return null;
+            return nullptr;
         }
         if (info.target->GetPointCount() != n_points) {
             PR1MITIVE_DEBUG_ERROR("PolygonObject's point-count does not match the required amount.");
-            return null;
+            return nullptr;
         }
 
         // Compute the space between each segment.
@@ -152,32 +152,32 @@ namespace shapes {
         Vector* points = info.target->GetPointW();
         CPolygon* polygons = info.target->GetPolygonW();
 
-        if (not points or not polygons) {
+        if (!points || !polygons) {
             PR1MITIVE_DEBUG_ERROR("Points or Polygons of the target-mesh could not be retrieved. End");
-            return null;
+            return nullptr;
         }
 
         // Compute how many threads should actually be used.
-        LONG thread_count = helpers::num_threads(n_points, BASECOMPLEXSHAPE_MAXPOINTSPERTHREAD, 1);
+        Int32 thread_count = helpers::num_threads(n_points, BASECOMPLEXSHAPE_MAXPOINTSPERTHREAD, 1);
         if (thread_count <= 0) {
             PR1MITIVE_DEBUG_WARNING("Thread-count is invalid. Setting to 1");
             thread_count = 1;
         }
-        if (not info.multithreading) {
+        if (!info.multithreading) {
             thread_count = 1;
         }
         #ifndef BASECOMPLEXSHAPE_MULTITHREADING
             thread_count = 1;
         #endif
 
-        if (not init_thread_activity(op, bc, &info, thread_count)) {
+        if (!init_thread_activity(op, bc, &info, thread_count)) {
             free_calculation(op, bc, &info);
             PolygonObject::Free(info.target);
-            return null;
+            return nullptr;
         }
 
         #ifdef BASECOMPLEXSHAPE_LASTRUNINFO
-            LONG tstart = GeGetMilliSeconds();
+            Int32 tstart = GeGetMilliSeconds();
         #endif
 
         ThreadingInfo thread_data = {hh->GetThread(), op, this, &info, points, n_points, {}, 0};
@@ -186,17 +186,17 @@ namespace shapes {
             generate_points(thread_data, 0);
         }
         else {
-            for (LONG i = 0; i < thread_count; ++i)
+            for (Int32 i = 0; i < thread_count; ++i)
                 threads.Append(thread(generate_points, std::ref(thread_data), i));
         }
 
         // Iterate over each polygon and construct the mesh'es polygons and the
         // UVW data.
-        LONG poly_i = 0;
-        LONG p1, p2, p3, p4;
+        Int32 poly_i = 0;
+        Int32 p1, p2, p3, p4;
         CPolygon poly;
-        for (LONG i=0; i < info.useg; i++) {
-            for (LONG j=0; j < info.vseg; j++) {
+        for (Int32 i=0; i < info.useg; i++) {
+            for (Int32 j=0; j < info.vseg; j++) {
                 // Compute the polygon's point-indecies.
                 p1 = i * (info.vseg + 1) + j;
                 p2 = p1 + 1;
@@ -226,7 +226,7 @@ namespace shapes {
             BaseTag* tag = op->GetFirstTag();
             while (tag) {
                 if (tag->IsInstanceOf(Tphong)) {
-                    tag = (BaseTag*) tag->GetClone(COPYFLAGS_0, null);
+                    tag = (BaseTag*) tag->GetClone(COPYFLAGS_0, nullptr);
                     info.target->InsertTag(tag);
                     break;
                 }
@@ -248,20 +248,20 @@ namespace shapes {
 
         // Optimize passes.
         if (info.optimize) {
-            for (LONG i=0; i < info.optimize_passes; i++) {
+            for (Int32 i=0; i < info.optimize_passes; i++) {
                 Bool success = helpers::optimize_object(info.target, info.optimize_treshold);
-                if (not success) PR1MITIVE_DEBUG_ERROR("MCOMMAND_OPTIMIZE pass #" + LongToString(i) + " failed.");
+                if (!success) PR1MITIVE_DEBUG_ERROR("MCOMMAND_OPTIMIZE pass #" + String::IntToString(i) + " failed.");
             }
         }
 
         #ifdef BASECOMPLEXSHAPE_LASTRUNINFO
             String str;
-            LONG delta = GeGetMilliSeconds() - tstart;
+            Int32 delta = GeGetMilliSeconds() - tstart;
             if (info.multithreading) {
-                str = GeLoadString(IDS_LASTRUN_MULTI, LongToString(delta), LongToString(thread_count));
+                str = GeLoadString(IDS_LASTRUN_MULTI, String::IntToString(delta), String::IntToString(thread_count));
             }
             else {
-                str = GeLoadString(IDS_LASTRUN, LongToString(delta));
+                str = GeLoadString(IDS_LASTRUN, String::IntToString(delta));
             }
             bc->SetString(PR1M_COMPLEXSHAPE_LASTRUN, str);
             dirty_count = op->GetDirty(DIRTYFLAGS_DATA);
@@ -274,15 +274,15 @@ namespace shapes {
         free_calculation(op, bc, &info);
 
         // Maybe post_process_object() made info.target invalid.
-        if (not info.target) return null;
+        if (!info.target) return nullptr;
 
         // Inform the mesh about the changes.
         info.target->Message(MSG_UPDATE);
         return info.target;
     }
 
-    Bool BaseComplexShape::Message(GeListNode* node, LONG type, void* ptr) {
-        if (not node) return false;
+    Bool BaseComplexShape::Message(GeListNode* node, Int32 type, void* ptr) {
+        if (!node) return false;
         BaseObject* op = (BaseObject*) node;
 
         switch (type) {
@@ -291,9 +291,9 @@ namespace shapes {
                 // Create a Phong-Tag on our object. This phong tag will be retrieve
                 // in GetVirtualObjects() and inserted into the virtual objects.
                 BaseTag* tag = op->MakeTag(Tphong);
-                if (not tag) return false;
+                if (!tag) return false;
                 BaseContainer* tbc = tag->GetDataInstance();
-                if (not tbc) return false;
+                if (!tbc) return false;
                 tbc->SetBool(PHONGTAG_PHONG_ANGLELIMIT, true);
                 return true;
             }
@@ -305,12 +305,12 @@ namespace shapes {
                 // Obtain the description-ID from the message.
                 DescriptionPostSetValue* data = (DescriptionPostSetValue*) ptr;
                 const DescID& id = *data->descid;
-                LONG rid = id[0].id;
+                Int32 rid = id[0].id;
 
                 // Adjust parameters.
-                if (rid is PR1M_COMPLEXSHAPE_USEGMENTS or rid is PR1M_COMPLEXSHAPE_VSEGMENTS) {
-                    LONG value = bc->GetLong(rid);
-                    bc->SetLong(rid, helpers::limit_min<LONG>(value, 1));
+                if (rid == PR1M_COMPLEXSHAPE_USEGMENTS || rid == PR1M_COMPLEXSHAPE_VSEGMENTS) {
+                    Int32 value = bc->GetInt32(rid);
+                    bc->SetInt32(rid, helpers::limit_min<Int32>(value, 1));
                 }
                 break;
 
@@ -322,7 +322,7 @@ namespace shapes {
 
 
     Bool register_complexshape_base() {
-        return RegisterDescription(Opr1m_complexshape, "Opr1m_complexshape");
+        return RegisterDescription(Opr1m_complexshape, "Opr1m_complexshape"_s);
     }
 
 } // end namespace shapes

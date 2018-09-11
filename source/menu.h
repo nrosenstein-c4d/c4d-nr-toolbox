@@ -2,6 +2,7 @@
 // All rights reserved.
 
 #pragma once
+#include <stdexcept>
 #include <c4d.h>
 
 namespace menu {
@@ -33,7 +34,9 @@ struct entry {
       if (child.name == name)
         return child;
     }
-    return *this->children.Append(entry(name, 0));
+    ifnoerr (entry& e = this->children.Append(entry(name, 0)))
+      return e;
+    throw std::runtime_error("children.Append() failed");
   }
 
   inline entry& AddPlugin(Int32 plugin_id) {
@@ -41,7 +44,9 @@ struct entry {
       if (child.plugin_id == plugin_id)
         return child;
     }
-    return *this->children.Append(entry("", plugin_id));
+    ifnoerr (entry& e = this->children.Append(entry("", plugin_id)))
+      return e;
+    throw std::runtime_error("children.Append() failed");
   }
 
   template <typename... T>
@@ -54,7 +59,9 @@ struct entry {
     if (last && last->plugin_id == -1) {
       return *last;
     }
-    return *this->children.Append(entry("", -1));
+    ifnoerr (entry& e = this->children.Append(entry("", -1)))
+      return e;
+    throw std::runtime_error("children.Append() failed");
   }
 
   template <typename... T>

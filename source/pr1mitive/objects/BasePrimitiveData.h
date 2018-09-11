@@ -21,7 +21,7 @@ namespace objects {
 
         // This attribute saves the dirty-count of the host-object to compare it within
         // BasePrimitiveData::optmize_cache().
-        LONG dirty_count;
+        Int32 dirty_count;
 
         // These two static attributes will keep the default color-values for handles, selected and
         // not selected.
@@ -55,28 +55,28 @@ namespace objects {
         // Overwriteable Methods ------------------------------------------------------------------
 
         // Returns the number of how many handles are avaialble to the plugin-object.
-        virtual LONG get_handle_count(BaseObject* op);
+        virtual Int32 get_handle_count(BaseObject* op);
 
         // Fill in information into the passed HandleInfo object. Returns true when the handle was
         // obtained successfully, false if not.
-        virtual Bool get_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        virtual Bool get_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
         // Set parameters of the host-object based on the new position of a handle.
-        virtual void set_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        virtual void set_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
         // Draws a handle-dot into the viewport at the specified position of the handle. Can be
         // overwritten to customize the drawing. The vector in *info.position* is already set to
         // the point's position in global space.
         // The color is set in the BasePrimitiveData::Draw() procedure so it does not need to be
         // set here if no other color than the default is used.
-        virtual void draw_handle(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, LONG handle, LONG hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color);
+        virtual void draw_handle(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, Int32 handle, Int32 hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color);
 
         // Draws additional stuff like a line from the origin to the handle. Can be overwritten
         // to customize stuff. The vector in *info.position* is already set to the point's position
         // in global space.
         // The color is set in the BasePrimitiveData::Draw() procedure so it does not need to be
         // set here if no other color than the default is used.
-        virtual void draw_handle_customs(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, LONG handle, LONG hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color);
+        virtual void draw_handle_customs(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, Int32 handle, Int32 hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color);
 
       //
       // ObjectData -------------------------------------------------------------------------------
@@ -84,9 +84,9 @@ namespace objects {
 
         virtual DRAWRESULT Draw(BaseObject* op, DRAWPASS pass, BaseDraw* bd, BaseDrawHelp* bh);
 
-        virtual LONG DetectHandle(BaseObject* op, BaseDraw* bd, LONG x, LONG y, QUALIFIER qualifier);
+        virtual Int32 DetectHandle(BaseObject* op, BaseDraw* bd, Int32 x, Int32 y, QUALIFIER qualifier);
 
-        virtual Bool MoveHandle(BaseObject* op, BaseObject* undo, const Vector& mouse_pos, LONG hitid, QUALIFIER qualifier, BaseDraw* bd);
+        virtual Bool MoveHandle(BaseObject* op, BaseObject* undo, const Vector& mouse_pos, Int32 hitid, QUALIFIER qualifier, BaseDraw* bd);
 
     };
 

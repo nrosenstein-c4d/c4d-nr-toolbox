@@ -3,6 +3,7 @@
 // Copyright (C) 2012-2013, Niklas Rosenstein
 // All rights reserved.
 
+#include <thread>
 #include <pr1mitive/defines.h>
 
 #if API_VERSION < 14000
@@ -23,8 +24,10 @@ namespace helpers {
     // ArrayClass definition depending on the API Version.
     #if API_VERSION < 14000
         template <class T> class ArrayClass : public GeDynamicArray<T>
+    #elif API_VERSION < 15000
+        template <class T> class ArrayClass : public maxon::BaseArray<T>
     #else
-        template <class T> class ArrayClass : public c4d_misc::BaseArray<T>
+        template <class T> class ArrayClass : public maxon::BaseArray<T>
     #endif
     {
 
@@ -35,7 +38,7 @@ namespace helpers {
                 if (Push(x)) {
                     return & operator [] (GetCount() - 1);
                 }
-                else return null;
+                else return nullptr;
             }
 
             void Reset() {
@@ -48,11 +51,11 @@ namespace helpers {
             FUUFUCKSHIT
         #endif
 
-            T& Get(LONG index) {
+            T& Get(Int32 index) {
                 return this->operator [] (index);
             }
 
-            const T& Get(LONG index) const {
+            const T& Get(Int32 index) const {
                 return this->operator [] (index);
             }
 
@@ -61,7 +64,7 @@ namespace helpers {
     // Convert a vector to a string. Naming convention is different to
     // better fit in with the C4D API.
     inline String VectorToString(const Vector& v) {
-        return String("Vector(") + RealToString(v.x) + String(", ") + RealToString(v.y) + String(", ") + RealToString(v.z) + String(")");
+        return String("Vector(") + String::FloatToString(v.x) + String(", ") + String::FloatToString(v.y) + String(", ") + String::FloatToString(v.z) + String(")");
     }
 
     // Convert a matrix to a string. Naming convention is different to better fit
@@ -69,10 +72,11 @@ namespace helpers {
     inline String MatrixToString(const Matrix& m) {
         String nl("\n");
         String c(",");
-        return String("Matrix{ v1:  ") + VectorToString(m.v1) + c + nl +
-               String("        v2:  ") + VectorToString(m.v2) + c + nl +
-               String("        v3:  ") + VectorToString(m.v3) + c + nl +
-               String("        off: ") + VectorToString(m.off) + String("}");
+        using namespace c4d_apibridge::M;
+        return String("Matrix{ v1:  ") + VectorToString(Mv1(m)) + c + nl +
+               String("        v2:  ") + VectorToString(Mv2(m)) + c + nl +
+               String("        v3:  ") + VectorToString(Mv3(m)) + c + nl +
+               String("        off: ") + VectorToString(Moff(m)) + String("}");
     }
 
     // Creates a set of 9 selections that select different parts of a
@@ -86,7 +90,7 @@ namespace helpers {
     UVWTag* make_planar_uvw(int useg, int vseg, Bool inverse_normals=false, Bool flipx=false, Bool flipy=false);
 
     // Optimizes the polygon- or spline-object using a modeling-command.
-    Bool optimize_object(BaseObject* op, Real treshold);
+    Bool optimize_object(BaseObject* op, Float treshold);
 
     // Return a vector whos' components are mixed to produce the lowest values.
     inline Vector vcompmin(const Vector& a, const Vector& b) {
@@ -134,10 +138,10 @@ namespace helpers {
     // Computes a how many threads should be used to process the
     // estimated number of iterations *itercount* taking
     // *max_per_thread* into account.
-    inline LONG num_threads(LONG itercount, LONG max_per_thread, LONG reduce = 0) {
-        LONG cpu_count = GeGetCPUCount();
-        LONG num_threads = (itercount + max_per_thread - 1) / max_per_thread;
-        LONG count = min<LONG>(cpu_count, num_threads);
+    inline Int32 num_threads(Int32 itercount, Int32 max_per_thread, Int32 reduce = 0) {
+        Int32 cpu_count = std::thread::hardware_concurrency();
+        Int32 num_threads = (itercount + max_per_thread - 1) / max_per_thread;
+        Int32 count = min<Int32>(cpu_count, num_threads);
         if (count - reduce >= 1)
             count -= reduce;
         return count;
@@ -147,13 +151,13 @@ namespace helpers {
     // thread. return-value * thread_count may be larger than the
     // actual number of iterations passed. This must be taken into account
     // when assigning a slice to a thread!!
-    inline LONG slice_count(LONG itercount, LONG thread_count) {
+    inline Int32 slice_count(Int32 itercount, Int32 thread_count) {
         return (itercount + thread_count - 1) / thread_count;
     }
 
-    // Returns the id of a DescID as LONG. Returns -1 on failure.
-    inline LONG get_descid_id(DescID& id) {
-        LONG depth = id.GetDepth();
+    // Returns the id of a DescID as Int32. Returns -1 on failure.
+    inline Int32 get_descid_id(DescID& id) {
+        Int32 depth = id.GetDepth();
         if (depth <= 0) return -1;
         else return id[depth - 1].id;
     }
@@ -177,7 +181,7 @@ namespace helpers {
     // Alternative to the Cinema 4D dependence list.
     class DependenceList {
 
-        LONG m_count;
+        Int32 m_count;
 
     public:
 

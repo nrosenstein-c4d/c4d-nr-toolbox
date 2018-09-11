@@ -2,14 +2,16 @@
  * All rights reserved. */
 
 #include <c4d.h>
-#include <nr/macros.h>
-#include <nr/c4d/util.h>
-#include <nr/c4d/fmap.h>
-#include <nr/c4d/iterators.h>
+#include <NiklasRosenstein/macros.hpp>
+#include <NiklasRosenstein/c4d/utils.hpp>
+#include <NiklasRosenstein/c4d/fmap.hpp>
+#include <NiklasRosenstein/c4d/iterators.hpp>
 #include <customgui_nrcolorpalette.h>
 #include <xcolor.h>
 #include "timehide.h"
 #include "res/description/Hnrtoolbox.h"
+
+namespace nr { using namespace niklasrosenstein; }
 
 using nr::c4d::get_param;
 using nr::c4d::set_param;
@@ -71,13 +73,18 @@ public:
 	{
 		if (!ActiveObjectManager_RegisterMode((ACTIVEOBJECTMODE) Hnrtoolbox, "nr:Workflow", ActiveObjectManager_ToolBoxHook))
     	return false;
-		if (!RegisterDescription(Hnrtoolbox, "Hnrtoolbox"))
+		if (!RegisterDescription(Hnrtoolbox, "Hnrtoolbox"_s))
 			return false;
 		Int32 const info = PLUGINFLAG_SCENEHOOK_NOTDRAGGABLE;
 		Int32 const priority = EXECUTIONPRIORITY_INITIAL;
 		Int32 const disklevel = 0;
-		return RegisterSceneHookPlugin(Hnrtoolbox, "nr:Workflow", info,
-			ToolboxHook::Alloc, priority, disklevel);
+		return RegisterSceneHookPlugin(
+			Hnrtoolbox,
+			"nr:Workflow"_s,
+			info,
+			ToolboxHook::Alloc,
+			priority,
+			disklevel);
 	}
 
 public: // SceneHookData Overrides
@@ -88,7 +95,7 @@ public: // SceneHookData Overrides
     BaseContainer* data = hook->GetDataInstance();
     if (!data) return false;
 
-    NR_BREAKABLE_IF (data->GetBool(NRTOOLBOX_HOOK_VIEWPORT_SHOWUVS)) {
+    NR_IF (data->GetBool(NRTOOLBOX_HOOK_VIEWPORT_SHOWUVS)) {
 			if (bd->GetDrawPass() != DRAWPASS_OBJECT) break;
 			bd->SetLightList(BDRAW_SETLIGHTLIST_NOLIGHTS);
 			for (auto& op : nr::c4d::iter_hierarchy<BaseObject>(doc->GetFirstObject(), false)) {
@@ -105,7 +112,7 @@ public: // SceneHookData Overrides
 	virtual EXECUTIONRESULT Execute(BaseSceneHook* hook, BaseDocument* doc,
 		BaseThread* bt, Int32 priority, EXECUTIONFLAGS) override
 	{
-		NR_BREAKABLE_IF (get_param(hook, NRTOOLBOX_HOOK_SWATCHES_SYNCHRONIZE).GetBool()) {
+		NR_IF (get_param(hook, NRTOOLBOX_HOOK_SWATCHES_SYNCHRONIZE).GetBool()) {
 			// TODO: Filter calls in which the synchronization is performed
 			// TODO: Support shader updates on nodes other than materials
 			GeData data = get_param(hook, NRTOOLBOX_HOOK_SWATCHES);
@@ -186,7 +193,10 @@ public: // MessageData Overrides
 	static Bool Register()
 	{
 		return RegisterMessagePlugin(
-			PLUGIN_ID, "nrToolbox-MessageHandler", 0, NewObjClear(MessageHandler));
+			PLUGIN_ID,
+			"nrToolbox-MessageHandler"_s,
+			0,
+			NewObjClear(MessageHandler));
 	}
 
   virtual Bool CoreMessage(Int32 type, const BaseContainer& msg)
@@ -264,8 +274,13 @@ public:
 	{
 		Int32 const priority = 0;
 		return RegisterVideoPostPlugin(
-      PLUGIN_ID, "nrToolbox-SafeFrame", PLUGINFLAG_VIDEOPOST_INHERENT,
-      Alloc, "", priority, VPPRIORITY_EXTERNAL);
+      PLUGIN_ID,
+			"nrToolbox-SafeFrame"_s,
+			PLUGINFLAG_VIDEOPOST_INHERENT,
+      Alloc,
+			""_s,
+			priority,
+			VPPRIORITY_EXTERNAL);
 	}
 
 public: // VideoPostData Overrides

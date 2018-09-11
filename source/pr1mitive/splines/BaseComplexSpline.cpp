@@ -23,8 +23,8 @@ namespace splines {
     class ContourThread : public C4DThread {
 
         Vector* dest_points;
-        LONG start;
-        LONG end;
+        Int32 start;
+        Int32 end;
         ComplexSplineInfo* info;
         BaseObject* op;
         BaseComplexSpline* spline;
@@ -34,10 +34,10 @@ namespace splines {
 
     public:
 
-        ContourThread() : C4DThread(), init(FALSE), running(FALSE) {
+        ContourThread() : C4DThread(), init(false), running(false) {
         }
 
-        void Init(Vector* dest_points, LONG start, LONG end,
+        void Init(Vector* dest_points, Int32 start, Int32 end,
                   ComplexSplineInfo* info, BaseObject* op,
                   BaseComplexSpline* spline) {
             this->dest_points = dest_points;
@@ -47,91 +47,91 @@ namespace splines {
             this->op = op;
             this->spline = spline;
 
-            init = TRUE;
+            init = true;
         }
 
         /* Override: C4DThread */
         void Main() {
-            Real u;
-            Real min = info->min;
-            Real delta = info->delta;
-            for (LONG i=start; i <= end; i++) {
+            Float u;
+            Float min = info->min;
+            Float delta = info->delta;
+            for (Int32 i=start; i <= end; i++) {
                 u = min + i * delta;
                 dest_points[i] = spline->calc_point(op, info, u);
             }
         }
 
         /* Override: C4DThread */
-        const CHAR* GetThreadName() {
+        const Char* GetThreadName() {
             return "Pr1mitive-ContourThread";
         }
 
     };
 
     Bool BaseComplexSpline::init_calculation(BaseObject* op, BaseContainer* bc, ComplexSplineInfo* info) {
-        info->seg = bc->GetLong(PR1M_COMPLEXSPLINE_SEGMENTS);
+        info->seg = bc->GetInt32(PR1M_COMPLEXSPLINE_SEGMENTS);
         info->optimize = bc->GetBool(PR1M_COMPLEXSPLINE_OPTIMIZE);
         return true;
     }
 
     void BaseComplexSpline::post_process_calculation(BaseObject* op, BaseContainer* bc, ComplexSplineInfo* info) {
-        if (not info->target) return;
+        if (!info->target) return;
         BaseContainer* dest = info->target->GetDataInstance();
         dest->SetBool(SPLINEOBJECT_CLOSED, info->closed);
-        dest->SetLong(SPLINEOBJECT_INTERPOLATION, bc->GetLong(SPLINEOBJECT_INTERPOLATION));
-        dest->SetLong(SPLINEOBJECT_SUB, bc->GetLong(SPLINEOBJECT_SUB));
-        dest->SetReal(SPLINEOBJECT_ANGLE, bc->GetReal(SPLINEOBJECT_ANGLE));
-        dest->SetReal(SPLINEOBJECT_MAXIMUMLENGTH, bc->GetReal(SPLINEOBJECT_MAXIMUMLENGTH));
+        dest->SetInt32(SPLINEOBJECT_INTERPOLATION, bc->GetInt32(SPLINEOBJECT_INTERPOLATION));
+        dest->SetInt32(SPLINEOBJECT_SUB, bc->GetInt32(SPLINEOBJECT_SUB));
+        dest->SetFloat(SPLINEOBJECT_ANGLE, bc->GetFloat(SPLINEOBJECT_ANGLE));
+        dest->SetFloat(SPLINEOBJECT_MAXIMUMLENGTH, bc->GetFloat(SPLINEOBJECT_MAXIMUMLENGTH));
     }
 
     void BaseComplexSpline::free_calculation(BaseObject* op, BaseContainer* bc, ComplexSplineInfo* info) {
     }
 
-    Vector BaseComplexSpline::calc_point(BaseObject* op, ComplexSplineInfo* info, Real u) {
+    Vector BaseComplexSpline::calc_point(BaseObject* op, ComplexSplineInfo* info, Float u) {
         return Vector(0);
     }
 
     Bool BaseComplexSpline::Init(GeListNode* node) {
-        if (not node) return false;
+        if (!node) return false;
         BaseObject* op = (BaseObject*) node;
         BaseContainer* bc = op->GetDataInstance();
 
         // Fill in the default-values for the Opr1m_complexcontour description.
-        bc->SetLong(PR1M_COMPLEXSPLINE_SEGMENTS, 40);
+        bc->SetInt32(PR1M_COMPLEXSPLINE_SEGMENTS, 40);
         bc->SetBool(PR1M_COMPLEXSPLINE_OPTIMIZE, false);
 
-        bc->SetLong(SPLINEOBJECT_INTERPOLATION, SPLINEOBJECT_INTERPOLATION_ADAPTIVE);
-        bc->SetLong(SPLINEOBJECT_SUB, 8);
-        bc->SetReal(SPLINEOBJECT_ANGLE, 5 * M_PI / 180.0);
-        bc->SetReal(SPLINEOBJECT_MAXIMUMLENGTH, 5);
+        bc->SetInt32(SPLINEOBJECT_INTERPOLATION, SPLINEOBJECT_INTERPOLATION_ADAPTIVE);
+        bc->SetInt32(SPLINEOBJECT_SUB, 8);
+        bc->SetFloat(SPLINEOBJECT_ANGLE, 5 * M_PI / 180.0);
+        bc->SetFloat(SPLINEOBJECT_MAXIMUMLENGTH, 5);
         return true;
     }
 
-    SplineObject* BaseComplexSpline::GetContour(BaseObject* op, BaseDocument* doc, Real lod, BaseThread* bt) {
-        if (not op) return null;
+    SplineObject* BaseComplexSpline::GetContour(BaseObject* op, BaseDocument* doc, Float lod, BaseThread* bt) {
+        if (!op) return nullptr;
         BaseContainer* bc = op->GetDataInstance();
 
         // Check if actually something has been changed and return the cache if not.
         BaseObject* cache = (BaseObject*) optimize_cache(op);
-        if (cache and cache->IsInstanceOf(Ospline)) return (SplineObject*) cache;
+        if (cache && cache->IsInstanceOf(Ospline)) return (SplineObject*) cache;
 
         // Initialize calculation.
         ComplexSplineInfo info;
-        if (not init_calculation(op, bc, &info)) return null;
+        if (!init_calculation(op, bc, &info)) return nullptr;
 
         // Make sure the segment-count is valid. Otherwise, undefined things could
         // happen.
         if (info.seg <= 0) {
             PR1MITIVE_DEBUG_ERROR("ComplexSplineInfo was not initialized to a valid state in init_calculation(). End");
-            return null;
+            return nullptr;
         }
 
         // Compute the spline-requirements.
-        LONG n_points = info.seg;
+        Int32 n_points = info.seg;
         info.target = SplineObject::Alloc(n_points, info.type);
-        if (not info.target) {
+        if (!info.target) {
             PR1MITIVE_DEBUG_ERROR("SplineObject could not be allocated. End");
-            return null;
+            return nullptr;
         }
 
         // Compute the space between each segment.
@@ -139,31 +139,31 @@ namespace splines {
 
         // Obtain the write point-pointers.
         Vector* points = info.target->GetPointW();
-        if (not points) {
+        if (!points) {
             PR1MITIVE_DEBUG_ERROR("Target points could not be retrieved. End");
-            return null;
+            return nullptr;
         }
 
         #ifdef BASECOMPLEXSPLINE_LASTRUNINFO
-            LONG tstart = GeGetMilliSeconds();
+            Int32 tstart = GeGetMilliSeconds();
         #endif
 
-        Real u;
-        for (LONG i=0; i < n_points; i++) {
+        Float u;
+        for (Int32 i=0; i < n_points; i++) {
             u = info.min + i * info.delta;
             points[i] = calc_point(op, &info, u);
         }
 
         #ifdef BASECOMPLEXSPLINE_LASTRUNINFO
-            LONG delta = GeGetMilliSeconds() - tstart;
-            String str = GeLoadString(IDS_LASTRUN, LongToString(delta));
+            Int32 delta = GeGetMilliSeconds() - tstart;
+            String str = GeLoadString(IDS_LASTRUN, String::IntToString(delta));
             bc->SetString(PR1M_COMPLEXSPLINE_LASTRUN, str);
         #endif
 
         // Optimize points if desired.
         if (info.optimize) {
             Bool success = helpers::optimize_object(info.target, info.optimize_treshold);
-            if (not success) {
+            if (!success) {
                 PR1MITIVE_DEBUG_ERROR("MCOMMAND_OPTIMIZE failed.");
             }
         }
@@ -175,7 +175,7 @@ namespace splines {
         free_calculation(op, bc, &info);
 
         // Maybe post_process_object() made info.target invalid.
-        if (not info.target) return null;
+        if (!info.target) return nullptr;
 
         // Inform the spline about the changes.
         info.target->Message(MSG_UPDATE);
@@ -187,25 +187,25 @@ namespace splines {
         BaseContainer *bc = ((BaseObject*)node)->GetDataInstance();
 
         // Enable/disable gadgets of the Osplineprimitive description.
-        LONG inter;
+        Int32 inter;
         switch (id[0].id) {
             case SPLINEOBJECT_SUB:
-                inter = bc->GetLong(SPLINEOBJECT_INTERPOLATION);
-                return (inter is SPLINEOBJECT_INTERPOLATION_NATURAL) or (inter is SPLINEOBJECT_INTERPOLATION_UNIFORM);
+                inter = bc->GetInt32(SPLINEOBJECT_INTERPOLATION);
+                return (inter == SPLINEOBJECT_INTERPOLATION_NATURAL) || (inter == SPLINEOBJECT_INTERPOLATION_UNIFORM);
 
             case SPLINEOBJECT_ANGLE:
-                inter = bc->GetLong(SPLINEOBJECT_INTERPOLATION);
-                return (inter is SPLINEOBJECT_INTERPOLATION_ADAPTIVE) or (inter is SPLINEOBJECT_INTERPOLATION_SUBDIV);
+                inter = bc->GetInt32(SPLINEOBJECT_INTERPOLATION);
+                return (inter == SPLINEOBJECT_INTERPOLATION_ADAPTIVE) || (inter == SPLINEOBJECT_INTERPOLATION_SUBDIV);
 
             case SPLINEOBJECT_MAXIMUMLENGTH:
-                return bc->GetLong(SPLINEOBJECT_INTERPOLATION) is SPLINEOBJECT_INTERPOLATION_SUBDIV;
+                return bc->GetInt32(SPLINEOBJECT_INTERPOLATION) == SPLINEOBJECT_INTERPOLATION_SUBDIV;
         }
 
         return super::GetDEnabling(node, id, t_data, flags, itemdesc);
     }
 
     Bool register_complexspline_base() {
-        return RegisterDescription(Opr1m_complexspline, "Opr1m_complexspline");
+        return RegisterDescription(Opr1m_complexspline, "Opr1m_complexspline"_s);
     }
 
 } // end namespace splines

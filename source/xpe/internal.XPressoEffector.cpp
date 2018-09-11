@@ -16,10 +16,9 @@
  * TODO: Make Effector dirty when Tag changed.
  */
 
-#include "misc/legacy.h"
 #include <c4d_graphview.h>
 #include <customgui_inexclude.h>
-#include <nr/c4d/cleanup.h>
+#include <NiklasRosenstein/c4d/cleanup.hpp>
 
 #include "MoDataNode.h"
 #include "XPressoEffector.h"
@@ -33,20 +32,20 @@
 
 // This points to the preset tag loaded from the preset file. Loaded
 // once on request.
-static BaseTag* g_preset_tag = NULL;
+static BaseTag* g_preset_tag = nullptr;
 
 static BaseTag* GetPresetTag() {
     if (!g_preset_tag) {
         Filename filename = GeGetPluginResourcePath() + XPRESSOEFFECTOR_PRESETNAME;
-        BaseDocument* doc = LoadDocument(filename, SCENEFILTER_OBJECTS, NULL);
-        if (!doc) return NULL;
+        BaseDocument* doc = LoadDocument(filename, SCENEFILTER_OBJECTS, nullptr);
+        if (!doc) return nullptr;
         BaseObject* op = doc->GetFirstObject();
-        g_preset_tag = (op ? op->GetTag(Texpresso) : NULL);
+        g_preset_tag = (op ? op->GetTag(Texpresso) : nullptr);
         if (g_preset_tag) g_preset_tag->Remove();
         KillDocument(doc);
     }
 
-    if (g_preset_tag) return (BaseTag*) g_preset_tag->GetClone(COPYFLAGS_0, NULL);
+    if (g_preset_tag) return (BaseTag*) g_preset_tag->GetClone(COPYFLAGS_0, nullptr);
     else return BaseTag::Alloc(Texpresso);
 }
 
@@ -56,7 +55,7 @@ class XPressoEffectorData : public EffectorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(XPressoEffectorData); }
+    static NodeData* Alloc() { return NewObjClear(XPressoEffectorData); }
 
     XPressoEffectorData() : super(), m_x_dcount(0), m_d_dcount(0) { }
 
@@ -72,7 +71,7 @@ public:
         GeData ge_selName;
         op->GetParameter(ID_MG_BASEEFFECTOR_SELECTION, ge_selName, DESCFLAGS_GET_0);
         String selName = ge_selName.GetString();
-        BaseSelect* sel = NULL;
+        BaseSelect* sel = nullptr;
         for (BaseTag* tag=gen->GetTag(Tmgselection); tag; tag=tag->GetNext()) {
             if (tag->IsInstanceOf(Tmgselection) && tag->GetName() == selName) {
                 GetMGSelectionMessage data;
@@ -87,14 +86,15 @@ public:
         m_execInfo.gen = gen;
         m_execInfo.falloff = GetFalloff();
         m_execInfo.sel = sel;
-        if (m_execInfo.falloff && !m_execInfo.falloff->InitFalloff(NULL, doc, op)) {
-            m_execInfo.falloff = NULL;
+        if (m_execInfo.falloff && !m_execInfo.falloff->InitFalloff(nullptr, doc, op)) {
+            m_execInfo.falloff = nullptr;
         }
         if (m_execInfo.falloff) m_execInfo.falloff->SetMg(op->GetMg());
 
-        Bool easyOn = FALSE;
+        Bool easyOn = false;
         m_execInfo.easyOn = &easyOn;
-        m_execInfo.easyValues = NewMem(Vector, md->GetCount());
+        iferr (m_execInfo.easyValues = NewMemClear(Vector, md->GetCount()))
+            ;
         if (!m_execInfo.easyValues) {
             GePrint(String(__FUNCTION__) + ": Failed to create easy values array.");
         }
@@ -111,32 +111,32 @@ public:
             super::ModifyPoints(op, gen, doc, data, md, thread);
         }
 
-        if (m_execInfo.easyValues) GeFree(m_execInfo.easyValues);
+        if (m_execInfo.easyValues) DeleteMem(m_execInfo.easyValues);
         m_execInfo.Clean();
     }
 
     virtual void CalcPointValue(BaseObject* op, BaseObject* gen, BaseDocument* doc,
-            EffectorDataStruct* data, LONG index, MoData* md, const Vector& globalpos,
-            Real falloff_weight) {
+            EffectorDataStruct* data, Int32 index, MoData* md, const Vector& globalpos,
+            Float falloff_weight) {
         if (!m_execInfo.easyValues) {
             return;
         }
 
         // Set everything to the calculated interpolation values.
         Vector* buf = (Vector*) data->strengths;
-        for (LONG i=0; i < BLEND_COUNT / 3; i++, buf++) {
+        for (Int32 i=0; i < BLEND_COUNT / 3; i++, buf++) {
             *buf = m_execInfo.easyValues[index];
         }
     }
 
-    virtual LONG GetEffectorFlags() {
+    virtual Int32 GetEffectorFlags() {
         BaseObject* op = static_cast<BaseObject*>(Get());
         if (!op) return 0;
 
         BaseContainer* bc = op->GetDataInstance();
         if (!bc) return 0;
 
-        LONG flags = EFFECTORFLAGS_HASFALLOFF;
+        Int32 flags = EFFECTORFLAGS_HASFALLOFF;
         if (bc->GetBool(XPRESSOEFFECTOR_TIMEDEPENDENT)) {
             flags |= EFFECTORFLAGS_TIMEDEPENDENT | EFFECTORFLAGS_CAMERADEPENDENT;
         }
@@ -146,7 +146,7 @@ public:
     //| ObjectData Overrides
 
     virtual EXECUTIONRESULT Execute(BaseObject* op, BaseDocument* doc, BaseThread* bt,
-            LONG priority, EXECUTIONFLAGS flags) {
+            Int32 priority, EXECUTIONFLAGS flags) {
         if (!_UpdateDependencies(op, doc)) return EXECUTIONRESULT_USERBREAK;
         return super::Execute(op, doc, bt, priority, flags);
     }
@@ -154,19 +154,19 @@ public:
     //| NodeData Overrides
 
     virtual Bool Init(GeListNode* node) {
-        if (!super::Init(node) || !node) return FALSE;
+        if (!super::Init(node) || !node) return false;
         BaseContainer* bc = static_cast<BaseObject*>(node)->GetDataInstance();
-        if (!bc) return FALSE;
-        bc->SetBool(XPRESSOEFFECTOR_TIMEDEPENDENT, FALSE);
+        if (!bc) return false;
+        bc->SetBool(XPRESSOEFFECTOR_TIMEDEPENDENT, false);
         bc->SetData(XPRESSOEFFECTOR_DEPENDENCIES, GeData(CUSTOMDATATYPE_INEXCLUDE_LIST, DEFAULTVALUE));
-        return TRUE;
+        return true;
     }
 
-    virtual Bool Message(GeListNode* node, LONG type, void* pData) {
-        if (!node) return FALSE;
+    virtual Bool Message(GeListNode* node, Int32 type, void* pData) {
+        if (!node) return false;
 
         // Calculate the dirty-count of all XPresso tags on the object.
-        LONG dcnt = _CountXPressoTagsDirty(static_cast<BaseObject*>(node));
+        Int32 dcnt = _CountXPressoTagsDirty(static_cast<BaseObject*>(node));
 
         // If the calculated dirty-count differs from the stored count,
         // we will mark the effector object as dirty.
@@ -185,7 +185,7 @@ public:
                 if (pData) {
                     *((XPressoEffector_ExecInfo*) pData) = m_execInfo;
                 }
-                return pData != NULL;
+                return pData != nullptr;
             }
 
             /**
@@ -193,7 +193,7 @@ public:
              * tag found in the objects' tag list.
              */
             case MSG_EDIT: {
-                BaseTag* tag = node ? ((BaseObject*) node)->GetTag(Texpresso) : NULL;
+                BaseTag* tag = node ? ((BaseObject*) node)->GetTag(Texpresso) : nullptr;
                 GvWorld* world = GvGetWorld();
                 if (tag && world) {
                     return world->OpenDialog(Texpresso, ((XPressoTag*) tag)->GetNodeMaster());
@@ -221,10 +221,10 @@ public:
 private:
 
     Bool _UpdateDependencies(BaseObject* op, BaseDocument* doc) {
-        if (!op) return FALSE;
+        if (!op) return false;
 
         // This variable will hold the current dirty-count.
-        LONG dcount = 0;
+        Int32 dcount = 0;
 
         // Compute the dirty-count of the objects in the dependency
         // field.
@@ -237,8 +237,8 @@ private:
 
             // And compute the dirty-count of all of these.
             if (list) {
-                LONG count = list->GetObjectCount();
-                for (LONG i=0; i < count; i++) {
+                Int32 count = list->GetObjectCount();
+                for (Int32 i=0; i < count; i++) {
                     BaseList2D* obj = list->ObjectFromIndex(doc, i);
                     if (obj) {
                         dcount += obj->GetDirty(DIRTYFLAGS_DATA);
@@ -255,11 +255,11 @@ private:
             op->SetDirty(DIRTYFLAGS_DATA);
             m_d_dcount = dcount;
         }
-        return TRUE;
+        return true;
     }
 
-    virtual LONG _CountXPressoTagsDirty(BaseObject* op, DIRTYFLAGS flags=DIRTYFLAGS_ALL, HDIRTYFLAGS hflags=HDIRTYFLAGS_ALL) {
-        LONG dcnt = 0;
+    virtual Int32 _CountXPressoTagsDirty(BaseObject* op, DIRTYFLAGS flags=DIRTYFLAGS_ALL, HDIRTYFLAGS hflags=HDIRTYFLAGS_ALL) {
+        Int32 dcnt = 0;
 
         // Iterate over all tags.
         for (BaseTag* tag=op->GetFirstTag(); tag; tag=tag->GetNext()) {
@@ -283,18 +283,18 @@ private:
     /**
      * Keeps track of the dirty-count of all XPresso tags of the effector.
      */
-    LONG m_x_dcount;
+    Int32 m_x_dcount;
 
     /**
      * Keeps track of the dirty-count of all dependencies.
      */
-    LONG m_d_dcount;
+    Int32 m_d_dcount;
 
 };
 
 Bool RegisterXPressoEffector() {
     menu::root().AddPlugin(IDS_MENU_EFFECTORS, ID_XPRESSOEFFECTOR);
-    nr::c4d::cleanup([] {
+    niklasrosenstein::c4d::cleanup([] {
         BaseTag::Free(g_preset_tag);
     });
     return RegisterEffectorPlugin(
@@ -302,7 +302,7 @@ Bool RegisterXPressoEffector() {
         GeLoadString(IDC_XPRESSOEFFECTOR_NAME),
         OBJECT_MODIFIER | PLUGINFLAG_HIDEPLUGINMENU | OBJECT_CALL_ADDEXECUTION,
         XPressoEffectorData::Alloc,
-        "Oxpressoeffector",
-        raii::AutoBitmap("icons/Oxpressoeffector.tif"),
+        "Oxpressoeffector"_s,
+        raii::AutoBitmap("icons/Oxpressoeffector.tif"_s),
         XPRESSOEFFECTOR_VERSION);
 }

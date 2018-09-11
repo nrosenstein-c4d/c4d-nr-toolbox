@@ -2,13 +2,16 @@
 // All rights reserved.
 
 #include <c4d.h>
-#include <nr/c4d/raii.h>
-#include <nr/c4d/cleanup.h>
+#include <c4d_apibridge.h>
+#include <NiklasRosenstein/c4d/raii.hpp>
+#include <NiklasRosenstein/c4d/cleanup.hpp>
 #include "res/c4d_symbols.h"
 #include "misc/print.h"
 #include "config.h"
 #include "menu.h"
 #include "GIT_VERSION.h"
+
+namespace nr { using namespace niklasrosenstein; }
 
 #define _REGISTER(x)\
   do {\
@@ -130,12 +133,13 @@ void PluginEnd() {
 //============================================================================
 //============================================================================
 Bool PluginMessage(Int32 msg, void* pdata) {
+  GePrint(">>>>> nrtoolbox loaded\n"_s);
   switch (msg) {
     case C4DPL_INIT_SYS:
-      ::resource.Init();
+      c4d_apibridge::GlobalResource().Init();
       break;
     case C4DPL_BUILDMENU: {
-      BaseContainer* bc = GetMenuResource("M_EDITOR");
+      BaseContainer* bc = GetMenuResource("M_EDITOR"_s);
       if (bc) {
         bc->InsData(MENURESOURCE_SUBMENU, menu::root().CreateMenu());
         menu::flush();

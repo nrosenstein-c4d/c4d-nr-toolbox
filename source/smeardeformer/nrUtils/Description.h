@@ -11,14 +11,14 @@
 #ifndef NR_UTILS_DESCRIPTION_H
 #define NR_UTILS_DESCRIPTION_H
 
-    #include "misc/legacy.h"
+    #include <c4d.h>
 
     namespace nr {
 
     /**
      * Extends a description by another description object.
      */
-    Bool ExtendDescription(Description* dest, Description* source, LONG root_id);
+    Bool ExtendDescription(Description* dest, Description* source, Int32 root_id);
 
     /**
      * Extend a description by a resource description identifier. This
@@ -26,7 +26,7 @@
      * be found. Pass a valid pointed for `loaded` if you want to check this
      * case. False is only returned on a fatal error (like a memory error).
      */
-    Bool ExtendDescription(Description* dest, const String& ident, LONG root_id, Bool* loaded=NULL);
+    Bool ExtendDescription(Description* dest, const String& ident, Int32 root_id, Bool* loaded=nullptr);
 
     /**
      * Extend a description by a resource description integral id. This
@@ -34,7 +34,7 @@
      * be found. Pass a valid pointed for `loaded` if you want to check this
      * case. False is only returned on a fatal error (like a memory error).
      */
-    Bool ExtendDescription(Description* dest, LONG id, LONG root_id, Bool* loaded=NULL);
+    Bool ExtendDescription(Description* dest, Int32 id, Int32 root_id, Bool* loaded=nullptr);
 
     } // namespace nr
 

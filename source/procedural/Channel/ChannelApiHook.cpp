@@ -4,15 +4,17 @@
 /// \file procedural/Channel/ChannelApiHook.cpp
 /// \lastmodified 2015/06/01
 
-#include <nr/macros.h>
-#include <nr/c4d/util.h>
+#include <NiklasRosenstein/macros.hpp>
+#include <NiklasRosenstein/c4d/utils.hpp>
 #include <nr/procedural/channel.h>
 
 #include "ChannelApiHook.h"
+
+namespace nr { using namespace niklasrosenstein; }
 using nr::procedural::ChannelApiHook;
 
-NR_DECLMEMBER(ChannelApiHook::s_GetParameter);
-NR_DECLMEMBER(ChannelApiHook::s_SetParameter);
+NR_DECL(ChannelApiHook::s_GetParameter);
+NR_DECL(ChannelApiHook::s_SetParameter);
 
 /// **************************************************************************
 /// **************************************************************************

@@ -24,10 +24,10 @@ Bool EnsureGeMarker(BaseObject* op) {
         if (marker) {
             op->SetMarker(*marker);
             GeMarker::Free(marker);
-            return TRUE;
+            return true;
         }
     }
-    return marker != NULL;
+    return marker != nullptr;
 }
 
 } // namespace nr

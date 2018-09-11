@@ -26,7 +26,7 @@ namespace shapes {
 
       public:
 
-        static NodeData* alloc() { return gNew(SeashellShape); }
+        static NodeData* alloc() { return NewObjClear(SeashellShape); }
 
       //
       // BaseComplexShape -------------------------------------------------------------------------
@@ -36,20 +36,20 @@ namespace shapes {
 
         void free_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info);
 
-        Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index);
+        Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index);
 
-        void draw_handle_customs(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, LONG handle, LONG hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color);
+        void draw_handle_customs(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, Int32 handle, Int32 hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color);
 
 
       //
       // BasePrimitiveData ------------------------------------------------------------------------
       //
 
-        LONG get_handle_count(BaseObject* op);
+        Int32 get_handle_count(BaseObject* op);
 
-        Bool get_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        Bool get_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
-        void set_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        void set_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
       //
       // ObjectData -------------------------------------------------------------------------------
@@ -62,28 +62,28 @@ namespace shapes {
     };
 
     struct SeashellData {
-        Real a; // Pipe Radius
-        Real b; // Height
-        Real c; // Radius
-        Real n; // Convolution
+        Float a; // Pipe Radius
+        Float b; // Height
+        Float c; // Radius
+        Float n; // Convolution
         const SplineData* splr;
         const SplineData* splp;
     };
 
     Bool SeashellShape::init_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info) {
-        if (not super::init_calculation(op, bc, info)) return false;
+        if (!super::init_calculation(op, bc, info)) return false;
         info->umin = 0;
         info->umax = 2;
         info->vmin = 0;
         info->vmax = 2;
 
         struct SeashellData* data = new struct SeashellData;
-        if (not data) return false;
+        if (!data) return false;
 
-        data->a = bc->GetReal(PR1M_SEASHELL_PIPERADIUS);
-        data->b = bc->GetReal(PR1M_SEASHELL_HEIGHT);
-        data->c = bc->GetReal(PR1M_SEASHELL_RADIUS);
-        data->n = bc->GetReal(PR1M_SEASHELL_DEGREES) / (2 * M_PI);
+        data->a = bc->GetFloat(PR1M_SEASHELL_PIPERADIUS);
+        data->b = bc->GetFloat(PR1M_SEASHELL_HEIGHT);
+        data->c = bc->GetFloat(PR1M_SEASHELL_RADIUS);
+        data->n = bc->GetFloat(PR1M_SEASHELL_DEGREES) / (2 * M_PI);
         data->splr = (const SplineData*) bc->GetCustomDataType(PR1M_SEASHELL_RADIUSSPLINE, CUSTOMDATATYPE_SPLINE);
         data->splp = (const SplineData*) bc->GetCustomDataType(PR1M_SEASHELL_PIPESPLINE, CUSTOMDATATYPE_SPLINE);
 
@@ -96,13 +96,13 @@ namespace shapes {
         delete data;
     }
 
-    Vector SeashellShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index) {
+    Vector SeashellShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index) {
         struct SeashellData* data = (struct SeashellData*) info->data;
-        Real x, y, z;
+        Float x, y, z;
 
         // Retrieve SplineData values.
-        Real t = ((v - info->vmin) / (info->vmax - info->vmin));
-        Real rt, pt;
+        Float t = ((v - info->vmin) / (info->vmax - info->vmin));
+        Float rt, pt;
 
         if (data->splr) {
             rt = data->splr->GetPoint(t).y;
@@ -118,7 +118,7 @@ namespace shapes {
             pt = 1.0;
         }
 
-        Real h = pt;
+        Float h = pt;
         x = data->a * h * Cos(data->n * v * M_PI) * (1 + Cos(u * M_PI)) + data->c * rt * Cos(data->n * v * M_PI);
         y = -(data->b * 0.5 * v + data->a * h  * Sin(u * M_PI));
         z = data->a * h * Sin(data->n * v * M_PI) * (1 + Cos(u * M_PI)) + data->c * rt * Sin(data->n * v * M_PI);
@@ -126,11 +126,11 @@ namespace shapes {
         return Vector(x, y, z);
     }
 
-    LONG SeashellShape::get_handle_count(BaseObject* op) {
+    Int32 SeashellShape::get_handle_count(BaseObject* op) {
         return 3;
     }
 
-    Bool SeashellShape::get_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    Bool SeashellShape::get_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
         BaseContainer* bc = op->GetDataInstance();
 
         Vector& point = info->position;
@@ -138,17 +138,17 @@ namespace shapes {
         info->center = Vector(0);
         switch (handle) {
             case HANDLE_RADIUS:
-                point.x = bc->GetReal(PR1M_SEASHELL_RADIUS);
+                point.x = bc->GetFloat(PR1M_SEASHELL_RADIUS);
                 diret.x = 1;
                 break;
 
             case HANDLE_PIPERADIUS:
-                point.x = bc->GetReal(PR1M_SEASHELL_RADIUS) + bc->GetReal(PR1M_SEASHELL_PIPERADIUS) * 2;
+                point.x = bc->GetFloat(PR1M_SEASHELL_RADIUS) + bc->GetFloat(PR1M_SEASHELL_PIPERADIUS) * 2;
                 diret.x = 1;
                 break;
 
             case HANDLE_HEIGHT:
-                point.y = -bc->GetReal(PR1M_SEASHELL_HEIGHT);
+                point.y = -bc->GetFloat(PR1M_SEASHELL_HEIGHT);
                 diret.y = 1;
                 break;
 
@@ -159,36 +159,36 @@ namespace shapes {
         return true;
     }
 
-    void SeashellShape::set_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    void SeashellShape::set_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
         BaseContainer* bc = op->GetDataInstance();
 
         Vector& point = info->position;
         switch (handle) {
             case HANDLE_RADIUS:
-                bc->SetReal(PR1M_SEASHELL_RADIUS, helpers::limit_min<Real>(point.x, 0));
+                bc->SetFloat(PR1M_SEASHELL_RADIUS, helpers::limit_min<Float>(point.x, 0));
                 break;
 
             case HANDLE_PIPERADIUS: {
-                Real value = point.x - bc->GetReal(PR1M_SEASHELL_RADIUS);
-                value = helpers::limit_min<Real>(value * 0.5, 0);
-                bc->SetReal(PR1M_SEASHELL_PIPERADIUS, value);
+                Float value = point.x - bc->GetFloat(PR1M_SEASHELL_RADIUS);
+                value = helpers::limit_min<Float>(value * 0.5, 0);
+                bc->SetFloat(PR1M_SEASHELL_PIPERADIUS, value);
                 break;
             }
 
             case HANDLE_HEIGHT:
-                bc->SetReal(PR1M_SEASHELL_HEIGHT, helpers::limit_min<Real>(-point.y, 0));
+                bc->SetFloat(PR1M_SEASHELL_HEIGHT, helpers::limit_min<Float>(-point.y, 0));
                 break;
 
             default: return;
         }
     }
 
-    void SeashellShape::draw_handle_customs(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, LONG handle, LONG hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color) {
-        if (handle is HANDLE_PIPERADIUS) {
+    void SeashellShape::draw_handle_customs(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, Int32 handle, Int32 hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color) {
+        if (handle == HANDLE_PIPERADIUS) {
             // The pipe-radius handle's line starts at the middle of it's tube.
             BaseContainer* bc = op->GetDataInstance();
-            Real radius = bc->GetReal(PR1M_SEASHELL_RADIUS);
-            Real piperadius = bc->GetReal(PR1M_SEASHELL_PIPERADIUS);
+            Float radius = bc->GetFloat(PR1M_SEASHELL_RADIUS);
+            Float piperadius = bc->GetFloat(PR1M_SEASHELL_PIPERADIUS);
             Vector origin = Vector(radius + piperadius, 0, 0) + mp;
             bd->DrawLine(origin, info->position, 0);
         }
@@ -196,15 +196,15 @@ namespace shapes {
     }
 
     Bool SeashellShape::Init(GeListNode* node) {
-        if (not super::Init(node)) return false;
+        if (!super::Init(node)) return false;
         BaseContainer* bc = ((BaseObject*)node)->GetDataInstance();
 
-        bc->SetReal(PR1M_SEASHELL_RADIUS, 50);
-        bc->SetReal(PR1M_SEASHELL_PIPERADIUS, 50);
-        bc->SetReal(PR1M_SEASHELL_HEIGHT, 150);
-        bc->SetReal(PR1M_SEASHELL_DEGREES, 720 * M_PI / 180.0);
-        bc->SetLong(PR1M_COMPLEXSHAPE_USEGMENTS, 20);
-        bc->SetLong(PR1M_COMPLEXSHAPE_VSEGMENTS, 50);
+        bc->SetFloat(PR1M_SEASHELL_RADIUS, 50);
+        bc->SetFloat(PR1M_SEASHELL_PIPERADIUS, 50);
+        bc->SetFloat(PR1M_SEASHELL_HEIGHT, 150);
+        bc->SetFloat(PR1M_SEASHELL_DEGREES, 720 * M_PI / 180.0);
+        bc->SetInt32(PR1M_COMPLEXSHAPE_USEGMENTS, 20);
+        bc->SetInt32(PR1M_COMPLEXSHAPE_VSEGMENTS, 50);
 
         SplineData* spldata = SplineData::Alloc();
         GeData gespldata;
@@ -231,9 +231,9 @@ namespace shapes {
     }
 
     void SeashellShape::GetDimension(BaseObject* op, Vector* mp, Vector* rad) {
-        PolygonObject* cache = (PolygonObject*) op->GetCache(null);
+        PolygonObject* cache = (PolygonObject*) op->GetCache(nullptr);
         if (cache && cache->IsInstanceOf(Opolygon)) {
-            LONG count = cache->GetPointCount();
+            Int32 count = cache->GetPointCount();
             if (count) {
                 const Vector* points = cache->GetPointR();
                 MinMax mm;
@@ -259,7 +259,9 @@ namespace shapes {
             GeLoadString(IDS_Opr1m_seashell),
             PLUGINFLAG_HIDEPLUGINMENU | OBJECT_GENERATOR,
             SeashellShape::alloc,
-            "Opr1m_seashell", PR1MITIVE_ICON("Opr1m_seashell"), 0);
+            "Opr1m_seashell"_s,
+            PR1MITIVE_ICON("Opr1m_seashell"),
+            0);
     }
 
 } // end namespace shapes

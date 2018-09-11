@@ -2,14 +2,15 @@
  * All rights reserved. */
 
 #include <c4d.h>
-#include <nr/macros.h>
-#include <nr/c4d/util.h>
+#include <c4d_apibridge.h>
+#include <NiklasRosenstein/macros.hpp>
+#include <NiklasRosenstein/c4d/utils.hpp>
 #include "customgui_nrcolorpalette.h"
 #include "res/description/Hnrtoolbox.h"
 #include "res/description/Xnrswatch.h"
 
-using nr::c4d::get_param;
-using nr::c4d::set_param;
+using niklasrosenstein::c4d::get_param;
+using niklasrosenstein::c4d::set_param;
 
 class SwatchShader : public ShaderData
 {
@@ -21,7 +22,7 @@ class SwatchShader : public ShaderData
   {
     String name = "???";
     BaseDocument* doc = shader->GetDocument();
-    NR_BREAKABLE_IF (doc) {
+    NR_IF (doc) {
       GeData temp;
       nr::ColorPaletteData* palette = nr::GetGlobalColorPalette(doc, temp);
       if (!palette) break;
@@ -101,14 +102,14 @@ public:
         auto* doc = node->GetDocument();
         auto* data = reinterpret_cast<DescriptionPopup*>(pdata);
         if (!doc || !data) return false;
-        if (data->id == XNRSWATCH_SELECT) {
-          if (data->chosen == 0) {
+        if (c4d_apibridge::GetDescriptionID(data) == XNRSWATCH_SELECT) {
+          if (c4d_apibridge::GetDescriptionChosen(data) == 0) {
             GeData temp;
             auto* palette = nr::GetGlobalColorPalette(doc, temp);
-            palette->FillPopupContainer(data->popup);
+            palette->FillPopupContainer(c4d_apibridge::GetDescriptionPopup(data));
           }
           else {
-            set_param(node, XNRSWATCH_ID, data->chosen);
+            set_param(node, XNRSWATCH_ID, c4d_apibridge::GetDescriptionChosen(data));
           }
         }
         return true;
@@ -124,5 +125,10 @@ Bool RegisterSwatchShader()
   Int32 const info = 0;
   Int32 const dlevel = 0;
   return RegisterShaderPlugin(
-    Xnrswatch, "nrSwatch", info, SwatchShader::Alloc, "Xnrswatch", dlevel);
+    Xnrswatch,
+    "nrSwatch"_s,
+    info,
+    SwatchShader::Alloc,
+    "Xnrswatch"_s,
+    dlevel);
 }

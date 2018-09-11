@@ -14,7 +14,7 @@
  * language governing permissions and limitations under the License.
  */
 
-#include "misc/legacy.h"
+#include <c4d.h>
 
 extern Bool RegisterXPEGroup();
 extern Bool RegisterXPressoEffector();

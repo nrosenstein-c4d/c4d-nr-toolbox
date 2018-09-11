@@ -15,16 +15,16 @@ namespace nr {
 
 void ComputeFaceNormals(
         const Vector* vertices, const CPolygon* faces,
-        Vector* normals, LONG face_count) {
-    for (LONG i=0; i < face_count; i++) {
+        Vector* normals, Int32 face_count) {
+    for (Int32 i=0; i < face_count; i++) {
         const CPolygon& f = faces[i];
         normals[i] = Cross(vertices[f.b] - vertices[f.a], vertices[f.d] - vertices[f.a]);
     }
 }
 
 Vector* ComputeFaceNormals(
-        const Vector* vertices, LONG vertex_count,
-        const CPolygon* faces,  LONG face_count) {
+        const Vector* vertices, Int32 vertex_count,
+        const CPolygon* faces,  Int32 face_count) {
     Vector* normals = memory::Alloc<Vector>(face_count);
     if (normals) {
         ComputeFaceNormals(vertices, faces, normals, face_count);
@@ -33,38 +33,38 @@ Vector* ComputeFaceNormals(
 }
 
 Bool ComputeVertexNormals(
-        const CPolygon* faces, const Vector* face_normals, LONG face_count,
-        Vector* normals, LONG vertex_count) {
+        const CPolygon* faces, const Vector* face_normals, Int32 face_count,
+        Vector* normals, Int32 vertex_count) {
     Neighbor nb;
-    if (!nb.Init(vertex_count, faces, face_count, NULL)) {
-        return FALSE;
+    if (!nb.Init(vertex_count, faces, face_count, nullptr)) {
+        return false;
     }
 
-    for (LONG i=0; i < vertex_count; i++) {
+    for (Int32 i=0; i < vertex_count; i++) {
         // Get an array of face indecies that are connected with the
         // point.
-        LONG* face_indecies = NULL;
-        LONG count = 0;
+        Int32* face_indecies = nullptr;
+        Int32 count = 0;
         nb.GetPointPolys(i, &face_indecies, &count);
 
         // Sum up the face normals.
         Vector& normal = normals[i] = Vector(0);
-        for (LONG i=0; i < count; i++) {
+        for (Int32 i=0; i < count; i++) {
             normal += face_normals[face_indecies[i]];
         }
 
-        if (count > 0) normal *= (1.0 / (Real) count);
+        if (count > 0) normal *= (1.0 / (Float) count);
     }
 
-    return TRUE;
+    return true;
 }
 
 Bool ComputeVertexNormals(
-        const Vector* vertices, LONG vertex_count,
-        const CPolygon* faces, LONG face_count,
+        const Vector* vertices, Int32 vertex_count,
+        const CPolygon* faces, Int32 face_count,
         Vector* normals) {
     Vector* face_normals = ComputeFaceNormals(vertices, vertex_count, faces, face_count);
-    if (!face_normals) return FALSE;
+    if (!face_normals) return false;
     Bool success = ComputeVertexNormals(faces, face_normals, face_count, normals, vertex_count);
     memory::Free(face_normals);
     return success;
@@ -72,26 +72,26 @@ Bool ComputeVertexNormals(
 
 
 Vector* ComputeVertexNormals(
-        const CPolygon* faces, const Vector* face_normals, LONG face_count,
-        LONG vertex_count) {
+        const CPolygon* faces, const Vector* face_normals, Int32 face_count,
+        Int32 vertex_count) {
     Vector* normals = memory::Alloc<Vector>(vertex_count);
     if (normals) {
         if (!ComputeVertexNormals(faces, face_normals, face_count, normals, vertex_count)) {
-            GeFree(normals);
-            normals = NULL;
+            DeleteMem(normals);
+            normals = nullptr;
         }
     }
     return normals;
 }
 
 Vector* ComputeVertexNormals(
-        const Vector* vertices, LONG vertex_count,
-        const CPolygon* faces, LONG face_count) {
+        const Vector* vertices, Int32 vertex_count,
+        const CPolygon* faces, Int32 face_count) {
     Vector* face_normals = ComputeFaceNormals(vertices, vertex_count, faces, face_count);
-    Vector* vertex_normals = NULL;
+    Vector* vertex_normals = nullptr;
     if (face_normals) {
         vertex_normals = ComputeVertexNormals(faces, face_normals, face_count, vertex_count);
-        GeFree(face_normals);
+        DeleteMem(face_normals);
     }
     return face_normals;
 }

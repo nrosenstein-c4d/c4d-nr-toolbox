@@ -5,6 +5,7 @@
 #define NRPROCEDURAL_UTILS_DESCRIPTIONHELPER_H_
 
 #include <c4d.h>
+#include <c4d_apibridge.h>
 #include <lib_description.h>
 
 /// ---------------------------------------------------------------------------
@@ -32,7 +33,7 @@ public:
       BaseContainer bc = GetCustomDataTypeDefault(DTYPE_BUTTON);
       bc.SetInt32(DESC_CUSTOMGUI, CUSTOMGUI_BUTTON);
       bc.SetString(DESC_NAME, name);
-      if (shortName.Content())
+      if (!c4d_apibridge::IsEmpty(shortName))
         bc.SetString(DESC_SHORT_NAME, shortName);
       m_desc->SetParameter(cid, bc, parentId);
     }
@@ -47,7 +48,7 @@ public:
     if (this->CheckSingleID(cid)) {
       BaseContainer bc = GetCustomDataTypeDefault(DTYPE_GROUP);
       bc.SetString(DESC_NAME, name);
-      if (shortName.Content())
+      if (!c4d_apibridge::IsEmpty(shortName))
         bc.SetString(DESC_SHORT_NAME, shortName);
       bc.SetInt32(DESC_DEFAULT, defaultOpen);
       bc.SetInt32(DESC_COLUMNS, columns);

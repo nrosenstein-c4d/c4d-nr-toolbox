@@ -17,7 +17,6 @@
 #ifndef NR_MODATANODE_H
 #define NR_MODATANODE_H
 
-    #include "misc/legacy.h"
     #include <c4d_baseeffectordata.h>
 
     enum {
@@ -27,13 +26,13 @@
         MODATANODE_EASYWEIGHT = MODATA_MATRIX + 10000,              // Vector [in]
 
         // Smaller than MODATA_MATRIX, which is the first MODATA_ item.
-        MODATANODE_INDEX = 35000,                                   // LONG [in]
+        MODATANODE_INDEX = 35000,                                   // Int32 [in]
         MODATANODE_OBJECT,                                          // LINK [out]
         MODATANODE_HOST,                                            // LINK [out]
-        MODATANODE_COUNT,                                           // LONG [out]
-        MODATANODE_ITERCOUNT,                                       // LONG [out]
+        MODATANODE_COUNT,                                           // Int32 [out]
+        MODATANODE_ITERCOUNT,                                       // Int32 [out]
         MODATANODE_FALLOFF,                                         // REAL [out]
-        MODATANODE_INDEXOUT,                                        // LONG [out]
+        MODATANODE_INDEXOUT,                                        // Int32 [out]
         MODATANODE_SELWEIGHT,                                       // BOOL [out]
 
     };

@@ -20,15 +20,17 @@
  */
 
 #include "c4d.h"
+#include "c4d_apibridge.h"
+#include "maxon/sort.h"
 #include "customgui_inexclude.h"
 #include "customgui_hyperlink.h"
 #include "lib_activeobjectmanager.h"
-#include "BaseArray.h"
-#include "HashMap.h"
 
 #include "res/c4d_symbols.h"
 #include "menu.h"
-#include <nr/c4d/raii.h>
+#include <NiklasRosenstein/c4d/raii.hpp>
+
+namespace nr { using namespace niklasrosenstein; }
 
 #define ID_AUTOCONNECT_COMMAND 1030516
 
@@ -119,7 +121,7 @@ Bool ConnectObjects(
   // Get the name of the object so we can use it later.
   options.forceName = test->GetName();
   BaseObject::Free(test);
-  if (!prefix.Content())
+  if (c4d_apibridge::IsEmpty(prefix))
     prefix = options.forceName + ": ";
 
   // Final result of the function.
@@ -203,7 +205,7 @@ Bool ConnectObjects(
   // object already has to make sure no object exceeds the
   // maximum number if connections.
   maxon::Bool created = false;
-  maxon::HashMap<C4DAtom*, Int32> map;
+  c4d_apibridge::HashMap<C4DAtom*, Int32> map;
 
   // Iterate over all connections and establish them.
   const auto end = list.End();
@@ -384,7 +386,7 @@ public:
       customdata.SetBool(HYPERLINK_IS_LINK, true);
       customdata.SetBool(HYPERLINK_ALIGN_RIGHT, true);
       customdata.SetBool(HYPERLINK_NO_UNDERLINE, true);
-      AddCustomGui(IDS_AUTOCONNECT_CMG_DEVLINK, CUSTOMGUI_HYPER_LINK_STATIC, "",
+      AddCustomGui(IDS_AUTOCONNECT_CMG_DEVLINK, CUSTOMGUI_HYPER_LINK_STATIC, ""_s,
              0, 0, 0, customdata);
       GroupEnd();
     }
@@ -492,7 +494,7 @@ private:
           Int32 icon = icons ? icons->GetInt32(id) : -1;
 
           String name = cycle->GetString(id);
-          if (name.Content()) {
+          if (!c4d_apibridge::IsEmpty(name)) {
             if (icon > 0) name += "&i" + String::IntToString(icon);
             if (last_id < 0) last_id = id;
             AddChild(IDS_AUTOCONNECT_CMB_TYPE, id, name);
@@ -545,5 +547,5 @@ Bool RegisterAutoConnect()
       PLUGINFLAG_HIDEPLUGINMENU,
       nr::c4d::auto_bitmap("res/icons/autoconnect.tif"),
       GeLoadString(IDS_AUTOCONNECT_HELP),
-      new AutoConnectCommand);
+      NewObjClear(AutoConnectCommand));
 }

@@ -8,7 +8,6 @@
 #ifndef TV_UTILS_H
 #define TV_UTILS_H
 
-    #include "misc/legacy.h"
     #include <c4d.h>
 
     class TvNode;
@@ -42,8 +41,8 @@
      * Collect all elements in the hierarchy started by *root* in
      * the AtomArray *arr* that have the specified bit set.
      */
-    void TvCollectByBit(LONG bitmask, BaseList2D* root, AtomArray* arr,
-                        Bool includeChildren=TRUE);
+    void TvCollectByBit(Int32 bitmask, BaseList2D* root, AtomArray* arr,
+                        Bool includeChildren=true);
 
     /**
      * Retrieve a NodeData's virtual function table.
@@ -91,7 +90,7 @@
     /**
      * @param root The root node to start from.
      * @param node The node to search for.
-     * @return TRUE when *node* is a child of *root*, but not if
+     * @return true when *node* is a child of *root*, but not if
      * *root* and *node* equal.
      */
     Bool TvFindChild(GeListNode* root, GeListNode* node);
@@ -99,19 +98,19 @@
     /**
      * @param root The root node to start from.
      * @param node The node to search for.
-     * @return TRUE if *node* is a direct child of *root*.
+     * @return true if *node* is a direct child of *root*.
      */
     Bool TvFindChildDirect(GeListNode* root, GeListNode* node);
 
     /**
      * @return The current keyboard input qualifier.
      */
-    LONG TvGetInputQualifier();
+    Int32 TvGetInputQualifier();
 
     /**
      * @return The INSERT_Mode depending on the passed qualifier.
      */
-    LONG TvGetInsertMode(LONG qual);
+    Int32 TvGetInsertMode(Int32 qual);
 
     /**
      * Fills the passed BaseContainer with plugin-IDs and plugin-Names
@@ -125,36 +124,36 @@
      * @param insertMode How a new node of the plugins is going to
      *        be inserted. There is also an INSERT_ABOVE constant,
      *        defined in the TeaPresso utils header.
-     * @param atLeastOne If not NULL is passed, the pointed memory
-     *        location will be set to TRUE if at least one plugin
+     * @param atLeastOne If not nullptr is passed, the pointed memory
+     *        location will be set to true if at least one plugin
      *        is allowed to be inserted.
      */
     Bool TvGatherPluginList(
-                BaseContainer& container, TvNode* contextNode=NULL,
-                LONG insertMode=0, Bool* atLeastOne=NULL);
+                BaseContainer& container, TvNode* contextNode=nullptr,
+                Int32 insertMode=0, Bool* atLeastOne=nullptr);
 
     /**
      * @param contextNode The node relative to the new location
      *        of the new node.
      * @param newNode The new node.
      * @param insertMode The insertion-mode.
-     * @return TRUE if *newNode* is allowed to be inserted the way
+     * @return true if *newNode* is allowed to be inserted the way
      * defined with *insertMode* in relation to *contextNode*.
      */
     Bool TvCheckInsertContext(
-                TvNode* contextNode, TvNode* newNode, LONG insertMode,
-                Bool fallback=FALSE);
+                TvNode* contextNode, TvNode* newNode, Int32 insertMode,
+                Bool fallback=false);
 
     /**
      * @param contextNode The node relative to the new location
      *        of the new node.
      * @param newNode The new node.
      * @param insertMode The insertion-mode.
-     * @return TRUE if the node was inserted, FALSE if not.
+     * @return true if the node was inserted, false if not.
      */
     Bool TvInsertNode(
-                TvNode* contextNode, TvNode* newNode, LONG insertMode,
-                Bool fallback=FALSE);
+                TvNode* contextNode, TvNode* newNode, Int32 insertMode,
+                Bool fallback=false);
 
     /**
      * Return static information from a plugin-type.
@@ -169,20 +168,20 @@
      * @param arr The AtomArray of BasePlugin's. The function does
      *        not check whether it actually is a BasePlugin, so it will
      *        crash when it contains some other kind of object.
-     * @param hideHidden TRUE when hidden plugins should be skipped.
-     * @return The selected BasePlugin or NULL.
+     * @param hideHidden true when hidden plugins should be skipped.
+     * @return The selected BasePlugin or nullptr.
      */
     void TvFillPopupContainerBasePlugin(
                 BaseContainer& dest, const AtomArray& arr,
-                Bool hideHidden=TRUE);
+                Bool hideHidden=true);
 
     /**
-     * Retrieve the LONG id from a DescID.
+     * Retrieve the Int32 id from a DescID.
      *
-     * @param descid The DescID to retrieve the LONG from.
-     * @return A LONG of the id.
+     * @param descid The DescID to retrieve the Int32 from.
+     * @return A Int32 of the id.
      */
-    inline LONG TvDescIDLong(const DescID& descid) {
+    inline Int32 TvDescIDLong(const DescID& descid) {
         return descid[descid.GetDepth() - 1].id;
     }
 

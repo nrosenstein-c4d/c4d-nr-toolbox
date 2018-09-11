@@ -7,7 +7,7 @@
 
 #pragma once
 #include <c4d.h>
-#include <nr/c4d/functional.h>
+#include <NiklasRosenstein/c4d/functional.hpp>
 
 namespace utils {
 

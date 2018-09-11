@@ -12,13 +12,13 @@
 
 using namespace nr::memory;
 
-Bool SmearState::Resize(LONG count) {
-    Bool success = TRUE;
+Bool SmearState::Resize(Int32 count) {
+    Bool success = true;
     success = success && Realloc<Vector>(original_vertices, count);
     success = success && Realloc<Vector>(original_normals, count);
     success = success && Realloc<Vector>(deformed_vertices, count);
     success = success && Realloc<Vector>(deformed_normals, count);
-    success = success && Realloc<SReal>(weights, count);
+    success = success && Realloc<Float32>(weights, count);
     vertex_count = count;
     initialized = success;
     return success;
@@ -30,23 +30,25 @@ void SmearState::Flush() {
     Free(deformed_vertices);
     Free(deformed_normals);
     vertex_count = 0;
-    initialized = FALSE;
+    initialized = false;
 }
 
 
-SmearSession* SmearHistory::NewSession(LONG max_history_count, Bool fake_session) {
+SmearSession* SmearHistory::NewSession(Int32 max_history_count, Bool fake_session) {
     if (max_history_count < 1) max_history_count = 1;
     m_level_override = -1;
     SmearState state;
-    SmearState* ptr = NULL;
+    SmearState* ptr = nullptr;
     if (!fake_session || GetHistoryCount() <= 0) {
-        fake_session = FALSE;
+        fake_session = false;
         // Remove all superfluos history elements. One item is implicit.
         while (m_states.GetCount() > max_history_count) {
             if (state.initialized) state.Flush();
             m_states.Pop(&state);
         }
-        ptr = m_states.Insert(0, state);
+        iferr (auto&& r = m_states.Insert(0, std::move(state)))
+            return nullptr;
+        ptr = &r;
     }
     else {
         m_level_override = max_history_count + 1;
@@ -54,9 +56,9 @@ SmearSession* SmearHistory::NewSession(LONG max_history_count, Bool fake_session
     }
 
     if (ptr) {
-        return gNew(SmearSession, this, ptr, fake_session);
+        return NewObjClear(SmearSession, this, ptr, fake_session);
     }
-    return NULL; // memory error
+    return nullptr; // memory error
 }
 
 SmearHistory::~SmearHistory() {
@@ -71,27 +73,27 @@ void SmearHistory::FreeSession(SmearSession*& session) {
         GePrint(String(__FUNCTION__) + ": Smear state is not up to date.");
         m_states.Pop(0);
     }
-    GeFree(session);
-    session = NULL;
+    DeleteMem(session);
+    session = nullptr;
 }
 
-LONG SmearHistory::GetHistoryCount() const {
-    LONG count = m_states.GetCount();
+Int32 SmearHistory::GetHistoryCount() const {
+    Int32 count = m_states.GetCount();
     if (m_level_override > 0 && count > m_level_override) {
         count = m_level_override + 1;
     }
     return count;
 }
 
-const SmearState* SmearHistory::GetState(LONG index) const {
+const SmearState* SmearHistory::GetState(Int32 index) const {
     if (index < 0 || index >= GetHistoryCount()) {
-        return NULL;
+        return nullptr;
     }
     if (m_level_override > 0 && index >= m_level_override) {
-        return NULL;
+        return nullptr;
     }
     if (!m_enabled && index != 0) {
-        return NULL;
+        return nullptr;
     }
     return &m_states[index];
 }
@@ -106,8 +108,8 @@ void SmearHistory::Reset() {
 
 
 SmearSession::SmearSession(SmearHistory* history, SmearState* state, Bool fake)
-: m_state(state), m_created(FALSE), m_updated(FALSE),
-  m_vertices(NULL), m_vertex_count(0), m_faces(NULL), m_face_count(0),
+: m_state(state), m_created(false), m_updated(false),
+  m_vertices(nullptr), m_vertex_count(0), m_faces(nullptr), m_face_count(0),
   m_fake(fake) {
 }
 
@@ -116,10 +118,10 @@ SmearSession::~SmearSession() {
 
 Bool SmearSession::CreateState(
         const Matrix& mg,
-        const Vector* vertices, LONG vertex_count,
-        const CPolygon* faces, LONG face_count) {
+        const Vector* vertices, Int32 vertex_count,
+        const CPolygon* faces, Int32 face_count) {
     if (m_created) {
-        return FALSE;
+        return false;
     }
 
     m_vertices = vertices;
@@ -130,10 +132,10 @@ Bool SmearSession::CreateState(
     if (!m_fake) {
         m_state->mg = mg;
         if (!m_state->Resize(vertex_count)) {
-            return FALSE;
+            return false;
         }
         // Copy the vertices to the storage in the SmearState.
-        for (LONG i=0; i < vertex_count; i++) {
+        for (Int32 i=0; i < vertex_count; i++) {
             m_state->original_vertices[i] = m_state->mg * vertices[i];
         }
 
@@ -143,25 +145,25 @@ Bool SmearSession::CreateState(
         if (!nr::ComputeVertexNormals(
                 m_vertices, m_vertex_count, m_faces,
                 m_face_count, m_state->original_normals)) {
-            return FALSE;
+            return false;
         }
     }
 
-    m_created = TRUE;
-    return TRUE;
+    m_created = true;
+    return true;
 }
 
 Bool SmearSession::DeformationComplete(const Matrix& mg) {
     if (!m_created || m_updated) {
         GePrint(String(__FUNCTION__) + ": Not yet created or already updated.");
-        return FALSE;
+        return false;
     }
 
     // m_state->mg = mg;
 
     // Copy the vertices to the deformed storage in the SmearState
     // using the pointers passed to `CreateState()`.
-    for (LONG i=0; i < m_vertex_count; i++) {
+    for (Int32 i=0; i < m_vertex_count; i++) {
         m_state->deformed_vertices[i] = /* m_state-> */ mg * m_vertices[i];
     }
 
@@ -170,10 +172,10 @@ Bool SmearSession::DeformationComplete(const Matrix& mg) {
             m_vertices, m_vertex_count, m_faces,
             m_face_count, m_state->deformed_normals)) {
         GePrint(String(__FUNCTION__) + ": Vertex normals not calculated.");
-        return FALSE;
+        return false;
     }
-    m_updated = TRUE;
-    return TRUE;
+    m_updated = true;
+    return true;
 }
 
 

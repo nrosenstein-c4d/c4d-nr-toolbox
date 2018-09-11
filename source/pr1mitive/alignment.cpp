@@ -24,8 +24,8 @@ namespace alignment {
             const Vector* points = ((PointObject*)op)->GetPointR();
             if (!points) return;
 
-            LONG count = ((PointObject*)op)->GetPointCount();
-            for (LONG i=0; i < count; i++) {
+            Int32 count = ((PointObject*)op)->GetPointCount();
+            for (Int32 i=0; i < count; i++) {
                 expand(points[i]);
             }
         }

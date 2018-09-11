@@ -8,7 +8,7 @@
 #ifndef NR_SMEARDATA_H
 #define NR_SMEARDATA_H
 
-    #include "misc/legacy.h"
+    #include <c4d.h>
 
     struct SmearData {
 
@@ -23,7 +23,7 @@
         PolygonObject* dest;
 
         Bool interactive;
-        Real strength;
+        Float strength;
 
         Bool inverted;
         const SplineData* weight_spline;

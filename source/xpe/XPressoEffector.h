@@ -17,7 +17,6 @@
 #ifndef NR_XPRESSOEFFECTOR_H
 #define NR_XPRESSOEFFECTOR_H
 
-    #include "misc/legacy.h"
     #include <c4d_baseeffectordata.h>
     #include <c4d_graphview.h>
     #include <c4d_falloffdata.h>
@@ -46,13 +45,13 @@
         XPressoEffector_ExecInfo() { Clean(); }
 
         void Clean() {
-            md = NULL;
-            gen = NULL;
-            falloff = NULL;
-            sel = NULL;
+            md = nullptr;
+            gen = nullptr;
+            falloff = nullptr;
+            sel = nullptr;
 
-            easyOn = NULL;
-            easyValues = NULL;
+            easyOn = nullptr;
+            easyValues = nullptr;
         }
 
     };
@@ -65,16 +64,16 @@
     public:
 
         static XPressoEffector* SafeCast(GeListNode* node) {
-            if (!node || !node->IsInstanceOf(ID_XPRESSOEFFECTOR)) return NULL;
+            if (!node || !node->IsInstanceOf(ID_XPRESSOEFFECTOR)) return nullptr;
             else return (XPressoEffector*) node;
         }
 
         Bool GetExecInfo(XPressoEffector_ExecInfo* info) {
             if (info) info->Clean();
             if (!info || !Message(MSG_XPRESSOEFFECTOR_GETEXECINFO, info)) {
-                return FALSE;
+                return false;
             }
-            return TRUE;
+            return true;
         }
 
     };

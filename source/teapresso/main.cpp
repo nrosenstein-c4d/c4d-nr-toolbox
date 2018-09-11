@@ -5,6 +5,7 @@
  * All rights reserved.
  */
 
+#include <c4d_apibridge.h>
 #include "TeaPresso.h"
 #include "BaseList2DTreeModel.h"
 #include "utils.h"
@@ -15,7 +16,7 @@
 #include <lib_activeobjectmanager.h>
 
 #define FULLFIT (BFH_SCALEFIT | BFV_SCALEFIT)
-#define EVENT_HANDLED TRUE
+#define EVENT_HANDLED true
 
 #include <cstdio>
 
@@ -29,7 +30,7 @@ Bool SetUpTest() {
     TvNode* root = TvGetActiveRoot();
     if (!root) {
         GePrint(">>> No root node.");
-        return FALSE;
+        return false;
     }
 
     TvNode* condition = TvNode::Alloc(Tvcondition);
@@ -37,7 +38,7 @@ Bool SetUpTest() {
         condition->InsertUnder(root);
         condition->SetUp();
     }
-    return TRUE;
+    return true;
 }
 
 
@@ -47,15 +48,15 @@ class TreeDialog : public GeDialog {
 
 protected:
 
-    LONG treeId;
+    Int32 treeId;
     String treeName;
     BaseContainer treeData;
     TreeViewCustomGui* tree;
 
 public:
 
-    TreeDialog() : super(), tree(NULL), treeId(CMG_TREEVIEW) {
-        treeData.SetBool(TREEVIEW_OUTSIDE_DROP, TRUE);
+    TreeDialog() : super(), tree(nullptr), treeId(CMG_TREEVIEW) {
+        treeData.SetBool(TREEVIEW_OUTSIDE_DROP, true);
     }
 
     virtual ~TreeDialog() {}
@@ -68,13 +69,13 @@ public:
 
     virtual Bool InitValues();
 
-    virtual Bool CoreMessage(LONG type, const BaseContainer& msg);
+    virtual Bool CoreMessage(Int32 type, const BaseContainer& msg);
 
 };
 
 Bool TreeDialog::CreateLayout() {
-    if (!super::CreateLayout()) return FALSE;
-    if (GroupBegin(0, FULLFIT, 1, 0, "", 0)) {
+    if (!super::CreateLayout()) return false;
+    if (GroupBegin(0, FULLFIT, 1, 0, ""_s, 0)) {
         tree = (TreeViewCustomGui*) AddCustomGui(
                     treeId, CUSTOMGUI_TREEVIEW, treeName,
                     FULLFIT, 350, 60, treeData);
@@ -85,21 +86,21 @@ Bool TreeDialog::CreateLayout() {
                 350, 60, treeData); */
         // GroupEnd();
     }
-    return TRUE;
+    return true;
 }
 
 Bool TreeDialog::InitValues() {
-    if (!super::InitValues()) return FALSE;
-    if (!createlayout) return TRUE;
+    if (!super::InitValues()) return false;
+    if (!createlayout) return true;
 
     if (tree) {
         AttachModel();
         tree->Refresh();
     }
-    return TRUE;
+    return true;
 }
 
-Bool TreeDialog::CoreMessage(LONG type, const BaseContainer& msg) {
+Bool TreeDialog::CoreMessage(Int32 type, const BaseContainer& msg) {
     if (type == MSG_TEAPRESSO_UPDATETREEVIEW) {
         if (tree) tree->Refresh();
     }
@@ -121,30 +122,30 @@ public:
     /* TreeViewFunctions Overrides */
 
     virtual void DrawCell(
-                void* root, void* ud, void* node, LONG column,
+                void* root, void* ud, void* node, Int32 column,
                 DrawInfo* drawinfo, const GeData& bgColor);
 
-    virtual LONG GetColumnWidth(
-                void* root, void* ud, void* node, LONG column,
+    virtual Int32 GetColumnWidth(
+                void* root, void* ud, void* node, Int32 column,
                 GeUserArea* area);
 
-    virtual LONG GetLineHeight(
-                void* root, void* ud, void* node, LONG column,
+    virtual Int32 GetLineHeight(
+                void* root, void* ud, void* node, Int32 column,
                 GeUserArea* area);
 };
 
 Bool TvTreeModel::AllowRemoveNode(
             void* root, void* ud, BaseList2D* node) {
     TvNode* tNode = (TvNode*) node;
-    if (!tNode) return FALSE;
+    if (!tNode) return false;
     TvNode* parent = tNode->GetUp();
-    if (!parent) return FALSE;
+    if (!parent) return false;
 
     return parent->AllowRemoveChild(tNode);
 }
 
 void TvTreeModel::DrawCell(
-            void* root, void* ud, void* node, LONG column,
+            void* root, void* ud, void* node, Int32 column,
             DrawInfo* drawinfo, const GeData& bgColor) {
     if (!root || !node) return;
 
@@ -165,11 +166,11 @@ void TvTreeModel::DrawCell(
 
     // Set default colors.
     Bool selected = IsSelected(root, ud, node);
-    LONG textColor;
+    Int32 textColor;
 
-    if (!tNode->IsEnabled(FALSE))
+    if (!tNode->IsEnabled(false))
         textColor = selected ? COLOR_TEXT_SELECTED_DARK : COLOR_TEXT_DISABLED;
-    else if (!tNode->IsEnabled(TRUE))
+    else if (!tNode->IsEnabled(true))
         textColor = selected ? COLOR_TEXT_SELECTED_DARK : COLOR_TEXT_EDIT_DISABLED;
     else
         textColor = selected ? COLOR_TEXT_SELECTED : COLOR_TEXT;
@@ -180,15 +181,15 @@ void TvTreeModel::DrawCell(
     tNode->DrawCell(column, rect, rr, drawinfo, bgColor);
 }
 
-LONG TvTreeModel::GetColumnWidth(
-            void* root, void* ud, void* node, LONG column, GeUserArea* area) {
+Int32 TvTreeModel::GetColumnWidth(
+            void* root, void* ud, void* node, Int32 column, GeUserArea* area) {
     if (!root || !node) return 0;
     TvNode* t_node = (TvNode*) node;
     return t_node->GetColumnWidth(column, area) + TEAPRESSO_HPADDING * 2;
 }
 
-LONG TvTreeModel::GetLineHeight(
-            void* root, void* ud, void* node, LONG column, GeUserArea* area) {
+Int32 TvTreeModel::GetLineHeight(
+            void* root, void* ud, void* node, Int32 column, GeUserArea* area) {
     if (!root || !node) return 0;
     TvNode* t_node = (TvNode*) node;
     return t_node->GetLineHeight(column, area) + TEAPRESSO_VPADDING * 2;
@@ -220,46 +221,45 @@ public:
 
     /* TreeViewFunctions Overrides */
 
-    virtual void SetName(
-                void* root, void* ud, void* node, const String& name) {
+    virtual void SetName(void* root, void* ud, void* node, const c4d_apibridge::String& name) override {
         super::SetName(root, ud, node, name);
         TvUpdateTreeViews();
     }
 
-    virtual void SelectionChanged(void* root, void* ud) {
+    virtual void SelectionChanged(void* root, void* ud) override {
         TvActivateAM();
         EventAdd();
     }
 
-    virtual void DeletePressed(void* root, void* ud) {
+    virtual void DeletePressed(void* root, void* ud) override {
         super::DeletePressed(root, ud);
         TvUpdateTreeViews();
     }
 
     virtual void CreateContextMenu(
-                void* root, void* ud, void* node, LONG column,
-                BaseContainer* bc);
+                void* root, void* ud, void* node, Int32 column,
+                BaseContainer* bc) override;
 
     virtual Bool ContextMenuCall(
-                void* root, void* ud, void* node, LONG column,
-                LONG command);
+                void* root, void* ud, void* node, Int32 column,
+                Int32 command) override;
 
-    virtual LONG AcceptDragObject(
-                void* root, void* ud, void* node, LONG dragtype,
-                void* dragobject, Bool& allowCopy);
+    virtual Int32 AcceptDragObject(
+                void* root, void* ud, void* node, Int32 dragtype,
+                void* dragobject, Bool& allowCopy) override;
 
     virtual void InsertObject(
-                void* root, void* ud, void* node, LONG dragtype,
-                void* dragobject, LONG insertmode, Bool copy);
+                void* root, void* ud, void* node, Int32 dragtype,
+                void* dragobject, Int32 insertmode, Bool copy) override;
 
-    virtual LONG IsChecked(void* root, void* ud, void* node, LONG column);
+    virtual Int32 IsChecked(void* root, void* ud, void* node, Int32 column) override;
 
     virtual void SetCheck(
-                void* root, void* ud, void* node, LONG column, Bool state,
-                const BaseContainer& msg);
+                void* root, void* ud, void* node, Int32 column, Bool state,
+                const BaseContainer& msg) override;
 
     virtual void GetBackgroundColor(
-                void* root, void* ud, void* node, LONG line, GeData* col);
+                void* root, void* ud, void* node, Int32 line, GeData* col) override;
 
 };
 
@@ -267,9 +267,9 @@ void TvManagerTreeModel::Attach(TreeViewCustomGui* tree) {
     this->tree = tree;
     if (!tree) return;
     BaseContainer layout;
-    layout.SetLong(TEAPRESSO_COLUMN_MAIN, LV_USERTREE);
-    layout.SetLong(TEAPRESSO_COLUMN_ENABLED, LV_CHECKBOX);
-    layout.SetLong(TEAPRESSO_COLUMN_CUSTOM, LV_USER);
+    layout.SetInt32(TEAPRESSO_COLUMN_MAIN, LV_USERTREE);
+    layout.SetInt32(TEAPRESSO_COLUMN_ENABLED, LV_CHECKBOX);
+    layout.SetInt32(TEAPRESSO_COLUMN_CUSTOM, LV_USER);
     tree->SetLayout(3, layout);
     tree->SetHeaderText(TEAPRESSO_COLUMN_MAIN, GeLoadString(COLUMN_MAIN));
     tree->SetHeaderText(TEAPRESSO_COLUMN_ENABLED, GeLoadString(COLUMN_ENABLED));
@@ -278,10 +278,10 @@ void TvManagerTreeModel::Attach(TreeViewCustomGui* tree) {
 
 BaseList2D* TvManagerTreeModel::AskInsertObject(
             void* root, void* ud, BaseList2D* node, void** pd, Bool copy) {
-    if (!node) return NULL;
+    if (!node) return nullptr;
     if (node->GetBit(BIT_FORCE_UNOPTIMIZED)) {
-        *pd = (void*) TRUE;
-        copy = TRUE;
+        *pd = (void*) true;
+        copy = true;
     }
     return super::AskInsertObject(root, ud, node, pd, copy);
 }
@@ -295,7 +295,7 @@ void TvManagerTreeModel::AskInsertObjectDone(
 }
 
 void TvManagerTreeModel::CreateContextMenu(
-            void* root, void* ud, void* node, LONG column,
+            void* root, void* ud, void* node, Int32 column,
             BaseContainer* bc) {
     if (!root) return;
     if (node) {
@@ -304,8 +304,8 @@ void TvManagerTreeModel::CreateContextMenu(
 }
 
 Bool TvManagerTreeModel::ContextMenuCall(
-            void* root, void* ud, void* node, LONG column, LONG command) {
-    if (!root) return FALSE;
+            void* root, void* ud, void* node, Int32 column, Int32 command) {
+    if (!root) return false;
 
     TvNode* tRoot = (TvNode*) root;
     TvNode* tNode = (TvNode*) node;
@@ -320,16 +320,16 @@ Bool TvManagerTreeModel::ContextMenuCall(
                 child = next;
             }
             TvUpdateTreeViews();
-            return TRUE;
+            return true;
         }
         case CONTEXT_EDIT: {
             AutoAlloc<AtomArray> arr;
-            TvCollectByBit(BIT_ACTIVE, (TvNode*) root, arr, TRUE);
+            TvCollectByBit(BIT_ACTIVE, (TvNode*) root, arr, true);
             if (arr->GetCount() > 0) {
                 EditObjectModal(*arr, GeLoadString(CONTEXT_EDIT));
                 ActiveObjectManager_SetObjects(ACTIVEOBJECTMODE_TEAPRESSO, *arr, 0);
             }
-            return TRUE;
+            return true;
         }
     }
 
@@ -342,16 +342,16 @@ Bool TvManagerTreeModel::ContextMenuCall(
         FreeListNode(newNode);
     }
     else if (newNode) {
-        LONG mode = TvGetInsertMode(TvGetInputQualifier());
+        Int32 mode = TvGetInsertMode(TvGetInputQualifier());
         TvNode* context = tNode ? tNode : tRoot;
         if (!tNode) mode = INSERT_UNDER;
 
-        Bool inserted = FALSE;
+        Bool inserted = false;
         inserted = TvInsertNode(context, newNode, mode);
         if (!inserted) {
             GePrint("Node " + newNode->GetName() + " could not be inserted.");
             FreeListNode(newNode);
-            return TRUE;
+            return true;
         }
         newNode->SetUp();
 
@@ -361,21 +361,21 @@ Bool TvManagerTreeModel::ContextMenuCall(
         // Open all nodes in a row.
         TvNode* current = newNode;
         while (current) {
-            Open(root, ud, current, TRUE);
+            Open(root, ud, current, true);
             current = current->GetUp();
         }
 
         TvUpdateTreeViews();
-        return TRUE;
+        return true;
     }
 
     // Ask the current node, maybe?
     if (tNode) {
-        Bool refreshTree = FALSE;
+        Bool refreshTree = false;
         if (tNode->ContextMenuCall(column, command, &refreshTree)) {
             if (refreshTree && tree)
                 TvUpdateTreeViews();
-            return TRUE;
+            return true;
         }
     }
 
@@ -383,27 +383,27 @@ Bool TvManagerTreeModel::ContextMenuCall(
     return super::ContextMenuCall(root, ud, node, column, command);
 }
 
-LONG TvManagerTreeModel::AcceptDragObject(
-            void* root, void* ud, void* node, LONG dragtype,
+Int32 TvManagerTreeModel::AcceptDragObject(
+            void* root, void* ud, void* node, Int32 dragtype,
             void* dragobject, Bool& allowCopy) {
-    allowCopy = TRUE;
+    allowCopy = true;
     if (dragtype != DRAGTYPE_ATOMARRAY) return 0;
     AtomArray* arr = (AtomArray*) dragobject;
     TvNode* tRoot = (TvNode*) root;
     TvNode* tNode = (TvNode*) node;
-    if (tNode == tRoot) tNode = NULL;
+    if (tNode == tRoot) tNode = nullptr;
 
     GePrint("AcceptDragObject: " + (tNode ? tNode->GetName() : "No Node, only Root"));
 
     if (!arr || arr->GetCount() <= 0) return 0;
 
-    BitAll(root, ud, root, BIT_HIGHLIGHT, FALSE);
+    BitAll(root, ud, root, BIT_HIGHLIGHT, false);
 
     // Make sure the objects in the array are all TeaPresso nodes.
-    LONG count = arr->GetCount();
-    LONG flags = INSERT_AFTER | INSERT_BEFORE | INSERT_UNDER;
+    Int32 count = arr->GetCount();
+    Int32 flags = INSERT_AFTER | INSERT_BEFORE | INSERT_UNDER;
     if (!tNode) flags &= ~INSERT_UNDER;
-    for (LONG i=0; i < count; i++) {
+    for (Int32 i=0; i < count; i++) {
         C4DAtom* obj = arr->GetIndex(i);
         if (!obj || !obj->IsInstanceOf(Tvbase)) {
             #ifdef VERBOSE
@@ -439,7 +439,7 @@ LONG TvManagerTreeModel::AcceptDragObject(
 
         // Check if the current object would fit under the destination.
         TvNode* failedAt;
-        failedAt = tObj->ValidateContextSafety(tNode ? tNode : tRoot, FALSE);
+        failedAt = tObj->ValidateContextSafety(tNode ? tNode : tRoot, false);
         if (failedAt) {
             #ifdef VERBOSE
             GePrint("failedAt 1 " + String(tNode ? " with destination." : " with root only."));
@@ -459,7 +459,7 @@ LONG TvManagerTreeModel::AcceptDragObject(
         if (tNode) {
             parent = tNode->GetUp();
             if (parent) {
-                failedAt = tObj->ValidateContextSafety(parent, FALSE);
+                failedAt = tObj->ValidateContextSafety(parent, false);
                 if (failedAt) {
                     #ifdef VERBOSE
                     GePrint("failedAt 2");
@@ -478,28 +478,28 @@ LONG TvManagerTreeModel::AcceptDragObject(
         }
     }
 
-    GePrint(">> " + LongToString(flags));
+    GePrint(">> " + String::IntToString(flags));
     return flags;
 }
 
 void TvManagerTreeModel::InsertObject(
-            void* root, void* ud, void* node, LONG dragtype,
-            void* dragobject, LONG insertmode, Bool copy) {
-    BitAll(root, ud, node, BIT_HIGHLIGHT, FALSE);
+            void* root, void* ud, void* node, Int32 dragtype,
+            void* dragobject, Int32 insertmode, Bool copy) {
+    BitAll(root, ud, node, BIT_HIGHLIGHT, false);
     super::InsertObject(root, ud, node, dragtype, dragobject,
                         insertmode, copy);
     TvActivateAM();
     EventAdd();
 }
 
-LONG TvManagerTreeModel::IsChecked(
-            void* root, void* ud, void* node, LONG column) {
+Int32 TvManagerTreeModel::IsChecked(
+            void* root, void* ud, void* node, Int32 column) {
     switch (column) {
         case TEAPRESSO_COLUMN_ENABLED: {
             TvNode* tNode = (TvNode*) node;
-            LONG flags = LV_CHECKBOX_ENABLED;
-            Bool itemEnabled = tNode->IsEnabled(FALSE);
-            if (tNode->IsEnabled(TRUE) && itemEnabled) {
+            Int32 flags = LV_CHECKBOX_ENABLED;
+            Bool itemEnabled = tNode->IsEnabled(false);
+            if (tNode->IsEnabled(true) && itemEnabled) {
                 flags |= LV_CHECKBOX_CHECKED;
             }
             else if (itemEnabled) {
@@ -512,7 +512,7 @@ LONG TvManagerTreeModel::IsChecked(
 }
 
 void TvManagerTreeModel::SetCheck(
-            void* root, void* ud, void* node, LONG column, Bool state,
+            void* root, void* ud, void* node, Int32 column, Bool state,
             const BaseContainer& msg) {
     switch (column) {
         case TEAPRESSO_COLUMN_ENABLED:
@@ -521,11 +521,11 @@ void TvManagerTreeModel::SetCheck(
 }
 
 void TvManagerTreeModel::GetBackgroundColor(
-            void* root, void* ud, void* node, LONG line, GeData* col) {
+            void* root, void* ud, void* node, Int32 line, GeData* col) {
     if (!root || !node) return;
     TvNode* tNode = (TvNode*) node;
     if (tNode->GetBit(BIT_HIGHLIGHT)) {
-        col->SetLong(COLOR_SYNTAX_COMMENTWRONG);
+        col->SetInt32(COLOR_SYNTAX_COMMENTWRONG);
     }
     else {
         Vector color;
@@ -545,55 +545,55 @@ public:
     void Attach(TreeViewCustomGui* tree) {
         if (!tree) return;
         BaseContainer layout;
-        layout.SetLong(TEAPRESSO_COLUMN_MAIN, LV_USERTREE);
+        layout.SetInt32(TEAPRESSO_COLUMN_MAIN, LV_USERTREE);
         tree->SetLayout(1, layout);
     }
 
     /* TreeViewFunctions Overrides */
 
-    virtual LONG GetDragType(void* root, void* ud, void* node) {
+    virtual Int32 GetDragType(void* root, void* ud, void* node) override {
         // Setting the BIT_FORCE_UNOPTIMIZED notifies the other tree-view
         // to copy the dragged nodes.
-        BitAll(root, ud, root, BIT_FORCE_UNOPTIMIZED, TRUE);
+        BitAll(root, ud, root, BIT_FORCE_UNOPTIMIZED, true);
         return super::GetDragType(root, ud, node);
     }
 
-    virtual LONG AcceptDragObject(
-                void* root, void* ud, void* node, LONG dragtype,
-                void* dragobject, Bool& allowCopy) {
+    virtual Int32 AcceptDragObject(
+                void* root, void* ud, void* node, Int32 dragtype,
+                void* dragobject, Bool& allowCopy) override {
         return 0;
     }
 
-    virtual Bool DoubleClick(
-            void* root, void* userdata, void* obj, LONG col,
-            MouseInfo* mouseinfo) {
+    virtual Int32 DoubleClick(
+            void* root, void* userdata, void* obj, Int32 col,
+            MouseInfo* mouseinfo) override {
         return EVENT_HANDLED;
     }
 
-    virtual void DeletePressed(void* root, void* ud) {}
+    virtual void DeletePressed(void* root, void* ud) override {}
 
     virtual void CreateContextMenu(
-                void* root, void* ud, void* node, LONG column,
-                BaseContainer* bc) {
+                void* root, void* ud, void* node, Int32 column,
+                BaseContainer* bc) override {
         bc->FlushAll();
     }
 
     virtual void DrawCell(
-                void* root, void* ud, void* node, LONG column,
-                DrawInfo* drawinfo, const GeData& bgColor);
+                void* root, void* ud, void* node, Int32 column,
+                DrawInfo* drawinfo, const GeData& bgColor) override;
 
-    virtual LONG GetColumnWidth(
-                void* root, void* ud, void* node, LONG column,
-                GeUserArea* area);
+    virtual Int32 GetColumnWidth(
+                void* root, void* ud, void* node, Int32 column,
+                GeUserArea* area) override;
 
-    virtual LONG GetLineHeight(
-                void* root, void* ud, void* node, LONG column,
-                GeUserArea* area);
+    virtual Int32 GetLineHeight(
+                void* root, void* ud, void* node, Int32 column,
+                GeUserArea* area) override;
 
 };
 
 void TvPluginsTreeModel::DrawCell(
-            void* root, void* ud, void* node, LONG column,
+            void* root, void* ud, void* node, Int32 column,
             DrawInfo* drawinfo, const GeData& bgColor) {
     if (!root || !node) return;
 
@@ -614,7 +614,7 @@ void TvPluginsTreeModel::DrawCell(
 
     // Set default colors.
     Bool selected = IsSelected(root, ud, node);
-    LONG textColor = selected ? COLOR_TEXT_SELECTED : COLOR_TEXT;
+    Int32 textColor = selected ? COLOR_TEXT_SELECTED : COLOR_TEXT;
 
     area->DrawSetPen(bgColor);
     area->DrawSetTextCol(textColor, COLOR_TRANS);
@@ -624,8 +624,8 @@ void TvPluginsTreeModel::DrawCell(
     GetIcon(tNode->GetType(), &icon);
     if (!icon.bmp) tNode->GetIcon(&icon);
 
-    LONG x = rect.x1;
-    LONG y = rect.y1;
+    Int32 x = rect.x1;
+    Int32 y = rect.y1;
 
     if (icon.bmp) {
         area->DrawBitmap(icon.bmp, x, y, TEAPRESSO_ICONSIZE,
@@ -634,23 +634,23 @@ void TvPluginsTreeModel::DrawCell(
     }
     else {
         area->DrawSetPen(COLOR_BGFOCUS);
-        LONG w, h;
+        Int32 w, h;
         w = h = TEAPRESSO_ICONSIZE;
         area->DrawRectangle(x, y, x + w, y + h);
     }
     x += TEAPRESSO_ICONSIZE + TEAPRESSO_HPADDING * 2;
 
     String name = tNode->GetName();
-    if (name.Content()) {
+    if (!c4d_apibridge::IsEmpty(name)) {
         area->DrawText(name, x, y);
         x += area->DrawGetTextWidth(name) + TEAPRESSO_HPADDING * 2;
     }
 }
 
-LONG TvPluginsTreeModel::GetColumnWidth(
-            void* root, void* ud, void* node, LONG column, GeUserArea* area) {
+Int32 TvPluginsTreeModel::GetColumnWidth(
+            void* root, void* ud, void* node, Int32 column, GeUserArea* area) {
     if (!root || !node) return 0;
-    LONG width = 0;
+    Int32 width = 0;
     if (column == TEAPRESSO_COLUMN_MAIN) {
         width = TEAPRESSO_ICONSIZE + TEAPRESSO_HPADDING * 2;
         width += area->DrawGetTextWidth(((TvNode*) node)->GetName());
@@ -658,9 +658,9 @@ LONG TvPluginsTreeModel::GetColumnWidth(
     return width + TEAPRESSO_HPADDING * 2;
 }
 
-LONG TvPluginsTreeModel::GetLineHeight(
-            void* root, void* ud, void* node, LONG column, GeUserArea* area) {
-    LONG height = 0;
+Int32 TvPluginsTreeModel::GetLineHeight(
+            void* root, void* ud, void* node, Int32 column, GeUserArea* area) {
+    Int32 height = 0;
     if (column == TEAPRESSO_COLUMN_MAIN) {
         height = area->DrawGetFontHeight();
         if (TEAPRESSO_ICONSIZE > height)
@@ -684,11 +684,11 @@ class TvManagerDialog : public TreeDialog {
 
 public:
 
-    TvManagerDialog() : super(), root(NULL) {
-        treeData.SetBool(TREEVIEW_HAS_HEADER, TRUE);
-        treeData.SetBool(TREEVIEW_ALTERNATE_BG, TRUE);
-        treeData.SetBool(TREEVIEW_HIDE_LINES, FALSE);
-        treeData.SetBool(TREEVIEW_RESIZE_HEADER, TRUE);
+    TvManagerDialog() : super(), root(nullptr) {
+        treeData.SetBool(TREEVIEW_HAS_HEADER, true);
+        treeData.SetBool(TREEVIEW_ALTERNATE_BG, true);
+        treeData.SetBool(TREEVIEW_HIDE_LINES, false);
+        treeData.SetBool(TREEVIEW_RESIZE_HEADER, true);
     }
 
     virtual ~TvManagerDialog() {}
@@ -709,7 +709,7 @@ public:
     virtual void AttachModel() {
         model.Attach(tree);
         if (tree) {
-            tree->SetRoot(root, &model, NULL);
+            tree->SetRoot(root, &model, nullptr);
             tree->Refresh();
         }
     }
@@ -718,7 +718,7 @@ public:
 
     virtual Bool CreateLayout();
 
-    virtual Bool Command(LONG type, const BaseContainer& msg);
+    virtual Bool Command(Int32 type, const BaseContainer& msg);
 
 };
 
@@ -729,11 +729,11 @@ Bool TvManagerDialog::CreateLayout() {
         GroupEnd();
     }
     SetTitle(GeLoadString(IDC_TVMANAGER_TITLE));
-    if (!super::CreateLayout()) return FALSE;
-    return TRUE;
+    if (!super::CreateLayout()) return false;
+    return true;
 }
 
-Bool TvManagerDialog::Command(LONG type, const BaseContainer& msg) {
+Bool TvManagerDialog::Command(Int32 type, const BaseContainer& msg) {
     switch (type) {
         case BTN_EDITROOT:
             if (root) {
@@ -744,20 +744,20 @@ Bool TvManagerDialog::Command(LONG type, const BaseContainer& msg) {
             break;
         case BTN_EXECUTE: {
             BaseDocument* doc = GetActiveDocument();
-            if (!doc) return TRUE;
+            if (!doc) return true;
             if (!root) {
                 GePrint("Critical: No root node set.");
-                return TRUE;
+                return true;
             }
 
             doc->StartUndo();
-            root->Execute(NULL, NULL);
+            root->Execute(nullptr, nullptr);
             doc->EndUndo();
             EventAdd();
             break;
         }
     };
-    return TRUE;
+    return true;
 }
 
 
@@ -772,7 +772,7 @@ public:
 
     static Bool StaticInit() {
         if (!root) root = TvCreatePluginsHierarchy();
-        return root != NULL;
+        return root != nullptr;
     }
 
     static void StaticFree() {
@@ -780,8 +780,8 @@ public:
     }
 
     TvPluginsDialog() : super() {
-        treeData.SetBool(TREEVIEW_ALTERNATE_BG, TRUE);
-        treeData.SetBool(TREEVIEW_HIDE_LINES, FALSE);
+        treeData.SetBool(TREEVIEW_ALTERNATE_BG, true);
+        treeData.SetBool(TREEVIEW_HIDE_LINES, false);
     }
 
     /* TreeDialog Overrides */
@@ -796,7 +796,7 @@ public:
 
 };
 
-BaseList2D* TvPluginsDialog::root = NULL;
+BaseList2D* TvPluginsDialog::root = nullptr;
 
 // ===========================================================================
 // ===== Commands ============================================================
@@ -832,9 +832,12 @@ Bool TvManagerCommand::RestoreLayout(void* secret) {
 
 static Bool RegisterTvManagerCommand() {
     return RegisterCommandPlugin(
-            ID_TVMANAGER_COMMAND, GeLoadString(IDC_TVMANAGER_OPEN),
-            PLUGINFLAG_COMMAND_HOTKEY, AutoBitmap("teapresso-manager.png"),
-            GeLoadString(IDC_TVMANAGER_OPEN_HELP), gNew(TvManagerCommand));
+        ID_TVMANAGER_COMMAND,
+        GeLoadString(IDC_TVMANAGER_OPEN),
+        PLUGINFLAG_COMMAND_HOTKEY,
+        AutoBitmap("teapresso-manager.png"_s),
+        GeLoadString(IDC_TVMANAGER_OPEN_HELP),
+        NewObjClear(TvManagerCommand));
 }
 
 
@@ -865,9 +868,12 @@ Bool TvPluginsCommand::RestoreLayout(void* secret) {
 
 static Bool RegisterTvPluginsCommand() {
     return RegisterCommandPlugin(
-            ID_TVPLUGINS_COMMAND, GeLoadString(IDC_TVPLUGINS_OPEN),
-            PLUGINFLAG_COMMAND_HOTKEY, AutoBitmap("teapresso-plugins.png"),
-            GeLoadString(IDC_TVPLUGINS_OPEN_HELP), gNew(TvPluginsCommand));
+        ID_TVPLUGINS_COMMAND,
+        GeLoadString(IDC_TVPLUGINS_OPEN),
+        PLUGINFLAG_COMMAND_HOTKEY,
+        AutoBitmap("teapresso-plugins.png"_s),
+        GeLoadString(IDC_TVPLUGINS_OPEN_HELP),
+        NewObjClear(TvPluginsCommand));
 }
 
 
@@ -879,14 +885,14 @@ GeData ActiveObjectManager_TeaPressoCallback(
             const BaseContainer& msg, void* data) {
     switch (msg.GetId()) {
         case AOM_MSG_ISENABLED:
-            return TRUE;
+            return true;
         case AOM_MSG_GETATOMLIST:
             AtomArray* arr = (AtomArray*) data;
             TvNode* root = TvGetActiveRoot();
             TvCollectByBit(BIT_ACTIVE, root, arr);
-            return TRUE;
+            return true;
     }
-    return FALSE;
+    return false;
 }
 
 static Bool RegisterTvActiveObjectManagerMode() {
@@ -910,7 +916,7 @@ class TeaPressoHook : public SceneHookData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TeaPressoHook); }
+    static NodeData* Alloc() { return NewObjClear(TeaPressoHook); }
 
     TeaPressoHook() : hookname(GeLoadString(IDC_TVROOT)) {
     }
@@ -919,35 +925,35 @@ public:
 
     virtual void Free(GeListNode* node);
 
-    virtual Bool Message(GeListNode* node, LONG type, void* pData);
+    virtual Bool Message(GeListNode* node, Int32 type, void* pData);
 
-    virtual LONG GetBranchInfo(
-                GeListNode* node, BranchInfo* info, LONG max,
+    virtual Int32 GetBranchInfo(
+                GeListNode* node, BranchInfo* info, Int32 max,
                 GETBRANCHINFO flags);
 
 };
 
 void TeaPressoHook::Free(GeListNode* node) {
     TvNode* root = TvGetActiveRoot();
-    GeListHead* head = root ? root->GetListHead() : NULL;
-    if (head) head->SetParent(NULL);
+    GeListHead* head = root ? root->GetListHead() : nullptr;
+    if (head) head->SetParent(nullptr);
     super::Free(node);
 }
 
-Bool TeaPressoHook::Message(GeListNode* node, LONG type, void* pData) {
+Bool TeaPressoHook::Message(GeListNode* node, Int32 type, void* pData) {
     return super::Message(node, type, pData);
 }
 
-LONG TeaPressoHook::GetBranchInfo(
-            GeListNode* node, BranchInfo* info, LONG max,
+Int32 TeaPressoHook::GetBranchInfo(
+            GeListNode* node, BranchInfo* info, Int32 max,
             GETBRANCHINFO flags) {
-    LONG count = 0;
+    Int32 count = 0;
     TvNode* root = TvGetActiveRoot();
-    GeListHead* head = root ? root->GetListHead() : NULL;
+    GeListHead* head = root ? root->GetListHead() : nullptr;
     if (head && max >= 1) {
         head->SetParent(node);
         info[0].head = head;
-        info[0].name = &hookname;
+        c4d_apibridge::SetBranchInfoName(info[0], &hookname);
         info[0].id = Tvbase;
         info[0].flags = BRANCHINFOFLAGS_HIDEINTIMELINE;
         count++;
@@ -957,9 +963,12 @@ LONG TeaPressoHook::GetBranchInfo(
 
 static Bool RegisterTeaPressoHook() {
     return RegisterSceneHookPlugin(
-            ID_TEAPRESSOHOOK, "TeaPresso SceneHook",
-            PLUGINFLAG_HIDE | PLUGINFLAG_SCENEHOOK_NOTDRAGGABLE,
-            TeaPressoHook::Alloc, 0, 0);
+        ID_TEAPRESSOHOOK,
+        "TeaPresso SceneHook"_s,
+        PLUGINFLAG_HIDE | PLUGINFLAG_SCENEHOOK_NOTDRAGGABLE,
+        TeaPressoHook::Alloc,
+        0,
+        0);
 }
 
 
@@ -968,57 +977,57 @@ static Bool RegisterTeaPressoHook() {
 // ===========================================================================
 
 Bool RegisterTeapresso() {
-    if (!RegisterDescription(Tvbase, "Tvbase")) {
+    if (!RegisterDescription(Tvbase, "Tvbase"_s)) {
         GePrint("Critical: Failed to register Tvbase description.");
-        return FALSE;
+        return false;
     }
-    if (!RegisterDescription(Tvbasecondition, "Tvbasecondition")) {
+    if (!RegisterDescription(Tvbasecondition, "Tvbasecondition"_s)) {
         GePrint("Critical: Failed to registerd Tvbasecondition description.");
-        return FALSE;
+        return false;
     }
     if (!RegisterTeaPressoHook()) {
         GePrint("Critical: Failed to register TeaPresso Hook.");
-        return FALSE;
+        return false;
     }
     if (!RegisterTvLibrary()) {
         GePrint("Critical: Failed to register TvLibrary.");
-        return FALSE;
+        return false;
     }
     if (!RegisterTvExtensions()) {
         GePrint("Critical: Failed to register Tv Extensions.");
-        return FALSE;
+        return false;
     }
     if (!RegisterTvActiveObjectManagerMode()) {
         GePrint("Critical: Failed to register Active Object Manager Mode.");
-        return FALSE;
+        return false;
     }
     if (!RegisterTvManagerCommand()) {
         GePrint("Critical: Failed to register TvManager Command.");
-        return FALSE;
+        return false;
     }
     if (!RegisterTvPluginsCommand()) {
         GePrint("Critical: Failed to register TvPlugins Command");
-        return FALSE;
+        return false;
     }
     if (!InitTvLibrary()) {
         GePrint("Critical: Failed to initialize TvLibrary.");
-        return FALSE;
+        return false;
     }
     if (!TvPluginsDialog::StaticInit()) {
         GePrint("Critical: TvPluginDialog could not be initialized.");
-        return FALSE;
+        return false;
     }
 
     // GePrint("TeaPresso was registered successfully.");
     return SetUpTest();
 }
 
-Bool MessageTeapresso(LONG type, void* pData) {
+Bool MessageTeapresso(Int32 type, void* pData) {
     switch (type) {
         case C4DPL_ENDACTIVITY:
             TvPluginsDialog::StaticFree();
             FreeTvLibrary();
             break;
     };
-    return TRUE;
+    return true;
 }

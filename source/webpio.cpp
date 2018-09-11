@@ -1,7 +1,8 @@
 // Copyright (C) 2013-2016  Niklas Rosenstein
 // All rights reserved.
 
-#include "misc/legacy.h"
+#include <c4d.h>
+#include <c4d_apibridge.h>
 #include <webp/decode.h>
 #include <webp/encode.h>
 
@@ -158,7 +159,7 @@ IMAGERESULT WebPBitmapImporter::Load(const Filename& name, BaseBitmap* bm, Int32
             uint8_t* pixel = image_data() + index;
 
             if (alpha_channel) {
-                alpha_channel->SetPixelCnt(x, y, 1, pixel + 3, COLORMODE_GRAY, COLORMODE_GRAY, PIXELCNT_0);
+                alpha_channel->SetPixelCnt(x, y, 1, pixel + 3, alpha_channel->GetBt()/8, COLORMODE_GRAY, PIXELCNT_0);
                 if (pixel[3] < 1) memset(pixel, 0, 3);
             }
 
@@ -190,7 +191,7 @@ IMAGERESULT WebPBitmapExporter::Save(const Filename& name, BaseBitmap* bm, BaseC
     }
 
     BaseBitmap* alpha_channel = bm->GetInternalChannel();
-    if (!savebits & SAVEBIT_ALPHA) alpha_channel = nullptr;
+    if (!Bool(savebits & SAVEBIT_ALPHA)) alpha_channel = nullptr;
 
     for (Int32 x=0; x < width; x++) {
         for (Int32 y=0; y < height; y++) {
@@ -252,16 +253,16 @@ IMAGERESULT WebPBitmapExporter::Save(const Filename& name, BaseBitmap* bm, BaseC
 Bool RegisterWebpIO() {
     RegisterBitmapLoaderPlugin(
         /* id   */ ID_WEBP_BITMAP_LOADER,
-        /* name */ "WebP",
+        /* name */ "WebP"_s,
         /* info */ 0,
         /* data */ new WebPBitmapImporter);
 
     RegisterBitmapSaverPlugin(
         /* id     */ ID_WEBP_BITMAP_SAVER,
-        /* name   */ "WebP",
+        /* name   */ "WebP"_s,
         /* info   */ PLUGINFLAG_BITMAPSAVER_SUPPORT_8BIT | PLUGINFLAG_BITMAPSAVER_FORCESUFFIX,
         /* data   */ new WebPBitmapExporter,
-        /* suffix */ "webp");
+        /* suffix */ "webp"_s);
 
-    return TRUE;
+    return true;
 }

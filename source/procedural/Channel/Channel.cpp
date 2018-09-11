@@ -6,6 +6,7 @@
 
 #define NR_LOGGING_PREFIX "Procedural|Channel.cpp"
 
+#include <c4d_apibridge.h>
 #include "Channel.h"
 #include "ChannelApiHook.h"
 #include "DrawHelper.h"
@@ -13,15 +14,19 @@
 #include "misc/print.h"
 
 #include <nr/procedural/channel.h>
-#include <nr/c4d/bitmaps.h>        // nr::c4d::tint_image
-#include <nr/c4d/description.h>    // nr::c4d::show_parameter
-#include <nr/c4d/raii.h>           // nr::raii::auto_bitmap
-#include <nr/c4d/string.h>         // nr::c4d::tostr
-#include <nr/macros.h>             // NR_BREAKABLE_IF
-#include <nr/math/math.h>          // nr::math::clamp
+#include <NiklasRosenstein/c4d/bitmaps.hpp>        // nr::c4d::tint_image
+#include <NiklasRosenstein/c4d/description.hpp>    // nr::c4d::show_parameter
+#include <NiklasRosenstein/c4d/raii.hpp>           // nr::raii::auto_bitmap
+#include <NiklasRosenstein/c4d/string.hpp>         // nr::c4d::tostr
+#include <NiklasRosenstein/macros.hpp>             // NR_IF
+#include <NiklasRosenstein/math.hpp>          // nr::math::clamp
 
+namespace nr { using namespace niklasrosenstein; }
+
+using c4d_apibridge::IsEmpty;
+using c4d_apibridge::GetDescriptionID;
 using nr::c4d::tostr;
-using nr::math::clamp;
+using nr::clamp;
 using nr::procedural::Channel;
 using nr::procedural::dynamicarray::DynamicArray;
 
@@ -401,7 +406,7 @@ void ChannelPlugin::UpdateChannelData(CHANNELUPDATE updateType)
   // Read the count from the reference channel if it exists.
   Bool success = true;
   Int32 newState = PROCEDURAL_CHANNEL_STATE_UNKNOWN;
-  NR_BREAKABLE_IF (mRef.Content()) {
+  NR_IF (!IsEmpty(mRef)) {
     // Find the reference chanenl and retrieved its data object.
     Channel* ref = channel->Find(mRef);
     ChannelPlugin* data = nullptr;
@@ -610,7 +615,7 @@ Bool ChannelPlugin::Init(GeListNode* node)
   bc->SetFloat(PROCEDURAL_CHANNEL_PARAM_DEFAULTV_FLOAT, 0.0);
   bc->SetVector(PROCEDURAL_CHANNEL_PARAM_DEFAULTV_VECTOR, Vector(0, 0, 0));
   bc->SetMatrix(PROCEDURAL_CHANNEL_PARAM_DEFAULTV_MATRIX, Matrix());
-  bc->SetString(PROCEDURAL_CHANNEL_PARAM_DEFAULTV_STRING, "");
+  bc->SetString(PROCEDURAL_CHANNEL_PARAM_DEFAULTV_STRING, ""_s);
 
   bc->SetInt32(PROCEDURAL_CHANNEL_DISPLAY_MODE, PROCEDURAL_CHANNEL_DISPLAY_MODE_OFF);
 
@@ -817,9 +822,9 @@ Bool ChannelPlugin::GetDEnabling(
     case PROCEDURAL_CHANNEL_PARAM_FRAMECOUNT:
     case PROCEDURAL_CHANNEL_PARAM_COUNT:
       if (mLocked) return false;
-      return !mRef.Content() && mType != PROCEDURAL_CHANNEL_TYPE_NIL;
+      return IsEmpty(mRef) && mType != PROCEDURAL_CHANNEL_TYPE_NIL;
     case PROCEDURAL_CHANNEL_UI_GOTOREF:
-      return mRef.Content() && static_cast<Channel*>(node)->Find(mRef);
+      return !IsEmpty(mRef) && static_cast<Channel*>(node)->Find(mRef);
     default:
       break;
   }
@@ -872,7 +877,7 @@ Bool ChannelPlugin::GetDDescription(
 
       did = DescLevel(id + 1, DTYPE_COLOR, 0);
       if (!sid || did.IsPartOf(*sid, nullptr)) {
-        colBc.SetString(DESC_NAME, "");
+        colBc.SetString(DESC_NAME, ""_s);
         desc->SetParameter(did, colBc, parentId);
       }
     }
@@ -916,11 +921,11 @@ Bool ChannelPlugin::Message(GeListNode* node, Int32 type, void* pData)
     case MSG_DESCRIPTION_COMMAND: {
       const auto* data = reinterpret_cast<const DescriptionCommand*>(pData);
       if (!data) break;
-      if (data->id == PROCEDURAL_CHANNEL_UI_MANUALREINIT) {
+      if (GetDescriptionID(data) == PROCEDURAL_CHANNEL_UI_MANUALREINIT) {
         node->Message(MSG_PROCEDURAL_CHANNEL_REINIT);
         return true;
       }
-      else if (data->id == PROCEDURAL_CHANNEL_UI_GOTOREF) {
+      else if (GetDescriptionID(data) == PROCEDURAL_CHANNEL_UI_GOTOREF) {
         Channel* ref = reinterpret_cast<Channel*>(node)->Find(mRef);
         BaseDocument* doc = node->GetDocument();
         if (ref && doc) {
@@ -1054,8 +1059,12 @@ Bool nr::procedural::RegisterChannelPlugin()
   const Int32 flags = TAG_VISIBLE | TAG_MULTIPLE | TAG_EXPRESSION;
   const Int32 disklevel = 0;
   if (!RegisterTagPlugin(
-      PROCEDURAL_CHANNEL_ID, "Channel", flags,
-      ChannelPlugin::Alloc, "nrprocedural_channel", G.database,
+      PROCEDURAL_CHANNEL_ID,
+      "Channel"_s,
+      flags,
+      ChannelPlugin::Alloc,
+      "nrprocedural_channel"_s,
+      G.database,
       disklevel))
     return false;
   return true;

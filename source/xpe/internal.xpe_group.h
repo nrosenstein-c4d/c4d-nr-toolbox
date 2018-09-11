@@ -17,8 +17,6 @@
 #ifndef NR_XPE_GROUP_INTERNAL_H
 #define NR_XPE_GROUP_INTERNAL_H
 
-    #include "misc/legacy.h"
-
     enum {
         ID_GV_OPGROUP_TYPE_XPRESSOEFFECTOR = 1030791,
     };

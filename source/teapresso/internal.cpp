@@ -5,14 +5,15 @@
  * All rights reserved.
  */
 
+#include <c4d_apibridge.h>
 #include "internal.h"
 #include "TeaPresso.h"
 #include "res/c4d_symbols.h"
 
 #define Tvfolder 1030299
 
-TvLibrary* TvLibrary::Get(LONG offset) {
-    static TvLibrary* lib = NULL;
+TvLibrary* TvLibrary::Get(Int32 offset) {
+    static TvLibrary* lib = nullptr;
     CheckLib(TEAPRESSO_LIB_ID, offset, (C4DLibrary**) &lib);
     return lib;
 }
@@ -21,20 +22,20 @@ TvLibrary* TvLibrary::Get(LONG offset) {
 // ===== Private =============================================================
 // ===========================================================================
 
-static TvNode* TvCreatePluginsHierarchy_Recursion(const BaseContainer* bc, LONG depth=0) {
+static TvNode* TvCreatePluginsHierarchy_Recursion(const BaseContainer* bc, Int32 depth=0) {
     TvNode* root = TvNode::Alloc(Tvfolder);
-    if (!root) return NULL;
+    if (!root) return nullptr;
     root->SetName(bc->GetString(1));
 
-    LONG id;
-    for (LONG i=0; TRUE; i++) {
+    Int32 id;
+    for (Int32 i=0; true; i++) {
         id = bc->GetIndexId(i);
         if (id == NOTOK) break;
 
         const GeData* data = bc->GetDataPointer(id);
         if (!data) continue;
 
-        TvNode* node = NULL;
+        TvNode* node = nullptr;
         switch (data->GetType()) {
             case DA_CONTAINER:
                 node = TvCreatePluginsHierarchy_Recursion(data->GetContainer(), depth + 1);
@@ -57,16 +58,16 @@ class TvFolderData : public TvOperatorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TvFolderData); }
+    static NodeData* Alloc() { return NewObjClear(TvFolderData); }
 
     /* TvOperatorData Overrides */
 
     virtual BaseList2D* Execute(TvNode* host, TvNode* root, BaseList2D* context) {
-        return NULL;
+        return nullptr;
     }
 
     virtual Bool AcceptParent(TvNode* host, TvNode* other) {
-        return FALSE;
+        return false;
     }
 
 };
@@ -76,7 +77,7 @@ public:
 // ===== Library Implementation ==============================================
 // ===========================================================================
 
-static TvNode* gRootNode = NULL;
+static TvNode* gRootNode = nullptr;
 static TvLibrary lib;
 
 
@@ -91,19 +92,19 @@ static BaseContainer* iTvGetFolderContainer() {
 
 static TvNode* iTvCreatePluginsHierarchy(const BaseContainer* bc) {
     if (!bc) bc = iTvGetFolderContainer();
-    if (!bc) return NULL;
+    if (!bc) return nullptr;
     return TvCreatePluginsHierarchy_Recursion(bc);
 }
 
 static Bool iTvRegisterOperatorPlugin(
-            LONG id, const String& name, LONG info, DataAllocator* alloc,
-            const String& desc, BaseBitmap* icon, LONG disklevel,
-            LONG destFolder) {
-    if (desc.Content() && !RegisterDescription(id, desc)) return FALSE;
+            Int32 id, const String& name, Int32 info, DataAllocator* alloc,
+            const String& desc, BaseBitmap* icon, Int32 disklevel,
+            Int32 destFolder) {
+    if (!c4d_apibridge::IsEmpty(desc) && !RegisterDescription(id, desc)) return false;
 
     TVPLUGIN data;
     ClearMem(&data, sizeof(data));
-    FillNodePlugin(&data, info, alloc, icon, disklevel, NULL);
+    FillNodePlugin(&data, info, alloc, icon, disklevel); //, nullptr);
 
     data.Execute            = &TvOperatorData::Execute;
     data.AskCondition       = &TvOperatorData::AskCondition;
@@ -153,12 +154,12 @@ static Bool iTvRegisterOperatorPlugin(
 
 static Bool InitFolderContainer() {
     BaseContainer* bc = iTvGetFolderContainer();
-    if (!bc) return FALSE;
+    if (!bc) return false;
 
     // Register the folder icon.#
     /*
     RegisterIcon(TEAPRESSO_FOLDERICON, AutoBitmap("folder.png"));
-    String icon = "&i" + LongToString(TEAPRESSO_FOLDERICON);
+    String icon = "&i" + String::IntToString(TEAPRESSO_FOLDERICON);
     */
 
     BaseContainer general;
@@ -180,19 +181,19 @@ static Bool InitFolderContainer() {
     BaseContainer contexts;
     contexts.SetString(1, GeLoadString(FOLDER_CONTEXTS));
     bc->SetContainer(TEAPRESSO_FOLDER_CONTEXTS, contexts);
-    return TRUE;
+    return true;
 }
 
 static Bool RegisterTvFolder() {
     return TvRegisterOperatorPlugin(
             Tvfolder, "", PLUGINFLAG_HIDE | PLUGINFLAG_HIDEPLUGINMENU,
             TvFolderData::Alloc, "", AutoBitmap(RESOURCEIMAGE_TIMELINE_FOLDER1),
-            0, FALSE);
+            0, false);
 }
 
 
 Bool RegisterTvLibrary() {
-    if (!InitFolderContainer()) return FALSE;
+    if (!InitFolderContainer()) return false;
 
     ClearMem(&lib, sizeof(lib));
     lib.TvRegisterOperatorPlugin    = iTvRegisterOperatorPlugin;
@@ -207,17 +208,17 @@ Bool RegisterTvLibrary() {
 Bool InitTvLibrary() {
     if (!gRootNode) {
         gRootNode = TvNode::Alloc(Tvroot);
-        if (!gRootNode) return FALSE;
+        if (!gRootNode) return false;
         GeListHead* head = GeListHead::Alloc();
         if (!head) {
             TvNode::Free(gRootNode);
-            gRootNode = NULL;
-            return FALSE;
+            gRootNode = nullptr;
+            return false;
         }
         head->InsertFirst(gRootNode);
     }
-    if (!RegisterTvFolder()) return FALSE;
-    return TRUE;
+    if (!RegisterTvFolder()) return false;
+    return true;
 }
 
 void FreeTvLibrary() {
@@ -226,7 +227,7 @@ void FreeTvLibrary() {
         gRootNode->Remove();
         if (head) GeListHead::Free(head);
         TvNode::Free(gRootNode);
-        gRootNode = NULL;
+        gRootNode = nullptr;
     }
 }
 

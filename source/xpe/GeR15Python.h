@@ -17,7 +17,6 @@
 #ifndef NR_GER15PYTHON_H
 #define NR_GER15PYTHON_H
 
-    #include "misc/legacy.h"
     #include <lib_py.h>
 
     #if API_VERSION >= 15000
@@ -37,7 +36,7 @@
 
             Bool ImportModule(const String &mod_name); //no GIL
 
-            Bool HasCode() { return _code.Content(); } //no GIL
+            Bool HasCode() { return !IsEmpty(_code); } //no GIL
 
             Bool CallFunction(const String &name, GeData *ret=nullptr);//GIL
             Bool HasFunction(const String &name);//GIL
@@ -45,17 +44,17 @@
             Bool SetString(const String &name, const String &str);//GIL
             Bool SetMatrix(const String &name, const Matrix &m);//GIL
             Bool SetVector(const String &name, const Vector &v);//GIL
-            Bool SetReal(const String &name, Real v);//GIL
+            Bool SetFloat(const String &name, Float v);//GIL
             Bool SetNode(const String &name, const GeListNode *node);//GIL
             Bool SetContainer(const String &name, const BaseContainer &bc);//GIL
             Bool SetCustom(const String &name, const String &type, const GeData &v);//GIL
-            Bool SetLong(const String &name, LONG v);//GIL
+            Bool SetInt32(const String &name, Int32 v);//GIL
 
             Bool GetContainer(const String &name, BaseContainer &bc);//GIL
-            Bool GetLong(const String &name, LONG &v);//GIL
+            Bool GetInt32(const String &name, Int32 &v);//GIL
             Bool GetMatrix(const String &name, Matrix &m);//GIL
 
-            // Bool PluginMessage(LONG id, void* data);//GIL
+            // Bool PluginMessage(Int32 id, void* data);//GIL
 
         private:
 

@@ -18,13 +18,13 @@ namespace tags {
 
       public:
 
-        static NodeData* alloc() { return gNew(AxisAlignTag); }
+        static NodeData* alloc() { return NewObjClear(AxisAlignTag); }
 
       //
       // TagData ----------------------------------------------------------------------------------
       //
 
-        EXECUTIONRESULT Execute(BaseTag* tag, BaseDocument* doc, BaseObject* op, BaseThread* bt, LONG priority, EXECUTIONFLAGS flags);
+        EXECUTIONRESULT Execute(BaseTag* tag, BaseDocument* doc, BaseObject* op, BaseThread* bt, Int32 priority, EXECUTIONFLAGS flags);
 
         Bool AddToExecution(BaseTag* tag, PriorityList* list);
 
@@ -40,11 +40,11 @@ namespace tags {
 
     };
 
-    EXECUTIONRESULT AxisAlignTag::Execute(BaseTag* tag, BaseDocument* doc, BaseObject* op, BaseThread* bt, LONG priority, EXECUTIONFLAGS flags) {
-        if (not tag) return EXECUTIONRESULT_USERBREAK;
-        if (not op) return EXECUTIONRESULT_USERBREAK;
+    EXECUTIONRESULT AxisAlignTag::Execute(BaseTag* tag, BaseDocument* doc, BaseObject* op, BaseThread* bt, Int32 priority, EXECUTIONFLAGS flags) {
+        if (!tag) return EXECUTIONRESULT_USERBREAK;
+        if (!op) return EXECUTIONRESULT_USERBREAK;
         BaseContainer* bc = tag->GetDataInstance();
-        if (not bc or not bc->GetBool(PR1M_ALIGNMENT_ENABLED)) return EXECUTIONRESULT_OK;
+        if (!bc || !bc->GetBool(PR1M_ALIGNMENT_ENABLED)) return EXECUTIONRESULT_OK;
 
         // Retrieve parameters.
         Bool apply_on_cache = bc->GetBool(PR1M_ALIGNMENT_USECACHE);
@@ -64,7 +64,7 @@ namespace tags {
         }
 
         // Compute the bounding-box.
-        alignment::AABBHelper bb(!up_mg);
+        alignment::AABBHelper bb(c4d_apibridge::Invert(up_mg));
         bb.expand(op, include_hierarchy);
 
         // Compute the bounding-box size and mid-point.
@@ -74,16 +74,16 @@ namespace tags {
         Vector delta = up_mg.off - mp;
 
         // Compute the offset specified in the tags' parameters.
-        LONG mul = (bc->GetBool(PR1M_ALIGNMENT_INVERSEOFF) ? -1 : 1);
+        Int32 mul = (bc->GetBool(PR1M_ALIGNMENT_INVERSEOFF) ? -1 : 1);
         Vector offmul = bc->GetVector(PR1M_ALIGNMENT_OFFMUL);
         Vector offset = bc->GetVector(PR1M_ALIGNMENT_OFF) * mul * offmul;
 
         // Align the object to the axises.
         Vector info;
-        info.x = bc->GetReal(PR1M_ALIGNMENT_X);
-        info.y = bc->GetReal(PR1M_ALIGNMENT_Y);
-        info.z = bc->GetReal(PR1M_ALIGNMENT_Z);
-        ml.off = mp + (size ^ info) + offset + delta * 2 - up_mg.off * 2;
+        info.x = bc->GetFloat(PR1M_ALIGNMENT_X);
+        info.y = bc->GetFloat(PR1M_ALIGNMENT_Y);
+        info.z = bc->GetFloat(PR1M_ALIGNMENT_Z);
+        ml.off = mp + (size * info) + offset + delta * 2 - up_mg.off * 2;
         if (op) op->SetMl(ml);
 
         BaseObject* dest = (BaseObject*) bc->GetLink(PR1M_ALIGNMENT_INDICATOR, doc);
@@ -117,17 +117,17 @@ namespace tags {
     }
 
     Bool AxisAlignTag::Init(GeListNode* node) {
-        if (not node) return false;
+        if (!node) return false;
         BaseTag* tag = (BaseTag*) node;
         BaseContainer* bc = tag->GetDataInstance();
-        if (not bc) return false;
+        if (!bc) return false;
 
         bc->SetBool(PR1M_ALIGNMENT_ENABLED, true);
 
         // The default-values is always the center.
-        bc->SetReal(PR1M_ALIGNMENT_X, 0.0);
-        bc->SetReal(PR1M_ALIGNMENT_Y, 0.0);
-        bc->SetReal(PR1M_ALIGNMENT_Z, 0.0);
+        bc->SetFloat(PR1M_ALIGNMENT_X, 0.0);
+        bc->SetFloat(PR1M_ALIGNMENT_Y, 0.0);
+        bc->SetFloat(PR1M_ALIGNMENT_Z, 0.0);
 
         bc->SetVector(PR1M_ALIGNMENT_OFF, Vector(0));
         bc->SetVector(PR1M_ALIGNMENT_OFFMUL, Vector(1));
@@ -135,18 +135,18 @@ namespace tags {
 
         bc->SetBool(PR1M_ALIGNMENT_USECACHE, false);
         bc->SetBool(PR1M_ALIGNMENT_INCLUDEHIERARCHY, false);
-        bc->SetLink(PR1M_ALIGNMENT_INDICATOR, NULL);
+        bc->SetLink(PR1M_ALIGNMENT_INDICATOR, nullptr);
         return true;
     }
 
     Bool AxisAlignTag::GetDEnabling(GeListNode* node, const DescID& id, const GeData& t_data, DESCFLAGS_ENABLE flags, const BaseContainer* itemdesc) {
-        LONG rid = id[0].id;
+        Int32 rid = id[0].id;
         BaseContainer* bc = ((BaseTag*) node)->GetDataInstance();
         switch (rid) {
             // The priority parameter should only be editable when "Apply on Cache"
             // is not checked.
             case EXPRESSION_PRIORITY:
-                return (bc ? not bc->GetBool(PR1M_ALIGNMENT_USECACHE) : false);
+                return (bc ? !bc->GetBool(PR1M_ALIGNMENT_USECACHE) : false);
         }
 
         return super::GetDEnabling(node, id, t_data, flags, itemdesc);
@@ -159,7 +159,9 @@ namespace tags {
             GeLoadString(IDS_Tpr1m_axisalign),
             TAG_VISIBLE | TAG_EXPRESSION,
             AxisAlignTag::alloc,
-            "Tpr1m_axisalign", PR1MITIVE_ICON("Tpr1m_axisalign"), 0);
+            "Tpr1m_axisalign"_s,
+            PR1MITIVE_ICON("Tpr1m_axisalign"),
+            0);
     };
 
 } // end namespace tags

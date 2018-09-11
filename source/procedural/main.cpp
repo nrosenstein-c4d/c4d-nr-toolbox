@@ -8,13 +8,13 @@
 #include "procedural/Channel/Channel.h"
 #include "procedural/CsvReader/CsvReader.h"
 
-#include <nr/c4d/cleanup.h>
+#include <NiklasRosenstein/c4d/cleanup.hpp>
 
 using namespace nr::procedural;
 
 Bool RegisterProcedural()
 {
-  nr::c4d::cleanup([] {
+  niklasrosenstein::c4d::cleanup([] {
     nr::procedural::UnloadChannelPlugin();
     nr::procedural::UnloadCsvReaderPlugin();
   });

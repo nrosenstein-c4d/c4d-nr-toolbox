@@ -4,23 +4,28 @@
 /// \file procedural/CsvReader/CsvReader.cpp
 /// \lastmodified 2015/07/10
 
+#include <c4d_apibridge.h>
+#include "fs.hpp"
 #include "CsvReader.h"
 #include "DescriptionHelper.h"
 #include "res/description/nrprocedural_csvreader.h"
 #include "misc/print.h"
 
 #include <nr/procedural/channel.h>
-#include <nr/parse/csv.h>
-#include <nr/c4d/description.h>
-#include <nr/c4d/util.h>
-#include <nr/c4d/raii.h>
-#include <nr/c4d/string.h>
-#include <nr/c4d/storage.h>
-#include <nr/math/math.h>
-#include <nr/os/fs.h>
+#include <NiklasRosenstein/csv.hpp>
+#include <NiklasRosenstein/c4d/description.hpp>
+#include <NiklasRosenstein/c4d/utils.hpp>
+#include <NiklasRosenstein/c4d/raii.hpp>
+#include <NiklasRosenstein/c4d/string.hpp>
+#include <NiklasRosenstein/c4d/storage.hpp>
+#include <NiklasRosenstein/math.hpp>
 
+namespace nr { using namespace niklasrosenstein; }
+
+using c4d_apibridge::IsEmpty;
+using c4d_apibridge::GetDescriptionID;
 using nr::c4d::tostr;
-using nr::math::clamp;
+using nr::clamp;
 using nr::procedural::Channel;
 
 /// **************************************************************************
@@ -51,7 +56,7 @@ namespace nr {
 class csv_table
 {
 public:
-  using csv_row = nr::parse::csv_row;
+  using csv_row = nr::csv_row;
 
   /* Default constructor. Sets @delim to {','} and @quote to {'"'}. */
   csv_table() : info_() { this->clear(); }
@@ -106,7 +111,7 @@ public:
 
     // Check if we need to reload the file.
     if (!force_reload && file == this->file_) {
-      uint64_t ftime = nr::os::getmtime(file);
+      uint64_t ftime = fs::getmtime(file);
       if (ftime == this->ftime_) {
         return true;
       }
@@ -114,7 +119,7 @@ public:
     }
     else {
       this->file_ = file;
-      this->ftime_ = nr::os::getmtime(file);
+      this->ftime_ = fs::getmtime(file);
     }
 
     // Flush and reload the CSV data.
@@ -132,7 +137,7 @@ public:
       this->rows_.push_back(row);
       return true;
     };
-    nr::parse::csv_parse(fp, callback, this->info_);
+    nr::csv_parse(fp, callback, this->info_);
 
     if (reloaded) *reloaded = true;
     this->loaded_ = true;
@@ -146,7 +151,7 @@ private:
   uint64_t ftime_;
   size_t rowmin_, rowmax_;
   std::vector<csv_row> rows_;
-  nr::parse::csv_info info_;
+  nr::csv_info info_;
 };
 
 /// **************************************************************************
@@ -219,7 +224,7 @@ private:
 /// **************************************************************************
 Bool CsvEntry::Init(BaseContainer* bc) const
 {
-  bc->SetString(mBaseId + PROCEDURAL_CSVREADER_ENTRY_CHANNELNAME, "");
+  bc->SetString(mBaseId + PROCEDURAL_CSVREADER_ENTRY_CHANNELNAME, ""_s);
   bc->SetInt32(mBaseId + PROCEDURAL_CSVREADER_ENTRY_LASTDIRTYCOUNT, 0);
   for (Int32 index = 0; index < 12; ++index)
     bc->SetInt32(mBaseId + PROCEDURAL_CSVREADER_ENTRY_COLUMNSTART + index, 0);
@@ -250,7 +255,7 @@ Bool CsvEntry::FillDescription(
   cid = DescLevel(channelNameId, DTYPE_STRING, 0);
   if (dh.CheckSingleID(cid)) {
     bc = GetCustomDataTypeDefault(DTYPE_STRING);
-    bc.SetString(DESC_NAME, "Target Channel");
+    bc.SetString(DESC_NAME, "Target Channel"_s);
     bc.SetBool(DESC_SCALEH, true);
     bc.SetInt32(DESC_ANIMATE, DESC_ANIMATE_OFF);
     desc->SetParameter(cid, bc, groupId);
@@ -395,36 +400,37 @@ void CsvEntry::Update(BaseTag* op, const csv_table& table) const
       break;
     }
     case PROCEDURAL_CHANNEL_TYPE_MATRIX: {
+      using namespace c4d_apibridge::M;
       Matrix value;
       for (Int32 row = startIndex; row < table.row_count(); ++row) {
         for (Int32 sub = 0; sub < itemLength; ++sub) {
           column = columns[sub * 3 + 0];
-          value.off.x = converter.Convert<Float>(&nr::c4d::to_float, row, column);
+          Moff(value).x = converter.Convert<Float>(&nr::c4d::to_float, row, column);
           column = columns[sub * 3 + 1];
-          value.off.y = converter.Convert<Float>(&nr::c4d::to_float, row, column);
+          Moff(value).y = converter.Convert<Float>(&nr::c4d::to_float, row, column);
           column = columns[sub * 3 + 2];
-          value.off.z = converter.Convert<Float>(&nr::c4d::to_float, row, column);
+          Moff(value).z = converter.Convert<Float>(&nr::c4d::to_float, row, column);
 
           column = columns[sub * 3 + 3];
-          value.v1.x = converter.Convert<Float>(&nr::c4d::to_float, row, column);
+          Mv1(value).x = converter.Convert<Float>(&nr::c4d::to_float, row, column);
           column = columns[sub * 3 + 4];
-          value.v1.y = converter.Convert<Float>(&nr::c4d::to_float, row, column);
+          Mv1(value).y = converter.Convert<Float>(&nr::c4d::to_float, row, column);
           column = columns[sub * 3 + 5];
-          value.v1.z = converter.Convert<Float>(&nr::c4d::to_float, row, column);
+          Mv1(value).z = converter.Convert<Float>(&nr::c4d::to_float, row, column);
 
           column = columns[sub * 3 + 6];
-          value.v2.x = converter.Convert<Float>(&nr::c4d::to_float, row, column);
+          Mv2(value).x = converter.Convert<Float>(&nr::c4d::to_float, row, column);
           column = columns[sub * 3 + 7];
-          value.v2.y = converter.Convert<Float>(&nr::c4d::to_float, row, column);
+          Mv2(value).y = converter.Convert<Float>(&nr::c4d::to_float, row, column);
           column = columns[sub * 3 + 8];
-          value.v2.z = converter.Convert<Float>(&nr::c4d::to_float, row, column);
+          Mv2(value).z = converter.Convert<Float>(&nr::c4d::to_float, row, column);
 
           column = columns[sub * 3 + 9];
-          value.v3.x = converter.Convert<Float>(&nr::c4d::to_float, row, column);
+          Mv3(value).x = converter.Convert<Float>(&nr::c4d::to_float, row, column);
           column = columns[sub * 3 + 10];
-          value.v3.y = converter.Convert<Float>(&nr::c4d::to_float, row, column);
+          Mv3(value).y = converter.Convert<Float>(&nr::c4d::to_float, row, column);
           column = columns[sub * 3 + 11];
-          value.v3.z = converter.Convert<Float>(&nr::c4d::to_float, row, column);
+          Mv3(value).z = converter.Convert<Float>(&nr::c4d::to_float, row, column);
 
           channel->SetElement(value, row - startIndex, sub);
         }
@@ -529,7 +535,7 @@ void CsvReaderPlugin::UpdateTable(BaseTag* op, Bool forceRefresh)
 cleanup:
   m_table.clear();
   m_cycleContainer.FlushAll();
-  m_cycleContainer.SetString(0, "---");
+  m_cycleContainer.SetString(0, "---"_s);
   op->SetDirty(DIRTYFLAGS_DESCRIPTION);
   return;
 
@@ -543,13 +549,13 @@ main:
 
   const Bool hasHeader = bc->GetBool(PROCEDURAL_CSVREADER_HASHEADER);
   const Filename sfn = bc->GetFilename(PROCEDURAL_CSVREADER_FILENAME);
-  if (!sfn.Content()) {
+  if (IsEmpty(sfn)) {
     this->SetStatus(op, "Not loaded.");
     goto cleanup;
   }
 
   const Filename dfn = nr::c4d::find_resource(sfn, doc);
-  if (!dfn.Content()) {
+  if (IsEmpty(dfn)) {
     this->SetStatus(op, "File could not be found.");
     goto cleanup;
   }
@@ -579,7 +585,7 @@ main:
 
   if (rebuildContainer) {
     m_cycleContainer.FlushAll();
-    m_cycleContainer.SetString(0, "---");
+    m_cycleContainer.SetString(0, "---"_s);
     if (success) {
       if (m_table.row_count() > 0) {
         csv_table::csv_row const& header = m_table.row(0);
@@ -633,7 +639,7 @@ Bool CsvReaderPlugin::Init(GeListNode* node)
 
   // op->SetDeformMode(true);
   data->SetBool(PROCEDURAL_CSVREADER_ENABLED, true);
-  data->SetString(PROCEDURAL_CSVREADER_STATUS, "Not Loaded.");
+  data->SetString(PROCEDURAL_CSVREADER_STATUS, "Not Loaded."_s);
   data->SetFilename(PROCEDURAL_CSVREADER_FILENAME, Filename());
   data->SetBool(PROCEDURAL_CSVREADER_HASHEADER, false);
   data->SetInt32(PROCEDURAL_CSVREADER_ENTRYCOUNT, 0);
@@ -642,7 +648,7 @@ Bool CsvReaderPlugin::Init(GeListNode* node)
   data->SetBool(PROCEDURAL_CSVREADER_ANIMATED, false);
   data->SetBool(PROCEDURAL_CSVREADER_ANIMCACHED, false);
   data->SetTime(PROCEDURAL_CSVREADER_ANIMOFFSET, BaseTime());
-  data->SetString(PROCEDURAL_CSVREADER_ANIMSTATUS, "42 frames found.");
+  data->SetString(PROCEDURAL_CSVREADER_ANIMSTATUS, "42 frames found."_s);
   return true;
 }
 
@@ -721,7 +727,7 @@ Bool CsvReaderPlugin::Message(GeListNode* node, Int32 msg, void* pData)
       BaseContainer* bc = op->GetDataInstance();
       const auto* data = reinterpret_cast<const DescriptionCommand*>(pData);
       if (!bc || !data) return false;
-      const Int32 widgetId = data->id[-1].id;
+      const Int32 widgetId = GetDescriptionID(data)[-1].id;
 
       if (widgetId == PROCEDURAL_CSVREADER_ADDENTRY) {
         const Int32 count = this->GetEntryCount(bc);
@@ -813,8 +819,13 @@ Bool nr::procedural::RegisterCsvReaderPlugin()
   Int32 const flags = TAG_VISIBLE | TAG_EXPRESSION;
   Int32 const disklevel = 0;
   if (!RegisterTagPlugin(
-      PROCEDURAL_CSVREADER_ID, "CSV Reader", flags, CsvReaderPlugin::Alloc,
-      "nrprocedural_csvreader", icon, disklevel))
+      PROCEDURAL_CSVREADER_ID,
+      "CSV Reader"_s,
+      flags,
+      CsvReaderPlugin::Alloc,
+      "nrprocedural_csvreader"_s,
+      icon,
+      disklevel))
     return false;
   return true;
 }

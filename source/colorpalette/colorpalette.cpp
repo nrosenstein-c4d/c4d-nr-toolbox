@@ -2,11 +2,11 @@
 // All rights reserved.
 
 #include <c4d.h>
-#include <nr/macros.h>
-#include <nr/c4d/gui.h>
-#include <nr/c4d/cleanup.h>
-#include <nr/c4d/customgui.h>
-#include <nr/c4d/iterators.h>
+#include <NiklasRosenstein/macros.hpp>
+#include <NiklasRosenstein/c4d/gui.hpp>
+#include <NiklasRosenstein/c4d/cleanup.hpp>
+#include <NiklasRosenstein/c4d/customgui.hpp>
+#include <NiklasRosenstein/c4d/iterators.hpp>
 #include "customgui_nrcolorpalette.h"
 #include "misc/print.h"
 
@@ -14,6 +14,8 @@ using nr::SwatchBase;
 using nr::Swatch;
 using nr::SwatchFolder;
 using nr::ColorPaletteData;
+
+namespace nr { using namespace niklasrosenstein; }
 
 static Vector g_last_color;
 static Float g_last_brightness = 1.0;
@@ -478,11 +480,11 @@ public: // GeDialog Overrides
 
   Bool CreateLayout() override
   {
-    GroupBegin(GADGET_MAINGROUP, BFH_SCALEFIT | BFV_SCALEFIT, 1, 0, "", 0); {
+    GroupBegin(GADGET_MAINGROUP, BFH_SCALEFIT | BFV_SCALEFIT, 1, 0, ""_s, 0); {
       GroupSpace(1, 1);
       GroupBorderSpace(2, 2, 2, 2);
-      GroupBegin(0, BFH_SCALEFIT | BFV_SCALEFIT, 2, 0, "", 0); {
-        GroupBegin(0, BFH_SCALEFIT | BFV_SCALEFIT, 1, 0, "", 0); {
+      GroupBegin(0, BFH_SCALEFIT | BFV_SCALEFIT, 2, 0, ""_s, 0); {
+        GroupBegin(0, BFH_SCALEFIT | BFV_SCALEFIT, 1, 0, ""_s, 0); {
           GroupBorderSpace(2, 2, 2, 2);
           GroupBorderNoTitle(BORDER_GROUP_IN);
           AddUserArea(GADGET_USERAREA, BFH_SCALEFIT | BFV_SCALEFIT);
@@ -492,8 +494,8 @@ public: // GeDialog Overrides
         if (g_last_layout) settings.SetContainer(CUSTOMGUI_SAVEDLAYOUTDATA, *g_last_layout);
         AddColorChooser(GADGET_COLORCHOOSER, BFH_SCALEFIT | BFV_SCALEFIT, 0, 0, 0, settings);
       } GroupEnd();
-      GroupBegin(0, BFH_SCALEFIT, 0, 1, "", 0); {
-        AddStaticText(GADGET_SWATCH_NAME, BFH_SCALEFIT, 0, 0, "-", BORDER_NONE);
+      GroupBegin(0, BFH_SCALEFIT, 0, 1, ""_s, 0); {
+        AddStaticText(GADGET_SWATCH_NAME, BFH_SCALEFIT, 0, 0, "-"_s, BORDER_NONE);
         this->bmp_show_chooser = nr::c4d::add_bitmap_button(
           this, GADGET_SHOWCOLORCHOOSER, RESOURCEIMAGE_EYEACTIVE, RESOURCEIMAGE_EYEINACTIVE);
       } GroupEnd();
@@ -593,7 +595,7 @@ Bool ColorPaletteData::Read(HyperFile* hf, Int32 disklevel)
   this->folders.Flush();
   Int32 count;
   if (!hf->ReadInt32(&count)) return false;
-  if (!this->folders.EnsureCapacity(count)) return false;
+  iferr (this->folders.EnsureCapacity(count)) return false;
   for (Int32 i = 0; i < count; ++i) {
     SwatchFolder folder;
     if (!folder.Read(hf, disklevel)) return false;
@@ -675,9 +677,9 @@ Bool ColorPaletteDataClass::SetDParameter(
 Bool RegisterColorPalette()
 {
   static Int32 const disklevel = 0;
-  if (!nr::c4d::register_customgui_plugin("Color Palette", 0, NewObj(ColorPaletteCustomGuiData)))
+  if (!nr::c4d::register_customgui_plugin("Color Palette", 0, NewObjClear(ColorPaletteCustomGuiData)))
     return false;
-  if (!RegisterCustomDataTypePlugin("Color Palette", ColorPaletteDataClass::Flags(), NewObjClear(ColorPaletteDataClass), disklevel))
+  if (!RegisterCustomDataTypePlugin("Color Palette"_s, ColorPaletteDataClass::Flags(), NewObjClear(ColorPaletteDataClass), disklevel))
     return false;
 
   return true;

@@ -3,7 +3,8 @@
 
 #pragma once
 #include <c4d.h>
-#include <nr/c4d/functional.h>
+#include <c4d_apibridge.h>
+#include <NiklasRosenstein/c4d/functional.hpp>
 #include "print.h"
 
 namespace raii {

@@ -8,7 +8,7 @@
 #ifndef TV_EXTENSIONS_H
 #define TV_EXTENSIONS_H
 
-    #include "misc/legacy.h"
+    #include <c4d.h>
 
     Bool RegisterTvExtensions();
 

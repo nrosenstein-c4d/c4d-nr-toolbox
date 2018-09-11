@@ -17,7 +17,7 @@
 #ifndef NR_LIB_CSV_H
 #define NR_LIB_CSV_H
 
-    #include "misc/legacy.h"
+    #include <c4d_apibridge.h>
 
     #if API_VERSION < 15000
         /* From R15.020 maxon/utilities/apibasemath.h */
@@ -43,7 +43,7 @@
          * Retrieve a value by index. If the index is out of range, the default
          * value is returned.
          */
-        const T& GetIndex(LONG index, const T& default_) const {
+        const T& GetIndex(Int32 index, const T& default_) const {
             if (index < 0 && index >= super::_cnt) return default_;
             else return super::operator [] (index);
         }
@@ -52,7 +52,7 @@
          * Retrieve a value by index. If the index is out of range, the default
          * value is returned.
          */
-        T& GetIndex(LONG index, T& default_) {
+        T& GetIndex(Int32 index, T& default_) {
             if (index < 0 && index >= super::_cnt) return default_;
             else return super::operator [] (index);
         }
@@ -80,20 +80,20 @@
 
     public:
 
-        CSVReader(CHAR delimiter=',', Bool stripWhitespace=TRUE);
+        CSVReader(Char delimiter=',', Bool stripWhitespace=true);
         virtual ~CSVReader();
 
         /**
-         * Open a file with the specified filename. Returns TRUE if the file
-         * could be opened, FALSE if not. Do not perform any reading operations
+         * Open a file with the specified filename. Returns true if the file
+         * could be opened, false if not. Do not perform any reading operations
          * if opening a file failed.
          */
         Bool Open(Filename fl) {
             if (m_isOpened) {
-                return FALSE; // already a file opened.
+                return false; // already a file opened.
             }
             m_isOpened = m_file->Open(fl, FILEOPEN_READ);
-            m_atEnd = FALSE;
+            m_atEnd = false;
             m_line = 0;
 
             switch (GetFileError()) {
@@ -121,15 +121,15 @@
          */
         Bool Close() {
             if (!m_isOpened) {
-                return TRUE;
+                return true;
             }
-            m_isOpened = FALSE;
-            m_atEnd = TRUE;
+            m_isOpened = false;
+            m_atEnd = true;
             return m_file->Close();
         }
 
         /**
-         * Return TRUE if the reader has opened a file.
+         * Return true if the reader has opened a file.
          */
         Bool IsOpened() {
             return m_isOpened;
@@ -137,14 +137,14 @@
 
         /**
          * Read a line from the opened file and append the cell values to the
-         * `destRow`. Returns TRUE on success, FALSE if a fatal error occured.
-         * Also returns FALSE if the end of the file has been reached, but
+         * `destRow`. Returns true on success, false if a fatal error occured.
+         * Also returns false if the end of the file has been reached, but
          * better use `AtEnd()` instead.
          */
         Bool GetRow(CSVRow& destRow);
 
         /**
-         * Returns TRUE if the end of the input file has been reached.
+         * Returns true if the end of the input file has been reached.
          */
         Bool AtEnd() const {
             return m_atEnd;
@@ -153,7 +153,7 @@
         /**
          * Return the current line-number in the input file.
          */
-        LONG GetLineNumber() const {
+        Int32 GetLineNumber() const {
             return m_line;
         }
 
@@ -170,13 +170,13 @@
 
     private:
 
-        String CharArrayToString(const c4d_misc::BaseArray<CHAR>& arr);
+        String CharArrayToString(const maxon::BaseArray<Char>& arr);
 
         Bool m_isOpened;
         Bool m_atEnd;
-        LONG m_line;
+        Int32 m_line;
         AutoAlloc<BaseFile> m_file;
-        CHAR m_delimiter;
+        Char m_delimiter;
         Bool m_stripWhitespace;
         STRINGENCODING m_encoding;
         CSVError m_error;
@@ -199,8 +199,8 @@
         /**
          * Initialize the BaseCSVTable.
          */
-        BaseCSVTable(CHAR delimiter=',', Bool hasHeader=FALSE)
-        : m_delimiter(delimiter), m_hasHeader(hasHeader), m_loaded(FALSE),
+        BaseCSVTable(Char delimiter=',', Bool hasHeader=false)
+        : m_delimiter(delimiter), m_hasHeader(hasHeader), m_loaded(false),
           m_error(CSVError_None), m_fileError(FILEERROR_NONE) { }
 
         /**
@@ -225,7 +225,7 @@
          * `LoadDataStart()` and `LoadDataEnd()` WILL BE CALLED if the file
          * does not exist.
          */
-        Bool Init(const Filename& filename, Bool forceUpdate=FALSE, Bool* didReload=NULL);
+        Bool Init(const Filename& filename, Bool forceUpdate=false, Bool* didReload=nullptr);
 
         /**
          * Retrieves the type of the error which occured at the last call
@@ -254,12 +254,12 @@
         /**
          * Set the delimiter to use in the CSV Reader.
          */
-        void SetDelimiter(CHAR delimiter) { m_delimiter = delimiter; }
+        void SetDelimiter(Char delimiter) { m_delimiter = delimiter; }
 
         /**
          * Return the delimiter that will be used in the CSV Reader.
          */
-        CHAR GetDelimiter() const { return m_delimiter; }
+        Char GetDelimiter() const { return m_delimiter; }
 
         /**
          * Returns the header of the CSV Table. This will return a valid
@@ -322,17 +322,17 @@
         /**
          * Return the number of rows stored.
          */
-        virtual LONG GetRowCount() const = 0;
+        virtual Int32 GetRowCount() const = 0;
 
         /**
          * Return the number of columns. This is the maximum number of
          * cells in all rows.
          */
-        virtual LONG GetColumnCount() const = 0;
+        virtual Int32 GetColumnCount() const = 0;
 
     private:
 
-        CHAR m_delimiter;
+        Char m_delimiter;
         Bool m_hasHeader;
 
         Bool m_loaded;
@@ -357,9 +357,9 @@
 
     public:
 
-        typedef c4d_misc::BaseArray<T> Array;
+        typedef maxon::BaseArray<T> Array;
 
-        TypedCSVTable(CHAR delimiter=',', Bool hasHeader=FALSE)
+        TypedCSVTable(Char delimiter=',', Bool hasHeader=false)
         : super(delimiter, hasHeader), m_columnCount(0) { }
 
         virtual ~TypedCSVTable() { }
@@ -367,7 +367,7 @@
         /**
          * Obtain a stored row from the table. Does not perfom in-bound checks!
          */
-        virtual const Array& GetRow(LONG index) const { return m_rows[index]; }
+        virtual const Array& GetRow(Int32 index) const { return m_rows[index]; }
 
         /**
          * Callback method when a converted row was stored.
@@ -390,32 +390,30 @@
         }
 
         virtual CSVError StoreRow(const CSVRow& row) {
-            LONG count = row.GetCount();
+            Int32 count = row.GetCount();
             // Defined in c4d_misc/utilities/apibasemath.h
-            m_columnCount = Max<LONG>(m_columnCount, count);
+            m_columnCount = Max<Int32>(m_columnCount, count);
 
             Array newRow;
-            if (!newRow.Resize(count)) {
+            iferr (newRow.Resize(count))
                 return CSVError_Memory;
-            }
-            for (LONG i=0; i < count; i++) {
+            for (Int32 i=0; i < count; i++) {
                 newRow[i] = Converter(row[i]);
             }
-
-            Array* ptr = m_rows.Append(newRow);
-            if (!ptr) return CSVError_Memory;
-            RowStored(*ptr);
+            iferr (Array& rowRef = m_rows.Append(std::move(newRow)))
+                return CSVError_Memory;
+            RowStored(rowRef);
             return CSVError_None;
         }
 
-        virtual LONG GetRowCount() const { return m_rows.GetCount(); }
+        virtual Int32 GetRowCount() const { return m_rows.GetCount(); }
 
-        virtual LONG GetColumnCount() const { return m_columnCount; }
+        virtual Int32 GetColumnCount() const { return m_columnCount; }
 
     private:
 
-        LONG m_columnCount;
-        c4d_misc::BlockArray<Array> m_rows;
+        Int32 m_columnCount;
+        maxon::BaseArray<Array> m_rows;
 
     };
 
@@ -430,27 +428,27 @@
      */
     template <typename DestType> void ConvertCSVRow(
             const CSVRow& row,
-            c4d_misc::BaseArray<DestType>& dest,
+            maxon::BaseArray<DestType>& dest,
             DestType (*converter)(const String&)) {
         // Construct a new array based on the template type.
         dest.Resize(row.GetCount());
 
         // Iterate over each element in the array.
-        for (LONG i=0; i < row.GetCount(); i++) {
+        for (Int32 i=0; i < row.GetCount(); i++) {
             DestType v = converter(row[i]);
             dest[i] = v;
         }
     }
 
     /**
-     * Convert a String to a LONG. Returns zero on failure.
+     * Convert a String to a Int32. Returns zero on failure.
      */
-    LONG StringToLong(const String& str);
+    Int32 StringToLong(const String& str);
 
     /**
      * Convert a string to a decimal number. Returns zero on failure.
      */
-    Real StringToReal(const String& str);
+    Float StringToReal(const String& str);
 
     /**
      * Returns a copy of the string.
@@ -460,8 +458,8 @@
     }
 
     typedef TypedCSVTable<String, StringToString> StringCSVTable;
-    typedef TypedCSVTable<LONG, StringToLong> Int32CSVTable;
-    typedef TypedCSVTable<Real, StringToReal> FloatCSVTable;
+    typedef TypedCSVTable<Int32, StringToLong> Int32CSVTable;
+    typedef TypedCSVTable<Float, StringToReal> FloatCSVTable;
 
     /**
      * This float CSV Table subclass implements retrieving minimum and
@@ -474,7 +472,7 @@
 
     public:
 
-        MMFloatCSVTable(CHAR delimiter=',', Bool hasHeader=FALSE)
+        MMFloatCSVTable(Char delimiter=',', Bool hasHeader=false)
         : super(delimiter, hasHeader) { }
 
         /**
@@ -495,15 +493,15 @@
          */
         const BaseContainer& GetHeaderContainer() const { return m_headBc; }
 
-        //| TypedCSVTable<Real> Overrides
+        //| TypedCSVTable<Float> Overrides
 
         virtual void RowStored(const Array& row) {
-            LONG count = row.GetCount();
-            m_minv.Resize(count);
-            m_maxv.Resize(count);
-            m_mmSet.Resize(count);
+            Int32 count = row.GetCount();
+            (void) m_minv.Resize(count);
+            (void) m_maxv.Resize(count);
+            (void) m_mmSet.Resize(count);
 
-            for (LONG i=0; i < count; i++) {
+            for (Int32 i=0; i < count; i++) {
                 Bool& isSet = m_mmSet[i];
                 if (!isSet || row[i] < m_minv[i]) {
                     m_minv[i] = row[i];
@@ -511,7 +509,7 @@
                 if (!isSet || row[i] > m_maxv[i]) {
                     m_maxv[i] = row[i];
                 }
-                isSet = TRUE;
+                isSet = true;
             }
         }
 
@@ -523,7 +521,7 @@
             m_headBc.FlushAll();
             super::FlushData();
 
-            GePrint("Reloading CSV File..");
+            GePrint("Reloading CSV File.."_s);
         }
 
         virtual void LoadDataEnd(CSVError error) {
@@ -531,14 +529,14 @@
             super::LoadDataEnd(error);
             if (error != CSVError_None) return;
 
-            m_headBc.SetString(-1, "-");
+            m_headBc.SetString(-1, "-"_s);
             const CSVRow& header = GetHeader();
-            for (LONG i=0; i < GetColumnCount(); i++) {
+            for (Int32 i=0; i < GetColumnCount(); i++) {
                 if (i < header.GetCount()) {
                     m_headBc.SetString(i, header[i]);
                 }
                 else {
-                    m_headBc.SetString(i, LongToString(i));
+                    m_headBc.SetString(i, String::IntToString(i));
                 }
             }
         }
@@ -546,7 +544,7 @@
     private:
 
         // Used temporarily in StoreRow(), reset in LoadDataEnd();
-        c4d_misc::BaseArray<Bool> m_mmSet;
+        maxon::BaseArray<Bool> m_mmSet;
 
         super::Array m_minv;
         super::Array m_maxv;

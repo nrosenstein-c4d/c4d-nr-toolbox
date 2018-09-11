@@ -5,10 +5,10 @@
 PythonBase* AllocPythonBase(PythonLibrary* lib) {
     GePythonGIL gil;
     PythonBase* base = lib->Alloc();
-    if (!base) return NULL;
+    if (!base) return nullptr;
     if (!lib->Initiated(base)) {
         lib->Free(base);
-        return NULL;
+        return nullptr;
     }
     return base;
 }
@@ -28,40 +28,40 @@ class TvPythonData : public TvOperatorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(TvPythonData); }
+    static NodeData* Alloc() { return NewObjClear(TvPythonData); }
 
-    TvPythonData() : pyExecute(NULL), base(AllocPythonBase(&lib)) {}
+    TvPythonData() : pyExecute(nullptr), base(AllocPythonBase(&lib)) {}
 
     ~TvPythonData() {
         FreePython();
         if (base) FreePythonBase(&lib, base);
-        base = NULL;
+        base = nullptr;
     }
 
     void FreePython() {
         GePythonGIL gil;
         if (pyExecute) lib.DecRef(pyExecute);
-        pyExecute = NULL;
+        pyExecute = nullptr;
     }
 
     /* TvOperatorData Overrides * /
 
     virtual Bool Execute(TvNode* host, TvNode* root, BaseList2D* context) {
         GePrint(__FUNCTION__);
-        if (!host) return FALSE;
+        if (!host) return false;
         if (!base) {
             GePrint("No base");
-            return FALSE;
+            return false;
         }
         if (!pyExecute) {
             GePrint("No pyExecute");
-            return FALSE;
+            return false;
         }
         GePythonGIL gil;
-        lib.SetGeListNode(base, "host", host, TRUE);
-        lib.SetGeListNode(base, "context", context, TRUE);
+        lib.SetGeListNode(base, "host", host, true);
+        lib.SetGeListNode(base, "context", context, true);
         _PyObject* re = lib.CallFunction(pyExecute);
-        return TRUE;
+        return true;
     }
 
     /*
@@ -74,12 +74,12 @@ public:
 
     /* NodeData Overrides * /
 
-    virtual Bool Message(GeListNode* gNode, LONG type, void* pData);
+    virtual Bool Message(GeListNode* gNode, Int32 type, void* pData);
 
 };
 
-Bool TvPythonData::Message(GeListNode* gNode, LONG type, void* pData) {
-    if (!gNode) return FALSE;
+Bool TvPythonData::Message(GeListNode* gNode, Int32 type, void* pData) {
+    if (!gNode) return false;
     TvNode* tNode = (TvNode*) gNode;
 
     switch (type) {
@@ -87,7 +87,7 @@ Bool TvPythonData::Message(GeListNode* gNode, LONG type, void* pData) {
             DescriptionCommand* data = (DescriptionCommand*) pData;
             if (data->id == TVPYTHON_COMPILE) {
                 FreePython();
-                if (!base) return TRUE;
+                if (!base) return true;
                 GePrint("Evaluating Python Source.");
 
                 BaseContainer* bc = ((TvNode*) gNode)->GetDataInstance();
@@ -109,7 +109,7 @@ Bool TvPythonData::Message(GeListNode* gNode, LONG type, void* pData) {
                     }
 
                 }
-                return TRUE;
+                return true;
             }
             break;
         }

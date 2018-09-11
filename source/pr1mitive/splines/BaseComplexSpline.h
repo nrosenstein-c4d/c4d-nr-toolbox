@@ -17,17 +17,17 @@ namespace splines {
     typedef struct ComplexSplineInfo {
 
         ComplexSplineInfo()
-        : target(null), seg(-1), min(0), max(0), type(SPLINETYPE_BSPLINE), closed(true),
-        optimize(false), optimize_treshold(0.01), delta(0.0), data(null) {
+        : target(nullptr), seg(-1), min(0), max(0), type(SPLINETYPE_BSPLINE), closed(true),
+        optimize(false), optimize_treshold(0.01), delta(0.0), data(nullptr) {
         };
 
-        //  The target-object. This is null on BaseComplexSpline::init_calculation().
+        //  The target-object. This is nullptr on BaseComplexSpline::init_calculation().
         SplineObject* target;
 
         // The number of u-segments and the defintion-range of the u-parameter.
-        LONG seg;
-        Real min;
-        Real max;
+        Int32 seg;
+        Float min;
+        Float max;
 
         // The spline-type to allocated. Default is SPLINETYPE_BSPLINE.
         SPLINETYPE type;
@@ -37,10 +37,10 @@ namespace splines {
 
         // True if points should be optimizied, False if not. Default is False.
         Bool optimize;
-        Real optimize_treshold;
+        Float optimize_treshold;
 
         // The space between each segment. Will be filled after init_calculation().
-        Real delta;
+        Float delta;
 
         // Subclasses of ComplexContour can write a pointer to additional information
         // that is necessary to compute the meshes' vertices, etc. It has to be
@@ -78,7 +78,7 @@ namespace splines {
 
         // This method is called to obtain a point in the spline for the passed
         // u-parameter.
-        virtual Vector calc_point(BaseObject* op, ComplexSplineInfo* info, Real u);
+        virtual Vector calc_point(BaseObject* op, ComplexSplineInfo* info, Float u);
 
       //
       // ObjectData -------------------------------------------------------------------------------
@@ -86,7 +86,7 @@ namespace splines {
 
         virtual Bool Init(GeListNode* node);
 
-        virtual SplineObject* GetContour(BaseObject* op, BaseDocument* doc, Real lod, BaseThread* bt);
+        virtual SplineObject* GetContour(BaseObject* op, BaseDocument* doc, Float lod, BaseThread* bt);
 
         virtual Bool GetDEnabling(GeListNode* node, const DescID& id, const GeData& t_data, DESCFLAGS_ENABLE flags, const BaseContainer* itemdesc);
 

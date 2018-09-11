@@ -20,7 +20,7 @@ namespace shapes {
 
       public:
 
-        static NodeData* alloc() { return gNew(ExpressionShape); }
+        static NodeData* alloc() { return NewObjClear(ExpressionShape); }
 
       //
       // BaseComplexShape -------------------------------------------------------------------------
@@ -30,9 +30,9 @@ namespace shapes {
 
         void free_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info);
 
-        Bool init_thread_activity(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info, LONG thread_count);
+        Bool init_thread_activity(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info, Int32 thread_count);
 
-        Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index);
+        Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index);
 
       //
       // ObjectData -------------------------------------------------------------------------------
@@ -50,10 +50,10 @@ namespace shapes {
 
         // The parser cache requires the added variables to still exist
         // in memory still it is only accepting memory addresses.
-        helpers::ArrayClass<Real> allocated_vars;
+        helpers::ArrayClass<Float> allocated_vars;
 
         Bool Init(String expr, ParserCache* dest) {
-            LONG error;
+            Int32 error;
             Bool result = parser->Init(expr, &error, UNIT_NONE, ANGLE_RAD);
             if (error == 0 && result) {
                 parser->GetParserData(dest);
@@ -65,16 +65,16 @@ namespace shapes {
     };
 
     Bool ExpressionShape::init_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info) {
-        if (not super::init_calculation(op, bc, info)) return false;
+        if (!super::init_calculation(op, bc, info)) return false;
 
         // NOTE: MCOMMAND_OPTIMIZE issue. Double optimization achieves correct
         // results for triangle faces merging in a single point.
         info->optimize_passes = 2;
 
-        info->umin = bc->GetReal(PR1M_EXPRESSIONSHAPE_UMIN);
-        info->umax = bc->GetReal(PR1M_EXPRESSIONSHAPE_UMAX);
-        info->vmin = bc->GetReal(PR1M_EXPRESSIONSHAPE_VMIN);
-        info->vmax = bc->GetReal(PR1M_EXPRESSIONSHAPE_VMAX);
+        info->umin = bc->GetFloat(PR1M_EXPRESSIONSHAPE_UMIN);
+        info->umax = bc->GetFloat(PR1M_EXPRESSIONSHAPE_UMAX);
+        info->vmin = bc->GetFloat(PR1M_EXPRESSIONSHAPE_VMIN);
+        info->vmax = bc->GetFloat(PR1M_EXPRESSIONSHAPE_VMAX);
         info->inverse_normals = bc->GetBool(PR1M_EXPRESSIONSHAPE_INVERSENORMALS);
         info->flip_uvw_x = bc->GetBool(PR1M_EXPRESSIONSHAPE_FLIPUVWX);
         info->flip_uvw_y = bc->GetBool(PR1M_EXPRESSIONSHAPE_FLIPUVWY);
@@ -91,21 +91,21 @@ namespace shapes {
         }
     }
 
-    Bool ExpressionShape::init_thread_activity(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info, LONG thread_count) {
+    Bool ExpressionShape::init_thread_activity(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info, Int32 thread_count) {
         // Allocate a parser for each thread separately.
         struct ExpressionData* data = new struct ExpressionData[thread_count];
-        if (not data) return false;
+        if (!data) return false;
 
         String expr_x = bc->GetString(PR1M_EXPRESSIONSHAPE_XEXPR);
         String expr_y = bc->GetString(PR1M_EXPRESSIONSHAPE_YEXPR);
         String expr_z = bc->GetString(PR1M_EXPRESSIONSHAPE_ZEXPR);
 
-        Real tu;
+        Float tu;
         // Add the dynamic variables so the parser knows about them and
         // parsing (which will follow) can succeed.
-        for (LONG i=0; i < thread_count; i++) {
-            data[i].parser->AddVar("u", &tu, true);
-            data[i].parser->AddVar("v", &tu, true);
+        for (Int32 i=0; i < thread_count; i++) {
+            data[i].parser->AddVar("u"_s, &tu, true);
+            data[i].parser->AddVar("v"_s, &tu, true);
         }
 
         // Parse the userdata and add variables respectively.
@@ -119,18 +119,18 @@ namespace shapes {
                 GeData gedata;
                 if (!op->GetParameter(itemid, gedata, DESCFLAGS_GET_0)) continue;
 
-                LONG type = gedata.GetType();
+                Int32 type = gedata.GetType();
                 String name = itemdesc->GetString(DESC_SHORT_NAME);
-                if (not name.Content() or name == "u" or name == "v") continue;
+                if (c4d_apibridge::IsEmpty(name) || name == "u" || name == "v") continue;
 
-                Real value;
+                Float value;
                 Bool use_variable = true;
 
                 switch (type) {
                     case DA_LONG:
                     case DA_REAL:
                     case DA_LLONG:
-                        value = gedata.GetReal();
+                        value = gedata.GetFloat();
                         break;
                     default:
                         use_variable = false;
@@ -139,11 +139,11 @@ namespace shapes {
 
                 if (use_variable) {
                     // Push the variable onto all parses allocated for the threads.
-                    for (LONG i=0; i < thread_count; i++) {
+                    for (Int32 i=0; i < thread_count; i++) {
                         // Again, the parser requires added variables to still exist in memory
                         // after adding them, this is why we keep them in this array.
-                        Real* p = data[i].allocated_vars.Append(value);
-                        data[i].parser->AddVar(name, p, true);
+                        ifnoerr (Float& p = data[i].allocated_vars.Append(value))
+                            data[i].parser->AddVar(name, &p, true);
                     }
                 }
             }
@@ -153,7 +153,7 @@ namespace shapes {
 
         // Initialize the parser cache for each allocated thread data and each expression.
         Bool success = true;
-        for (LONG i=0; i < thread_count && success; i++) {
+        for (Int32 i=0; i < thread_count && success; i++) {
             success = data[i].Init(expr_x, data[i].cache_x) &&
                       data[i].Init(expr_y, data[i].cache_y) &&
                       data[i].Init(expr_z, data[i].cache_z);
@@ -163,20 +163,20 @@ namespace shapes {
         return success;
     }
 
-    Vector ExpressionShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index) {
+    Vector ExpressionShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index) {
         struct ExpressionData* data = (struct ExpressionData*) info->data + thread_index;
 
-		Real* pu = &u;
-		Real* pv = &v;
-        data->parser->AddVar("u", pu, true);
-        data->parser->AddVar("v", pv, true);
+		Float* pu = &u;
+		Float* pv = &v;
+        data->parser->AddVar("u"_s, pu, true);
+        data->parser->AddVar("v"_s, pv, true);
 
-        LONG error = 0;
+        Int32 error = 0;
         Vector p;
         data->parser->Calculate(data->cache_x, &p.x, &error);
-        if (not error)
+        if (!error)
             data->parser->Calculate(data->cache_y, &p.y, &error);
-        if (not error)
+        if (!error)
             data->parser->Calculate(data->cache_z, &p.z, &error);
 
         if (error) return Vector(0);
@@ -186,20 +186,20 @@ namespace shapes {
     }
 
     Bool ExpressionShape::Init(GeListNode* node) {
-        if (not super::Init(node)) return false;
+        if (!super::Init(node)) return false;
         BaseContainer* bc = ((BaseList2D*)node)->GetDataInstance();
 
         // bc->SetBool(PR1M_COMPLEXSHAPE_MULTITHREADING, false);
-        bc->SetLong(PR1M_COMPLEXSHAPE_USEGMENTS, 10);
+        bc->SetInt32(PR1M_COMPLEXSHAPE_USEGMENTS, 10);
 
-        bc->SetString(PR1M_EXPRESSIONSHAPE_XEXPR, "Cos(u) * 100");
-        bc->SetString(PR1M_EXPRESSIONSHAPE_YEXPR, "Cos(v) * 100");
-        bc->SetString(PR1M_EXPRESSIONSHAPE_ZEXPR, "Cos(u + v) * 100");
+        bc->SetString(PR1M_EXPRESSIONSHAPE_XEXPR, "Cos(u) * 100"_s);
+        bc->SetString(PR1M_EXPRESSIONSHAPE_YEXPR, "Cos(v) * 100"_s);
+        bc->SetString(PR1M_EXPRESSIONSHAPE_ZEXPR, "Cos(u + v) * 100"_s);
 
-        bc->SetReal(PR1M_EXPRESSIONSHAPE_UMIN, 0);
-        bc->SetReal(PR1M_EXPRESSIONSHAPE_UMAX, M_PI);
-        bc->SetReal(PR1M_EXPRESSIONSHAPE_VMIN, -M_PI);
-        bc->SetReal(PR1M_EXPRESSIONSHAPE_VMAX, M_PI);
+        bc->SetFloat(PR1M_EXPRESSIONSHAPE_UMIN, 0);
+        bc->SetFloat(PR1M_EXPRESSIONSHAPE_UMAX, M_PI);
+        bc->SetFloat(PR1M_EXPRESSIONSHAPE_VMIN, -M_PI);
+        bc->SetFloat(PR1M_EXPRESSIONSHAPE_VMAX, M_PI);
 
         bc->SetBool(PR1M_EXPRESSIONSHAPE_INVERSENORMALS, false);
         bc->SetBool(PR1M_EXPRESSIONSHAPE_ROTATEPOLYGONS, true);
@@ -215,7 +215,9 @@ namespace shapes {
             GeLoadString(IDS_Opr1m_expression),
             PLUGINFLAG_HIDEPLUGINMENU | OBJECT_GENERATOR,
             ExpressionShape::alloc,
-            "Opr1m_expression", PR1MITIVE_ICON("Opr1m_expression"), 0);
+            "Opr1m_expression"_s,
+            PR1MITIVE_ICON("Opr1m_expression"),
+            0);
     }
 
 } // end namespace shapes

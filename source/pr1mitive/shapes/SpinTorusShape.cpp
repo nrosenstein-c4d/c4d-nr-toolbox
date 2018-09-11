@@ -27,7 +27,7 @@ namespace shapes {
 
       public:
 
-        static NodeData* alloc() { return gNew(SpinTorusShape); }
+        static NodeData* alloc() { return NewObjClear(SpinTorusShape); }
 
       //
       // BaseComplexShape --------------------------------------------------------------------------
@@ -39,17 +39,17 @@ namespace shapes {
 
         void post_process_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info);
 
-        Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index);
+        Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index);
 
       //
       // BasePrimitiveData
       //
 
-        LONG get_handle_count(BaseObject* op);
+        Int32 get_handle_count(BaseObject* op);
 
-        Bool get_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        Bool get_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
-        void set_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        void set_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
       //
       // ObjectData --------------------------------------------------------------------------------
@@ -60,20 +60,20 @@ namespace shapes {
     };
 
     struct SpinTorusData {
-        Real radius;
-        Real pradius;
+        Float radius;
+        Float pradius;
     };
 
     Bool SpinTorusShape::init_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info) {
-        if (not super::init_calculation(op, bc, info)) return false;
+        if (!super::init_calculation(op, bc, info)) return false;
         info->umin = info->vmin = 0;
         info->umax = info->vmax = 2 * M_PI;
 
         struct SpinTorusData* data = new struct SpinTorusData;
-        if (not data) return false;
+        if (!data) return false;
         info->data = (void*) data;
-        data->pradius = bc->GetReal(PR1M_SPINTORUS_PIPERADIUS);
-        data->radius = bc->GetReal(PR1M_SPINTORUS_RADIUS) + data->pradius;;
+        data->pradius = bc->GetFloat(PR1M_SPINTORUS_PIPERADIUS);
+        data->radius = bc->GetFloat(PR1M_SPINTORUS_RADIUS) + data->pradius;;
         return true;
     }
 
@@ -84,15 +84,15 @@ namespace shapes {
 
     void SpinTorusShape::post_process_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info) {
         // Some normales have to be reversed.
-        LONG vseg2 = info->vseg;
+        Int32 vseg2 = info->vseg;
         CPolygon* polys = info->target->GetPolygonW();
-        LONG polycount = info->target->GetPolygonCount();
+        Int32 polycount = info->target->GetPolygonCount();
         UVWTag* uvw = info->uvw_dest;
         UVWHandle uvwhandle ;
         if (uvw) uvwhandle = uvw->GetDataAddressW();
-        else uvwhandle = null;
+        else uvwhandle = nullptr;
 
-        for (LONG i=0; i < polycount; i++) {
+        for (Int32 i=0; i < polycount; i++) {
             if ((i % vseg2) < (vseg2 / 2 - 0.5)) {
                 CPolygon* poly = polys + i;
                 CPolygon  ref  = *poly;
@@ -138,32 +138,32 @@ namespace shapes {
         }
     }
 
-    Vector SpinTorusShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index) {
+    Vector SpinTorusShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index) {
         auto data = (struct SpinTorusData*) info->data;
-        Real r = data->pradius;
-        Real R = data->radius;
-        Real x = (R + r * (Cos(u / 2) * Sin(v) - Sin(u / 2) * Sin(2 * v))) * Cos(u);
-        Real y = (R + r * (Cos(u / 2) * Sin(v) - Sin(u / 2) * Sin(2 * v))) * Sin(u);
-        Real z = r * (Sin(u / 2) * Sin(v) + Cos(u / 2) * Sin(2 * v));
+        Float r = data->pradius;
+        Float R = data->radius;
+        Float x = (R + r * (Cos(u / 2) * Sin(v) - Sin(u / 2) * Sin(2 * v))) * Cos(u);
+        Float y = (R + r * (Cos(u / 2) * Sin(v) - Sin(u / 2) * Sin(2 * v))) * Sin(u);
+        Float z = r * (Sin(u / 2) * Sin(v) + Cos(u / 2) * Sin(2 * v));
         return Vector(x, z, y);
     }
 
-    LONG SpinTorusShape::get_handle_count(BaseObject* op) {
+    Int32 SpinTorusShape::get_handle_count(BaseObject* op) {
         return 2;
     }
 
-    Bool SpinTorusShape::get_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    Bool SpinTorusShape::get_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
         BaseContainer* bc = op->GetDataInstance();
         Vector& point = info->position;
         info->direction = Vector(1, 0, 0);
-        Real radius = bc->GetReal(PR1M_SPINTORUS_RADIUS);
+        Float radius = bc->GetFloat(PR1M_SPINTORUS_RADIUS);
 
         switch (handle) {
             case HANDLE_RADIUS:
                 point.x = radius;
                 break;
             case HANDLE_PIPERADIUS:
-                point.x = radius + bc->GetReal(PR1M_SPINTORUS_PIPERADIUS) * 2;
+                point.x = radius + bc->GetFloat(PR1M_SPINTORUS_PIPERADIUS) * 2;
                 break;
             default:
                 return false;
@@ -172,30 +172,30 @@ namespace shapes {
         return true;
     }
 
-    void SpinTorusShape::set_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    void SpinTorusShape::set_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
         BaseContainer* bc = op->GetDataInstance();
         Vector& point = info->position;
 
         switch (handle) {
             case HANDLE_RADIUS:
-                bc->SetReal(PR1M_SPINTORUS_RADIUS, limit_min<Real>(point.x, 0));
+                bc->SetFloat(PR1M_SPINTORUS_RADIUS, limit_min<Float>(point.x, 0));
                 break;
 
             case HANDLE_PIPERADIUS:
-                Real radius = limit_min<Real>(bc->GetReal(PR1M_SPINTORUS_RADIUS), 0);
-                Real pradius = (point.x - radius) * 0.5;
-                bc->SetReal(PR1M_SPINTORUS_PIPERADIUS, pradius);
+                Float radius = limit_min<Float>(bc->GetFloat(PR1M_SPINTORUS_RADIUS), 0);
+                Float pradius = (point.x - radius) * 0.5;
+                bc->SetFloat(PR1M_SPINTORUS_PIPERADIUS, pradius);
                 break;
         }
     }
 
     Bool SpinTorusShape::Init(GeListNode* node) {
-        if (not super::Init(node)) return false;
+        if (!super::Init(node)) return false;
         BaseContainer* bc = ((BaseObject*)node)->GetDataInstance();
-        bc->SetReal(PR1M_SPINTORUS_RADIUS, 100);
-        bc->SetReal(PR1M_SPINTORUS_PIPERADIUS, 20);
-        bc->SetLong(PR1M_COMPLEXSHAPE_USEGMENTS, 40);
-        bc->SetLong(PR1M_COMPLEXSHAPE_VSEGMENTS, 40);
+        bc->SetFloat(PR1M_SPINTORUS_RADIUS, 100);
+        bc->SetFloat(PR1M_SPINTORUS_PIPERADIUS, 20);
+        bc->SetInt32(PR1M_COMPLEXSHAPE_USEGMENTS, 40);
+        bc->SetInt32(PR1M_COMPLEXSHAPE_VSEGMENTS, 40);
         return true;
     }
 
@@ -206,8 +206,9 @@ namespace shapes {
             GeLoadString(IDS_Opr1m_spintorus),
             PLUGINFLAG_HIDEPLUGINMENU | OBJECT_GENERATOR,
             SpinTorusShape::alloc,
-            "Opr1m_spintorus",
-            PR1MITIVE_ICON("Opr1m_spintorus"), 0);
+            "Opr1m_spintorus"_s,
+            PR1MITIVE_ICON("Opr1m_spintorus"),
+            0);
     }
 
 } // end namespace shapes

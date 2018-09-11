@@ -11,7 +11,7 @@
 #define NR_DATATYPES_DYNAMICARRAY_H_
 
 #include <c4d.h>
-#include <nr/c4d/string.h>
+#include <NiklasRosenstein/c4d/string.hpp>
 
 namespace nr {
 namespace procedural {
@@ -121,8 +121,7 @@ public:
     }
 
     char* data = reinterpret_cast<char*>(mData);
-    char* newData = ReallocMem(data, realSize);
-    if (newData == nullptr) {
+    iferr (char* newData = ReallocMem(data, realSize)) {
       // If we were only to shrink the memory, there sould be no error in
       // reallocating it. If there is, we already destroyed objects that
       // were valid in the original array and we prefer to not completely
@@ -212,7 +211,7 @@ public:
   ///     contains useful information about it.
   inline String ToString() const
   {
-    using nr::c4d::tostr;
+    using niklasrosenstein::c4d::tostr;
     return \
       "DynamicArray(mTypeSize=" + tostr(mTypeSize) + ", " +
       "mCount=" + tostr(mCount) + ", " +

@@ -8,8 +8,7 @@
 #ifndef TEAPRESSO_H
 #define TEAPRESSO_H
 
-    #include "misc/legacy.h"
-    //#include <c4d.h>
+    #include <c4d.h>
 
     // Include the resource descriptions of TeaPresso nodes.
     #include "res/description/Tvbase.h"
@@ -77,7 +76,7 @@
      * Represents a rectangle in 2D space in absolute coordinates.
      */
     struct TvRectangle {
-        LONG x1, y1, x2, y2;
+        Int32 x1, y1, x2, y2;
     };
 
 
@@ -101,7 +100,7 @@
 
         Bool AskCondition(TvNode* root, BaseList2D* context);
 
-        Bool PredictContextType(LONG type);
+        Bool PredictContextType(Int32 type);
 
         Bool AcceptParent(TvNode* other);
 
@@ -109,17 +108,17 @@
 
         Bool AllowRemoveChild(TvNode* child);
 
-        void DrawCell(LONG column, const TvRectangle& rect,
+        void DrawCell(Int32 column, const TvRectangle& rect,
                       const TvRectangle& real_rect, DrawInfo* drawinfo,
                       const GeData& bgColor);
 
-        LONG GetColumnWidth(LONG column, GeUserArea* area);
+        Int32 GetColumnWidth(Int32 column, GeUserArea* area);
 
-        LONG GetLineHeight(LONG column, GeUserArea* area);
+        Int32 GetLineHeight(Int32 column, GeUserArea* area);
 
-        void CreateContextMenu(LONG column, BaseContainer* bc);
+        void CreateContextMenu(Int32 column, BaseContainer* bc);
 
-        Bool ContextMenuCall(LONG column, LONG command, Bool* refreshTree);
+        Bool ContextMenuCall(Int32 column, Int32 command, Bool* refreshTree);
 
         String GetDisplayName() const;
 
@@ -131,12 +130,12 @@
         Bool SetUp();
 
         /**
-         * @return TRUE if the node is enabled, FALSE if not.
+         * @return true if the node is enabled, false if not.
          */
-        Bool IsEnabled(Bool checkParents=TRUE);
+        Bool IsEnabled(Bool checkParents=true);
 
         /**
-         * @param enabled TRUE if the node should be enabled, FALSE if
+         * @param enabled true if the node should be enabled, false if
          *        it should be disabled.
          */
         void SetEnabled(Bool enabled);
@@ -157,12 +156,12 @@
         /**
          * @param color Memory-location to be filled with the node's
          *        display-color.
-         * @param depends TRUE when the display-mode should be taken
+         * @param depends true when the display-mode should be taken
          *        in account.
-         * @return TRUE when the color was filled, FALSE if not. The
+         * @return true when the color was filled, false if not. The
          * color will not be filled when the color-mode is set to auto.
          */
-        Bool GetDisplayColor(Vector* color, Bool depends=TRUE);
+        Bool GetDisplayColor(Vector* color, Bool depends=true);
 
         /**
          * Sets the display-color of the node. Does not affect the
@@ -181,7 +180,7 @@
          * is a child-node of another hierarchy.
          *
          * @param newParent The new parent node to check the
-         *        tree-structure with. Passing NULL will validate
+         *        tree-structure with. Passing nullptr will validate
          *        the existing nodes only.
          * @param checkRemoval Additionally check if the node
          *        is actually allowed to be removed, moving it to
@@ -189,7 +188,7 @@
          *        otherwise.
          * @return The node that did not accept something.
          */
-        TvNode* ValidateContextSafety(TvNode* newParent, Bool checkRemoval=TRUE);
+        TvNode* ValidateContextSafety(TvNode* newParent, Bool checkRemoval=true);
 
         /* BaseList2D Overrides */
 
@@ -209,7 +208,7 @@
             return (TvNode*) BaseList2D::GetUp();
         }
 
-        static TvNode* Alloc(LONG typeId);
+        static TvNode* Alloc(Int32 typeId);
 
         static void Free(TvNode*& ptr);
 
@@ -241,8 +240,8 @@
 
         /**
          * Called within the execution pipeline from an arbitrary node
-         * to check if the condition this node represents evaluates to TRUE
-         * or FALSE. Required for condition nodes.
+         * to check if the condition this node represents evaluates to true
+         * or false. Required for condition nodes.
          *
          * @param host The node's host object. Cinema 4D owns the
          *        pointed object.
@@ -252,13 +251,13 @@
         virtual Bool AskCondition(TvNode* host, TvNode* root, BaseList2D* context);
 
         /**
-         * @return TRUE when the passed type identifer is a possible
+         * @return true when the passed type identifer is a possible
          * context-type forwarded to child-nodes.
          */
-        virtual Bool PredictContextType(TvNode* host, LONG type);
+        virtual Bool PredictContextType(TvNode* host, Int32 type);
 
         /**
-         * @return TRUE if *other* would be accepted to be parent
+         * @return true if *other* would be accepted to be parent
          * of the host object.
          */
         virtual Bool AcceptParent(TvNode* host, TvNode* other);
@@ -269,21 +268,21 @@
          * a drag-array. If only one of the objects is not accepted,
          * the whole drag-operation is abandoned.
          *
-         * The default implementation returns always TRUE.
+         * The default implementation returns always true.
          *
-         * Note: It is important that this function returns TRUE
+         * Note: It is important that this function returns true
          * for each object that *is already* a child-object if the node.
          *
          * @param host The node's host object. Cinema 4D owns the
          *        pointed object.
          * @param child The child to be inserted.
-         * @return TRUE if the child is accepted, FALSE if not.
+         * @return true if the child is accepted, false if not.
          */
         virtual Bool AcceptChild(TvNode* host, TvNode* other);
 
         /**
-         * @return TRUE when the child object may be removed, FALSE
-         * if not. The default implementation returns TRUE always.
+         * @return true when the child object may be removed, false
+         * if not. The default implementation returns true always.
          */
         virtual Bool AllowRemoveChild(TvNode* host, TvNode* child);
 
@@ -305,21 +304,21 @@
          *        line and column.
          */
         virtual void DrawCell(
-                    TvNode* host, LONG column, const TvRectangle& rect,
+                    TvNode* host, Int32 column, const TvRectangle& rect,
                     const TvRectangle& real_rect, DrawInfo* drawinfo,
                     const GeData& bgColor);
 
         /**
          * @return The width of the cell in the passed column index.
          */
-        virtual LONG GetColumnWidth(
-                    TvNode* host, LONG column, GeUserArea* area);
+        virtual Int32 GetColumnWidth(
+                    TvNode* host, Int32 column, GeUserArea* area);
 
         /**
          * @return The height of the cell in the passed column index.
          */
-        virtual LONG GetLineHeight(
-                    TvNode* host, LONG column, GeUserArea* area);
+        virtual Int32 GetLineHeight(
+                    TvNode* host, Int32 column, GeUserArea* area);
 
         /**
          * Called to add entries to the passed BaseContainer used
@@ -333,7 +332,7 @@
          * @param bc The container to add items to.
          */
         virtual void CreateContextMenu(
-                    TvNode* host, LONG column, BaseContainer* bc);
+                    TvNode* host, Int32 column, BaseContainer* bc);
 
         /**
          * Called when an item was clicked in the context-menu of
@@ -343,12 +342,12 @@
          *        pointed object.
          * @param column The column id the right-click was invoked at.
          * @param command The command id of the clicked entry.
-         * @param refreshTree Set this to TRUE when the tree-view
+         * @param refreshTree Set this to true when the tree-view
          *        should be refreshed.
-         * @return TRUE when the call was handled, FALSE if not.
+         * @return true when the call was handled, false if not.
          */
         virtual Bool ContextMenuCall(
-                    TvNode* host, LONG column, LONG command,
+                    TvNode* host, Int32 column, Int32 command,
                     Bool* refreshTree);
 
         /**
@@ -366,9 +365,9 @@
 
         virtual Bool Init(GeListNode* node);
 
-        virtual Bool IsInstanceOf(const GeListNode* node, LONG type) const;
+        virtual Bool IsInstanceOf(const GeListNode* node, Int32 type) const;
 
-        virtual Bool Message(GeListNode* node, LONG type, void* pData);
+        virtual Bool Message(GeListNode* node, Int32 type, void* pData);
 
         virtual Bool GetDEnabling(
                 GeListNode* node, const DescID& id, const GeData& tData,
@@ -389,7 +388,7 @@
         Bool (TvOperatorData::*AskCondition)(
                 TvNode* host, TvNode* root, BaseList2D* context);
         Bool (TvOperatorData::*PredictContextType)(
-                TvNode* host, LONG type);
+                TvNode* host, Int32 type);
         Bool (TvOperatorData::*AcceptParent)(
                 TvNode* host, TvNode* other);
         Bool (TvOperatorData::*AcceptChild)(
@@ -397,17 +396,17 @@
         Bool (TvOperatorData::*AllowRemoveChild)(
                 TvNode* host, TvNode* child);
         void (TvOperatorData::*DrawCell)(
-                TvNode* host, LONG column, const TvRectangle& rect,
+                TvNode* host, Int32 column, const TvRectangle& rect,
                 const TvRectangle& real_rect, DrawInfo* drawinfo,
                 const GeData& bgColor);
-        LONG (TvOperatorData::*GetColumnWidth)(
-                TvNode* host, LONG column, GeUserArea* area);
-        LONG (TvOperatorData::*GetLineHeight)(
-                TvNode* host, LONG column, GeUserArea* area);
+        Int32 (TvOperatorData::*GetColumnWidth)(
+                TvNode* host, Int32 column, GeUserArea* area);
+        Int32 (TvOperatorData::*GetLineHeight)(
+                TvNode* host, Int32 column, GeUserArea* area);
         void (TvOperatorData::*CreateContextMenu)(
-                TvNode* host, LONG column, BaseContainer* bc);
+                TvNode* host, Int32 column, BaseContainer* bc);
         Bool (TvOperatorData::*ContextMenuCall)(
-                TvNode* host, LONG column, LONG command,
+                TvNode* host, Int32 column, Int32 command,
                 Bool* refreshTree);
         String (TvOperatorData::*GetDisplayName)(
                 const TvNode* host) const;
@@ -430,27 +429,27 @@
      * @param destFolder 0 To let automatically determine the folder, -1
      *        to not add the plugin to a folder. Or a folder id to add the
      *        plugin to.
-     * @return TRUE if the plugin was successfully registered, FALSE
+     * @return true if the plugin was successfully registered, false
      * if not.
      */
     Bool TvRegisterOperatorPlugin(
-                LONG id, const String& name, LONG info, DataAllocator* alloc,
-                const String& desc, BaseBitmap* icon, LONG disklevel,
-                LONG destFolder=0);
+                Int32 id, const String& name, Int32 info, DataAllocator* alloc,
+                const String& desc, BaseBitmap* icon, Int32 disklevel,
+                Int32 destFolder=0);
 
     // =======================================================================
     // ===== Library Function Definitions ====================================
     // =======================================================================
 
     /**
-     * @return TRUE when TeaPresso is installed, FALSE if not.
+     * @return true when TeaPresso is installed, false if not.
      */
     Bool TvInstalled();
 
     /**
      * Returns the active TeaPresso hierarchy.
      *
-     * @return The root of the active TeaPresso hierarchy. May be NULL.
+     * @return The root of the active TeaPresso hierarchy. May be nullptr.
      */
     TvNode* TvGetActiveRoot();
 
@@ -459,7 +458,7 @@
      * installed TeaPresso plugins. TvRegisterOperatorPlugin() will
      * automatically register the node in the "Generals" tab (with
      * id TEAPRESSO_FOLDER_GENERAL), unless its *doAddTab* parameter is
-     * set to FALSE.
+     * set to false.
      *
      * Every item in the container must have its own unique identifer
      * obtained from the plugincafe.
@@ -475,10 +474,10 @@
      * been sent).
      *
      * @param bc The container to construct the hierarchy from. Errors
-     *        are ignored. Passing NULL will use the global container.
+     *        are ignored. Passing nullptr will use the global container.
      * @return The hierarchy.
      */
-    TvNode* TvCreatePluginsHierarchy(const BaseContainer* bc=NULL);
+    TvNode* TvCreatePluginsHierarchy(const BaseContainer* bc=nullptr);
 
     /**
      * Update the TvManager tree-view(s).
@@ -493,7 +492,7 @@
      * @param arr An optional array of TvNode's that will be displayed
      *        in the attribute manager.
      */
-    void TvActivateAM(const AtomArray* arr=NULL);
+    void TvActivateAM(const AtomArray* arr=nullptr);
 
     /**
      * Brings the Attribute Manager to show the passed TeaPresso node.

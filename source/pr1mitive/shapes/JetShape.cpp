@@ -25,7 +25,7 @@ namespace shapes {
 
       public:
 
-        static NodeData* alloc() { return gNew(JetShape); }
+        static NodeData* alloc() { return NewObjClear(JetShape); }
 
       //
       // BaseComplexShape -------------------------------------------------------------------------
@@ -35,17 +35,17 @@ namespace shapes {
 
         void free_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info);
 
-        Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index);
+        Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index);
 
       //
       // BasePrimitveData -------------------------------------------------------------------------
       //
 
-        LONG get_handle_count(BaseObject* op);
+        Int32 get_handle_count(BaseObject* op);
 
-        Bool get_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        Bool get_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
-        void set_handle(BaseObject* op, LONG handle, HandleInfo* info);
+        void set_handle(BaseObject* op, Int32 handle, HandleInfo* info);
 
       //
       // ObjectData -------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ namespace shapes {
     };
 
     Bool JetShape::init_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info) {
-        if (not super::init_calculation(op, bc, info)) return false;
+        if (!super::init_calculation(op, bc, info)) return false;
 
         // NOTE: MCOMMAND_OPTIMIZE issue. Double optimization achieves correct
         // results for triangle faces merging in a single point.
@@ -74,7 +74,7 @@ namespace shapes {
         info->vmax = 2 * M_PI;
 
         struct JetData* data = new struct JetData;
-        if (not data) return false;
+        if (!data) return false;
 
         data->size = bc->GetVector(PR1M_JET_SIZE);
         data->size.x /= 3;
@@ -88,26 +88,26 @@ namespace shapes {
         delete data;
     }
 
-    Vector JetShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index) {
+    Vector JetShape::calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index) {
         // Maximum value of cosh() is cosh(pi) in this case.
-        static const Real u_max = cosh(M_PI);
-        static const Real u_min = 1.0;
+        static const Float u_max = cosh(M_PI);
+        static const Float u_min = 1.0;
 
         // Retrieve the information that was created in init_calculation() and compute the
         // point at the passed parameters.
         auto data = (struct JetData*) info->data;
-        Real x = (1 - cosh(u)) * Sin(u) * Cos(v) * 0.5 * data->size.x;
-        Real y = (1 - cosh(u)) * Sin(u) * Sin(v) * 0.5 * data->size.y;
-        Real z = ((cosh(u) - u_min) / (u_max - u_min)) * data->size.z - (data->size.z * 0.5);
+        Float x = (1 - cosh(u)) * Sin(u) * Cos(v) * 0.5 * data->size.x;
+        Float y = (1 - cosh(u)) * Sin(u) * Sin(v) * 0.5 * data->size.y;
+        Float z = ((cosh(u) - u_min) / (u_max - u_min)) * data->size.z - (data->size.z * 0.5);
 
         return Vector(x, y, z);
     }
 
-    LONG JetShape::get_handle_count(BaseObject* op) {
+    Int32 JetShape::get_handle_count(BaseObject* op) {
         return 3;
     }
 
-    Bool JetShape::get_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    Bool JetShape::get_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
         BaseContainer* bc = op->GetDataInstance();
         Vector& point = info->position;
         Vector& diret = info->direction;
@@ -134,22 +134,22 @@ namespace shapes {
         return true;
     }
 
-    void JetShape::set_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    void JetShape::set_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
         BaseContainer* bc = op->GetDataInstance();
         Vector point = info->position * 2;
         Vector size  = bc->GetVector(PR1M_JET_SIZE);
 
         switch (handle) {
             case HANDLE_WIDTH:
-                size.x = helpers::limit_min<Real>(point.x, 0);
+                size.x = helpers::limit_min<Float>(point.x, 0);
                 break;
 
             case HANDLE_HEIGHT:
-                size.y = helpers::limit_min<Real>(point.y, 0);
+                size.y = helpers::limit_min<Float>(point.y, 0);
                 break;
 
             case HANDLE_DEPTH:
-                size.z = helpers::limit_min<Real>(point.z , 0);
+                size.z = helpers::limit_min<Float>(point.z , 0);
                 break;
         }
 
@@ -157,7 +157,7 @@ namespace shapes {
     }
 
     Bool JetShape::Init(GeListNode* node) {
-        if (not super::Init(node)) return false;
+        if (!super::Init(node)) return false;
         BaseContainer* bc = ((BaseObject*)node)->GetDataInstance();
         bc->SetVector(PR1M_JET_SIZE, Vector(50, 50, 200));
         return true;
@@ -176,7 +176,9 @@ namespace shapes {
             GeLoadString(IDS_Opr1m_jet),
             PLUGINFLAG_HIDEPLUGINMENU | OBJECT_GENERATOR,
             JetShape::alloc,
-            "Opr1m_jet", PR1MITIVE_ICON("Opr1m_jet"), 0);
+            "Opr1m_jet"_s,
+            PR1MITIVE_ICON("Opr1m_jet"),
+            0);
     }
 
 } // end namespace shapes

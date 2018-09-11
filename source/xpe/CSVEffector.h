@@ -17,7 +17,6 @@
 #ifndef NR_CSVEFFECTOR_H
 #define NR_CSVEFFECTOR_H
 
-    #include "misc/legacy.h"
     #include <c4d_baseeffectordata.h>
 
     enum {

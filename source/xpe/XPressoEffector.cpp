@@ -17,11 +17,11 @@
 #include "XPressoEffector.h"
 
 XPressoEffector* GetNodeXPressoEffector(GvNode* node) {
-    GvNodeMaster* master = node ? node->GetNodeMaster() : NULL;
-    BaseList2D* object = NULL;
+    GvNodeMaster* master = node ? node->GetNodeMaster() : nullptr;
+    BaseList2D* object = nullptr;
     if (master) {
         object = master->GetOwner();
-        if (!object) return NULL;
+        if (!object) return nullptr;
     }
     if (object->IsInstanceOf(Tbase)) {
         object = ((BaseTag*) object)->GetObject();

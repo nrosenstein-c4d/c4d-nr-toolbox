@@ -64,9 +64,9 @@ namespace pr1mitive {
 
           private:
 
-            static const LONG           id = 1028979;
+            static const Int32           id = 1028979;
             static Pr1mSerialHook*      instance;
-            static LONG                 status;
+            static Int32                 status;
 
           public:
 
@@ -75,7 +75,7 @@ namespace pr1mitive {
           //
 
             // Returns the registration status code.
-            static LONG get_status();
+            static Int32 get_status();
 
             // Registers the hook to Cinema 4D.
             static Bool enable_hook();
@@ -87,23 +87,23 @@ namespace pr1mitive {
           // SNHook -----------------------------------------------------------------------------------
           //
 
-            LONG SNCheck(const String& c4d_serial, const String& serial, LONG regdate, LONG currdate);
+            Int32 SNCheck(const String& c4d_serial, const String& serial, Int32 regdate, Int32 currdate);
 
             const String& GetTitle();
 
         };
 
-        Pr1mSerialHook* Pr1mSerialHook::instance = null;
-        LONG Pr1mSerialHook::status = STATUS_WRONG;
+        Pr1mSerialHook* Pr1mSerialHook::instance = nullptr;
+        Int32 Pr1mSerialHook::status = STATUS_WRONG;
 
-        LONG Pr1mSerialHook::get_status() {
+        Int32 Pr1mSerialHook::get_status() {
             return status;
         }
 
         Bool Pr1mSerialHook::enable_hook() {
-            if (not instance) {
+            if (!instance) {
                 instance = new Pr1mSerialHook;
-                if (not instance) {
+                if (!instance) {
                     return false;
                 }
                  instance->Register(Pr1mSerialHook::id, SNFLAG_OWN);
@@ -115,9 +115,9 @@ namespace pr1mitive {
             if (instance) delete instance;
         }
 
-        LONG Pr1mSerialHook::SNCheck(const String& c4dsn, const String& sn, LONG regdate, LONG currdate) {
+        Int32 Pr1mSerialHook::SNCheck(const String& c4dsn, const String& sn, Int32 regdate, Int32 currdate) {
             status = STATUS_WRONG;
-            if (!regdate && !sn.Content()) return SN_WRONGNUMBER;
+            if (!regdate && IsEmpty(sn)) return SN_WRONGNUMBER;
 
             // Allow NET Render.
             if (IsNet()) {
@@ -142,7 +142,7 @@ namespace pr1mitive {
                 String c4dlicense;
 
                 // Check if we're in a multi-license environment and adjust the serial-number.
-                if (sninfo.nr.Content()) c4dlicense = sninfo.nr;
+                if (!IsEmpty(sninfo.nr)) c4dlicense = sninfo.nr;
                 else c4dlicense = c4dsn;
 
                 char* c4dlicense_raw = c4dlicense.GetCStringCopy();
@@ -152,7 +152,7 @@ namespace pr1mitive {
                 }
 
                 serial::C4DLicense c4dlicense_obj(c4dlicense_raw);
-                GeFree(c4dlicense_raw);
+                DeleteMem(c4dlicense_raw);
 
                 if (c4dlicense_obj.type == serial::LICENSETYPE_INVALID) {
                     PR1MITIVE_DEBUG_ERROR("Cinema 4D license is invalid. Kind'a werid, because it is passed by C4D..");
@@ -180,8 +180,8 @@ namespace pr1mitive {
         }
 
         const String& Pr1mSerialHook::GetTitle() {
-            static String* title = null;
-            if (not title) {
+            static String* title = nullptr;
+            if (!title) {
                 title = new String(GeLoadString(IDS_PR1MITIVE_NAME, PR1MITIVE_VERSION_STRING));
             }
             return *title;
@@ -189,7 +189,7 @@ namespace pr1mitive {
 
 
         Bool activation_start() {
-            LONG status = Pr1mSerialHook::get_status();
+            Int32 status = Pr1mSerialHook::get_status();
             if (!(status & STATUS_OK)) return true;
 
             // Bases
@@ -219,7 +219,7 @@ namespace pr1mitive {
             return true;
         }
 
-        Bool activation_msg(LONG type, void* ptr) {
+        Bool activation_msg(Int32 type, void* ptr) {
             switch (type) {
                 case C4DPL_INIT_SYS:
                     return Pr1mSerialHook::enable_hook();

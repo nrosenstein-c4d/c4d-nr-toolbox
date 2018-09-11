@@ -8,7 +8,7 @@
 #ifndef NR_SMEARHISTORY_H
 #define NR_SMEARHISTORY_H
 
-    #include "misc/legacy.h"
+    #include <c4d.h>
 
     class SmearSession;
 
@@ -18,20 +18,20 @@
         Vector* original_normals;
         Vector* deformed_vertices;
         Vector* deformed_normals;
-        SReal*  weights; // filled by the smear deformer
+        Float32*  weights; // filled by the smear deformer
         Matrix mg;
-        LONG vertex_count;
+        Int32 vertex_count;
         Bool initialized;
 
         SmearState()
-        : original_vertices(NULL), original_normals(NULL),
-          deformed_vertices(NULL), deformed_normals(NULL),
-          weights(NULL), vertex_count(0), initialized(FALSE) { }
+        : original_vertices(nullptr), original_normals(nullptr),
+          deformed_vertices(nullptr), deformed_normals(nullptr),
+          weights(nullptr), vertex_count(0), initialized(false) { }
 
         ~SmearState() {
         }
 
-        Bool Resize(LONG count);
+        Bool Resize(Int32 count);
 
         void Flush();
 
@@ -44,17 +44,17 @@
     public:
 
         SmearHistory()
-        : m_enabled(TRUE), m_level_override(-1) { }
+        : m_enabled(true), m_level_override(-1) { }
 
         ~SmearHistory();
 
-        SmearSession* NewSession(LONG max_history_count, Bool fake_session=FALSE);
+        SmearSession* NewSession(Int32 max_history_count, Bool fake_session=false);
 
         void FreeSession(SmearSession*& session);
 
-        LONG GetHistoryCount() const;
+        Int32 GetHistoryCount() const;
 
-        const SmearState* GetState(LONG index) const;
+        const SmearState* GetState(Int32 index) const;
 
         void SetEnabled(Bool enabled) { m_enabled = enabled; }
 
@@ -63,12 +63,12 @@
         Bool CompareTime(const BaseTime& time) {
             if (m_prevtime != time) {
                 m_prevtime = time;
-                return TRUE;
+                return true;
             }
-            return FALSE;
+            return false;
         }
 
-        void CapHistoryLevel(LONG history_level) {
+        void CapHistoryLevel(Int32 history_level) {
             if (history_level < 1) history_level = 1;
             m_level_override = history_level + 1;
         }
@@ -77,9 +77,9 @@
 
         BaseTime m_prevtime;
         Bool m_enabled;
-        LONG m_level_override;
+        Int32 m_level_override;
 
-        typedef c4d_misc::BaseArray<SmearState> StateArray;
+        typedef maxon::BaseArray<SmearState> StateArray;
         StateArray m_states;
 
     };
@@ -94,8 +94,8 @@
 
         Bool CreateState(
                 const Matrix& mg,
-                const Vector* vertices, LONG vertex_count,
-                const CPolygon* faces, LONG face_count);
+                const Vector* vertices, Int32 vertex_count,
+                const CPolygon* faces, Int32 face_count);
 
         Bool DeformationComplete(const Matrix& mg);
 
@@ -109,9 +109,9 @@
         Bool m_updated;
 
         const Vector* m_vertices;
-        LONG m_vertex_count;
+        Int32 m_vertex_count;
         const CPolygon* m_faces;
-        LONG m_face_count;
+        Int32 m_face_count;
 
     };
 

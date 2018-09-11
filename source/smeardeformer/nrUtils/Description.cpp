@@ -12,56 +12,56 @@
 
 namespace nr {
 
-Bool ExtendDescription(Description* dest, Description* source, LONG root_id) {
+Bool ExtendDescription(Description* dest, Description* source, Int32 root_id) {
     void* handle = source->BrowseInit();
     if (!handle) {
-        return FALSE; // memory error
+        return false; // memory error
     }
 
-    const BaseContainer* itemdesc = NULL;
+    const BaseContainer* itemdesc = nullptr;
     DescID id, groupid;
     while (source->GetNext(handle, &itemdesc, id, groupid)) {
-        if (DESCID_ROOT == itemdesc->GetLong(DESC_PARENTID)) {
+        if (DESCID_ROOT == itemdesc->GetInt32(DESC_PARENTID)) {
             // TODO: Check if this is legal and correct.
-            const_cast<BaseContainer*>(itemdesc)->SetLong(DESC_PARENTID, root_id);
+            const_cast<BaseContainer*>(itemdesc)->SetInt32(DESC_PARENTID, root_id);
         }
         dest->SetParameter(id, *itemdesc, groupid);
     }
 
     source->BrowseFree(handle);
-    return TRUE;
+    return true;
 }
 
-Bool ExtendDescription(Description* dest, const String& ident, LONG root_id, Bool* loaded) {
-    if (loaded) *loaded = FALSE;
+Bool ExtendDescription(Description* dest, const String& ident, Int32 root_id, Bool* loaded) {
+    if (loaded) *loaded = false;
     AutoAlloc<Description> source;
     if (!source) {
-        return FALSE;
+        return false;
     }
     if (!source->LoadDescription(ident)) {
-        return TRUE;
+        return true;
     }
     if (!ExtendDescription(dest, source, root_id)) {
-        return FALSE;
+        return false;
     }
-    if (loaded) *loaded = TRUE;
-    return TRUE;
+    if (loaded) *loaded = true;
+    return true;
 }
 
-Bool ExtendDescription(Description* dest, LONG id, LONG root_id, Bool* loaded) {
-    if (loaded) *loaded = FALSE;
+Bool ExtendDescription(Description* dest, Int32 id, Int32 root_id, Bool* loaded) {
+    if (loaded) *loaded = false;
     AutoAlloc<Description> source;
     if (!source) {
-        return FALSE;
+        return false;
     }
     if (!source->LoadDescription(id)) {
-        return TRUE;
+        return true;
     }
     if (!ExtendDescription(dest, source, root_id)) {
-        return FALSE;
+        return false;
     }
-    if (loaded) *loaded = TRUE;
-    return TRUE;
+    if (loaded) *loaded = true;
+    return true;
 }
 
 

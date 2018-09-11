@@ -21,7 +21,7 @@ namespace debug {
     void _debug_message(const char* prefix, const char* funcname, const char* filename, int lineno, String message) {
         char* string = message.GetCStringCopy();
         _debug_message(prefix, funcname, filename, lineno, string);
-        GeFree(string);
+        DeleteMem(string);
     }
 
     void _debug_printf(const char* format, ...) {

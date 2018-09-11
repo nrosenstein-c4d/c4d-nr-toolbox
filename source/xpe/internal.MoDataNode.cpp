@@ -17,12 +17,11 @@
  * - Update referencing object if XPresso changes.
  */
 
-#include "base.h"
-
-#include "misc/legacy.h"
+#include <c4d_apibridge.h>
 #include <c4d_operatordata.h>
 #include <c4d_baseeffectordata.h>
-#include <nr/c4d/cleanup.h>
+#include <NiklasRosenstein/c4d/cleanup.hpp>
+#include <NiklasRosenstein/macros.h>
 
 #include "MoDataNode.h"
 #include "XPressoEffector.h"
@@ -53,12 +52,12 @@ struct PortInfo {
     /**
      * ID of the port.
      */
-    LONG id;
+    Int32 id;
 
     /**
      * Datatype identifier of the port.
      */
-    LONG dtype;
+    Int32 dtype;
 
     /**
      * Flags for the ports type. Whether it is an inport, outport or both.
@@ -68,7 +67,7 @@ struct PortInfo {
     /**
      * String-ID of the port. If <= 0, falls back to `id`.
      */
-    LONG ids;
+    Int32 ids;
 
     /**
      * Port-description flags.
@@ -84,13 +83,13 @@ struct PortInfo {
     /**
      * Constructor for four items.
      */
-    PortInfo(LONG id, LONG dtype, PortFlags flags, LONG ids)
+    PortInfo(Int32 id, Int32 dtype, PortFlags flags, Int32 ids)
     : id(id), dtype(dtype), flags(flags), ids(ids), descflags(GV_PORTDESCRIPTION_NONE) { }
 
     /**
      * Constructor for five items.
      */
-    PortInfo(LONG id, LONG dtype, PortFlags flags, LONG ids, GvPortDescFlags descflags)
+    PortInfo(Int32 id, Int32 dtype, PortFlags flags, Int32 ids, GvPortDescFlags descflags)
     : id(id), dtype(dtype), flags(flags), ids(ids), descflags(descflags) { }
 
     /**
@@ -102,7 +101,7 @@ struct PortInfo {
 
     /**
      * Return the flags of the port, shifted by `PortFlags_EasyShift`
-     * if *easyMode* is passed TRUE.
+     * if *easyMode* is passed true.
      */
     PortFlags GetPortFlagsShifted(Bool easyMode) const {
         if (easyMode) {
@@ -114,23 +113,23 @@ struct PortInfo {
     }
 
     /**
-     * Returns TRUE if the passed GvPortIO mode fits with the flags of
+     * Returns true if the passed GvPortIO mode fits with the flags of
      * this port.
      */
     Bool CheckPortIOMode(GvPortIO portIo, Bool easyMode) const {
         PortFlags flags = GetPortFlagsShifted(easyMode);
         switch (portIo) {
             case GV_PORT_INVALID:
-                return FALSE;
+                return false;
             case GV_PORT_INPUT:
                 return flags & PortFlags_In;
             case GV_PORT_OUTPUT:
                 return flags & PortFlags_Out;
             case GV_PORT_INPUT_OR_GEDATA:
                 // TODO: Is this handling correct?
-                return TRUE;
+                return true;
             default:
-                return FALSE;
+                return false;
         }
     }
 
@@ -176,19 +175,19 @@ class MoPortHandler {
 
 public:
 
-    MoPortHandler(LONG dataId) : m_dataId(dataId) { }
+    MoPortHandler(Int32 dataId) : m_dataId(dataId) { }
 
     virtual ~MoPortHandler() { }
 
-    virtual Bool MDToPort(GvPort* port, GvRun* run, MoData* md, LONG index) = 0;
+    virtual Bool MDToPort(GvPort* port, GvRun* run, MoData* md, Int32 index) = 0;
 
-    virtual Bool PortToMD(GvPort* port, GvRun* run, MoData* md, LONG index) = 0;
+    virtual Bool PortToMD(GvPort* port, GvRun* run, MoData* md, Int32 index) = 0;
 
-    LONG GetId() const { return m_dataId; }
+    Int32 GetId() const { return m_dataId; }
 
 protected:
 
-    LONG m_dataId;
+    Int32 m_dataId;
 
 };
 
@@ -199,42 +198,42 @@ class AwesomeMoPortHandler : public MoPortHandler {
 
 public:
 
-    AwesomeMoPortHandler(LONG dataId, const T& def)
+    AwesomeMoPortHandler(Int32 dataId, const T& def)
     : super(dataId), m_default(def) { }
 
     T* EnsureArray(MoData* md) {
         T* array = (T*) md->GetArray(m_dataId);
         if (!array) {
-            LONG index = md->AddArray(m_dataId);
+            Int32 index = md->AddArray(m_dataId);
             if (index == NOTOK) {
                 // DEBUG-OFF: MoData Array Adding failed.
-                GePrint(__FUNCTION__ ": Adding array failed. [" + LongToString(m_dataId) + "]");
-                return NULL;
+                GePrint(String(NR_CURRENT_FUNCTION) + ": Adding array failed. [" + String::IntToString(m_dataId) + "]");
+                return nullptr;
             }
             array = (T*) md->GetIndexArray(index);
             if (!array) {
-                GePrint(__FUNCTION__ ": Even after adding the array, it could not be retrieved. [" + LongToString(m_dataId) + "]");
-                return NULL;
+                GePrint(String(NR_CURRENT_FUNCTION) + ": Even after adding the array, it could not be retrieved. [" + String::IntToString(m_dataId) + "]");
+                return nullptr;
             }
         }
         return array;
     }
 
-    virtual Bool iMDToPort(GvPort* port, GvRun* run, T* array, LONG index) = 0;
+    virtual Bool iMDToPort(GvPort* port, GvRun* run, T* array, Int32 index) = 0;
 
-    virtual Bool iPortToMD(GvPort* port, GvRun* run, T* array, LONG index) = 0;
+    virtual Bool iPortToMD(GvPort* port, GvRun* run, T* array, Int32 index) = 0;
 
     //| MoPortHandler Overrides
 
-    virtual Bool MDToPort(GvPort* port, GvRun* run, MoData* md, LONG index) {
+    virtual Bool MDToPort(GvPort* port, GvRun* run, MoData* md, Int32 index) {
         T* array = EnsureArray(md);
         if (!array) return iMDToPort(port, run, &m_default, 0);
         else return iMDToPort(port, run, array, index);
     }
 
-    virtual Bool PortToMD(GvPort* port, GvRun* run, MoData* md, LONG index) {
+    virtual Bool PortToMD(GvPort* port, GvRun* run, MoData* md, Int32 index) {
         T* array = EnsureArray(md);
-        if (!array) return FALSE;
+        if (!array) return false;
         else return iPortToMD(port, run, array, index);
     }
 
@@ -250,13 +249,13 @@ class MoMatrixPortHandler : public AwesomeMoPortHandler<Matrix> {
 
 public:
 
-    MoMatrixPortHandler(LONG a, const Matrix& b) : super(a, b) { }
+    MoMatrixPortHandler(Int32 a, const Matrix& b) : super(a, b) { }
 
-    virtual Bool iMDToPort(GvPort* port, GvRun* run, Matrix* array, LONG index) {
+    virtual Bool iMDToPort(GvPort* port, GvRun* run, Matrix* array, Int32 index) {
         return port->SetMatrix(array[index], run);
     }
 
-    virtual Bool iPortToMD(GvPort* port, GvRun* run, Matrix* array, LONG index) {
+    virtual Bool iPortToMD(GvPort* port, GvRun* run, Matrix* array, Int32 index) {
         return port->GetMatrix(&array[index], run);
     }
 
@@ -268,123 +267,124 @@ class MoVectorPortHandler : public AwesomeMoPortHandler<Vector> {
 
 public:
 
-    MoVectorPortHandler(LONG a, const Vector& b) : super(a, b) { }
+    MoVectorPortHandler(Int32 a, const Vector& b) : super(a, b) { }
 
-    virtual Bool iMDToPort(GvPort* port, GvRun* run, Vector* array, LONG index) {
+    virtual Bool iMDToPort(GvPort* port, GvRun* run, Vector* array, Int32 index) {
         return port->SetVector(array[index], run);
     }
 
-    virtual Bool iPortToMD(GvPort* port, GvRun* run, Vector* array, LONG index) {
+    virtual Bool iPortToMD(GvPort* port, GvRun* run, Vector* array, Int32 index) {
         return port->GetVector(&array[index], run);
     }
 
 };
 
-class MoIntPortHandler : public AwesomeMoPortHandler<LONG> {
+class MoIntPortHandler : public AwesomeMoPortHandler<Int32> {
 
-    typedef AwesomeMoPortHandler<LONG> super;
+    typedef AwesomeMoPortHandler<Int32> super;
 
 public:
 
-    MoIntPortHandler(LONG a, const LONG& b) : super(a, b) { }
+    MoIntPortHandler(Int32 a, const Int32& b) : super(a, b) { }
 
-    virtual Bool iMDToPort(GvPort* port, GvRun* run, LONG* array, LONG index) {
+    virtual Bool iMDToPort(GvPort* port, GvRun* run, Int32* array, Int32 index) {
         return port->SetInteger(array[index], run);
     }
 
-    virtual Bool iPortToMD(GvPort* port, GvRun* run, LONG* array, LONG index) {
+    virtual Bool iPortToMD(GvPort* port, GvRun* run, Int32* array, Int32 index) {
         return port->GetInteger(&array[index], run);
     }
 
 };
 
-class MoRealPortHandler : public AwesomeMoPortHandler<Real> {
+class MoRealPortHandler : public AwesomeMoPortHandler<Float> {
 
-    typedef AwesomeMoPortHandler<Real> super;
+    typedef AwesomeMoPortHandler<Float> super;
 
 public:
 
-    MoRealPortHandler(LONG a, const Real& b) : super(a, b) { }
+    MoRealPortHandler(Int32 a, const Float& b) : super(a, b) { }
 
-    virtual Bool iMDToPort(GvPort* port, GvRun* run, Real* array, LONG index) {
-        return port->SetReal(array[index], run);
+    virtual Bool iMDToPort(GvPort* port, GvRun* run, Float* array, Int32 index) {
+        return port->SetFloat(array[index], run);
     }
 
-    virtual Bool iPortToMD(GvPort* port, GvRun* run, Real* array, LONG index) {
-        return port->GetReal(&array[index], run);
+    virtual Bool iPortToMD(GvPort* port, GvRun* run, Float* array, Int32 index) {
+        return port->GetFloat(&array[index], run);
     }
 
 };
 
-static MoPortHandler** g_portHandlers = NULL;
-static LONG g_portHandlerCount = 0;
+static MoPortHandler** g_portHandlers = nullptr;
+static Int32 g_portHandlerCount = 0;
 
 static void InitMoPortHandlers() {
     g_portHandlerCount = 14;
-    g_portHandlers = NewMemClear(MoPortHandler*, g_portHandlerCount);
+    iferr (g_portHandlers = NewMemClear(MoPortHandler*, g_portHandlerCount))
+        CriticalStop("Well shit");
 
-    LONG i = 0;
-    g_portHandlers[i++] = gNew(MoMatrixPortHandler, MODATA_MATRIX, Matrix());
-    g_portHandlers[i++] = gNew(MoMatrixPortHandler, MODATA_LASTMAT, Matrix());
-    g_portHandlers[i++] = gNew(MoMatrixPortHandler, MODATA_STARTMAT, Matrix());
+    Int32 i = 0;
+    g_portHandlers[i++] = NewObjClear(MoMatrixPortHandler, MODATA_MATRIX, Matrix());
+    g_portHandlers[i++] = NewObjClear(MoMatrixPortHandler, MODATA_LASTMAT, Matrix());
+    g_portHandlers[i++] = NewObjClear(MoMatrixPortHandler, MODATA_STARTMAT, Matrix());
 
-    g_portHandlers[i++] = gNew(MoVectorPortHandler, MODATA_COLOR, Vector());
-    g_portHandlers[i++] = gNew(MoVectorPortHandler, MODATA_SIZE, Vector(1, 1, 1));
-    g_portHandlers[i++] = gNew(MoVectorPortHandler, MODATA_UVW, Vector());
+    g_portHandlers[i++] = NewObjClear(MoVectorPortHandler, MODATA_COLOR, Vector());
+    g_portHandlers[i++] = NewObjClear(MoVectorPortHandler, MODATA_SIZE, Vector(1, 1, 1));
+    g_portHandlers[i++] = NewObjClear(MoVectorPortHandler, MODATA_UVW, Vector());
 
-    g_portHandlers[i++] = gNew(MoIntPortHandler, MODATA_FLAGS, 0);
-    g_portHandlers[i++] = gNew(MoIntPortHandler, MODATA_SPLINE_SEGMENT, -1);
-    g_portHandlers[i++] = gNew(MoIntPortHandler, MODATA_ALT_INDEX, -1);
+    g_portHandlers[i++] = NewObjClear(MoIntPortHandler, MODATA_FLAGS, 0);
+    g_portHandlers[i++] = NewObjClear(MoIntPortHandler, MODATA_SPLINE_SEGMENT, -1);
+    g_portHandlers[i++] = NewObjClear(MoIntPortHandler, MODATA_ALT_INDEX, -1);
 
-    g_portHandlers[i++] = gNew(MoRealPortHandler, MODATA_WEIGHT, 1.0);
-    g_portHandlers[i++] = gNew(MoRealPortHandler, MODATA_CLONE, 0.0);
-    g_portHandlers[i++] = gNew(MoRealPortHandler, MODATA_TIME, 0.0);
-    g_portHandlers[i++] = gNew(MoRealPortHandler, MODATA_FALLOFF_WGT, 1.0);
-    g_portHandlers[i++] = gNew(MoRealPortHandler, MODATA_GROWTH, 0.0);
+    g_portHandlers[i++] = NewObjClear(MoRealPortHandler, MODATA_WEIGHT, 1.0);
+    g_portHandlers[i++] = NewObjClear(MoRealPortHandler, MODATA_CLONE, 0.0);
+    g_portHandlers[i++] = NewObjClear(MoRealPortHandler, MODATA_TIME, 0.0);
+    g_portHandlers[i++] = NewObjClear(MoRealPortHandler, MODATA_FALLOFF_WGT, 1.0);
+    g_portHandlers[i++] = NewObjClear(MoRealPortHandler, MODATA_GROWTH, 0.0);
 }
 
 static void FreeMoPortHandlers() {
-    for (LONG i=0; i < g_portHandlerCount; i++) {
+    for (Int32 i=0; i < g_portHandlerCount; i++) {
         DeleteObj(g_portHandlers[i]);
     }
     DeleteMem(g_portHandlers);
     g_portHandlerCount = 0;
 }
 
-MoPortHandler* FindMoPortHandler(LONG dataId) {
-    for (LONG i=0; i < g_portHandlerCount; i++) {
+MoPortHandler* FindMoPortHandler(Int32 dataId) {
+    for (Int32 i=0; i < g_portHandlerCount; i++) {
         MoPortHandler* handler = g_portHandlers[i];
         if (handler && handler->GetId() == dataId) return handler;
     }
-    return NULL;
+    return nullptr;
 }
 
 
-static PortInfo* FindPortInformation(LONG id) {
+static PortInfo* FindPortInformation(Int32 id) {
     for (PortInfo* port=g_ports; port->id != 0; port++) {
         if (port->id == id) return port;
     }
-    return NULL;
+    return nullptr;
 }
 
-static Bool NodeHasPort(GvNode* node, LONG id, GvPortIO portIo) {
-    LONG count = 0;
+static Bool NodeHasPort(GvNode* node, Int32 id, GvPortIO portIo) {
+    Int32 count = 0;
     if (portIo == GV_PORT_INPUT) count = node->GetInPortCount();
     else if (portIo == GV_PORT_OUTPUT) count = node->GetOutPortCount();
     else return 0;
 
-    for (LONG i=0; i < count; i++) {
-        GvPort* port = NULL;
+    for (Int32 i=0; i < count; i++) {
+        GvPort* port = nullptr;
         if (portIo == GV_PORT_INPUT) port = node->GetInPort(i);
         else if (portIo == GV_PORT_OUTPUT) port = node->GetOutPort(i);
-        if (port && port->GetMainID() == id) return TRUE;
+        if (port && port->GetMainID() == id) return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 static GeData GetPortGeData(GvNode* node, GvPort* port, GvRun* run, Bool* success) {
-    if (success) *success = FALSE;
+    if (success) *success = false;
     if (!node || !port) return GeData();
 
     GvPortDescription pd;
@@ -400,7 +400,7 @@ static GeData GetPortGeData(GvNode* node, GvPort* port, GvRun* run, Bool* succes
     if (port->GetData(data.data, data.info->value_handler->value_id, run)) {
         CUSTOMDATATYPEPLUGIN* pl = FindCustomDataTypePlugin(data.info->data_handler->data_id);
         if (pl && CallCustomDataType(pl, ConvertGvToGeData)(data.data, 0, result)) {
-            if (success) *success = TRUE;
+            if (success) *success = true;
         }
     }
     GvFreeDynamicData(data);
@@ -408,19 +408,19 @@ static GeData GetPortGeData(GvNode* node, GvPort* port, GvRun* run, Bool* succes
 }
 
 static Bool SetPortGeData(const GeData& ge_data, GvNode* node, GvPort* port, GvRun* run) {
-    if (!node || !port || !run) return FALSE;
+    if (!node || !port || !run) return false;
 
     GvPortDescription pd;
-    if (!node->GetPortDescription(port->GetIO(), port->GetMainID(), &pd)) return FALSE;
+    if (!node->GetPortDescription(port->GetIO(), port->GetMainID(), &pd)) return false;
 
     GvDataInfo* info = GvGetWorld()->GetDataTypeInfo(pd.data_id);
-    if (!info) return FALSE;
+    if (!info) return false;
 
     GvDynamicData data;
     GvAllocDynamicData(node, data, info);
 
     CUSTOMDATATYPEPLUGIN* pl = FindCustomDataTypePlugin(data.info->data_handler->data_id);
-    Bool ok = TRUE;
+    Bool ok = true;
     ok = ok && pl;
     ok = ok && CallCustomDataType(pl, ConvertGeDataToGv)(ge_data, data.data, 0);
     ok = ok && port->SetData(data.data, data.info->value_handler->value_id, run);
@@ -435,7 +435,7 @@ class MoDataNodeData : public GvOperatorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(MoDataNodeData); }
+    static NodeData* Alloc() { return NewObjClear(MoDataNodeData); }
 
     MoDataNodeData() : super() { }
 
@@ -443,8 +443,8 @@ public:
 
     //| GvOperatorData Overrides
 
-    virtual Bool iGetPortDescription(GvNode* node, GvPortIO portIo, LONG id, GvPortDescription* pd) {
-        if (!node || !pd) return NULL;
+    virtual Bool iGetPortDescription(GvNode* node, GvPortIO portIo, Int32 id, GvPortDescription* pd) {
+        if (!node || !pd) return false;
         Bool easyMode = GetEasyMode(node);
 
         PortInfo* p = FindPortInformation(id);
@@ -452,27 +452,27 @@ public:
             pd->name = p->GetName();
             pd->flags = p->descflags;
             pd->data_id = p->dtype;
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
 
     virtual Bool iCreateOperator(GvNode* node) {
-        if (!node) return FALSE;
+        if (!node) return false;
 
-        node->SetParameter(MODATANODE_EASYMODE, GeData(TRUE), DESCFLAGS_SET_0);
+        node->SetParameter(MODATANODE_EASYMODE, GeData(true), DESCFLAGS_SET_0);
 
-        Bool ok = TRUE;
-        ok = ok && node->AddPort(GV_PORT_INPUT, MODATANODE_INDEX) != NULL;
-        ok = ok && node->AddPort(GV_PORT_OUTPUT, MODATANODE_HOST) != NULL;
-        ok = ok && node->AddPort(GV_PORT_OUTPUT, MODATANODE_OBJECT) != NULL;
-        ok = ok && node->AddPort(GV_PORT_OUTPUT, MODATANODE_COUNT) != NULL;
+        Bool ok = true;
+        ok = ok && node->AddPort(GV_PORT_INPUT, MODATANODE_INDEX) != nullptr;
+        ok = ok && node->AddPort(GV_PORT_OUTPUT, MODATANODE_HOST) != nullptr;
+        ok = ok && node->AddPort(GV_PORT_OUTPUT, MODATANODE_OBJECT) != nullptr;
+        ok = ok && node->AddPort(GV_PORT_OUTPUT, MODATANODE_COUNT) != nullptr;
         return ok;
     }
 
-    virtual LONG FillPortsMenu(GvNode* node, BaseContainer& names, BaseContainer& ids,
-            GvValueID valueType, GvPortIO portIo, LONG firstMenuId) {
-        if (!node) return FALSE;
+    virtual Int32 FillPortsMenu(GvNode* node, BaseContainer& names, BaseContainer& ids,
+            GvValueID valueType, GvPortIO portIo, Int32 firstMenuId) {
+        if (!node) return false;
         switch (portIo) {
             case GV_PORT_INPUT:
             case GV_PORT_OUTPUT:
@@ -480,13 +480,13 @@ public:
             case GV_PORT_INVALID:
             case GV_PORT_INPUT_OR_GEDATA:
             default:
-                return TRUE; // TODO: unkown type, dunno how to handle
+                return true; // TODO: unkown type, dunno how to handle
         }
 
         // Check if the node is in easy-mode.
         Bool easyMode = GetEasyMode(node);
 
-        LONG itemCount = 0;
+        Int32 itemCount = 0;
         for (PortInfo* port=g_ports; port->id != 0; port++) {
             if (!port->CheckPortIOMode(portIo, easyMode)) continue;
 
@@ -494,7 +494,7 @@ public:
             if (NodeHasPort(node, port->id, portIo)) name += "&d&";
 
             names.SetString(firstMenuId, name);
-            ids.SetLong(firstMenuId, port->id);
+            ids.SetInt32(firstMenuId, port->id);
             firstMenuId++;
             itemCount++;
         }
@@ -503,12 +503,12 @@ public:
     }
 
     virtual Bool AddToCalculationTable(GvNode* node, GvRun* run) {
-        if (!node || !run || !m_execInfo.md) return FALSE;
+        if (!node || !run || !m_execInfo.md) return false;
         return run->AddNodeToCalculationTable(node);
     }
 
     virtual Bool InitCalculation(GvNode* node, GvCalc* calc, GvRun* run) {
-        if (!node || !calc || !run) return FALSE;
+        if (!node || !calc || !run) return false;
 
         // Retrieve the Execution-Info.
         m_execInfo.Clean();
@@ -517,7 +517,7 @@ public:
             effector->GetExecInfo(&m_execInfo);
         }
         else {
-            return FALSE;
+            return false;
         }
 
         if (m_execInfo.easyOn) {
@@ -525,7 +525,7 @@ public:
         }
 
         if (!GvBuildValuesTable(node, m_values, calc, run, GV_EXISTING_PORTS)) {
-            return FALSE;
+            return false;
         }
         return super::InitCalculation(node, calc, run);
     }
@@ -536,9 +536,9 @@ public:
     }
 
     virtual Bool Calculate(GvNode* node, GvPort* outPort, GvRun* run, GvCalc* calc) {
-        if (!node || !run || !calc || !m_execInfo.md) return FALSE;
+        if (!node || !run || !calc || !m_execInfo.md) return false;
         if (!GvCalculateInValuesTable(node, run, calc, m_values)) {
-            return FALSE;
+            return false;
         }
 
         MoData* md = m_execInfo.md;
@@ -547,15 +547,15 @@ public:
         BaseSelect* sel = m_execInfo.sel;
         XPressoEffector* effector = GetNodeXPressoEffector(node);
 
-        LONG cloneIndex;
+        Int32 cloneIndex;
         GvPort* indexPort = node->GetInPortFirstMainID(MODATANODE_INDEX);
         if (indexPort && indexPort->GetInteger(&cloneIndex, run)) ;
         else cloneIndex = 0;
 
         // Check if the index is in range.
-        LONG cloneCount = md->GetCount();
+        Int32 cloneCount = md->GetCount();
         if (cloneCount <= 0) {
-            return FALSE;
+            return false;
         }
 
         // Limit the clone index.
@@ -568,7 +568,12 @@ public:
 
         if (!outPort) {
             // Iterate over all available in-ports and update the MoData.
-            for (LONG i=0; i < m_values.nr_of_in_values; i++) {
+            #if API_VERSION < 20000
+            Int count = m_values.nr_of_in_values;
+            #else
+            Int count = m_values.in_values.GetCount();
+            #endif
+            for (Int32 i=0; i < count; i++) {
                 GvValue* value = m_values.GetInValue(i);
                 if (!value || value->GetMainID() < MODATANODE_MODATAINDEX_START) {
                     continue;
@@ -580,7 +585,7 @@ public:
                 }
                 ServeDynamicInport(node, port, run, md, cloneIndex);
             }
-            return TRUE;
+            return true;
         }
         else {
             // Serve the current output-port.
@@ -596,18 +601,18 @@ public:
                 case MODATANODE_INDEXOUT:
                     return outPort->SetInteger(cloneIndex, run);
                 case MODATANODE_FALLOFF: {
-                    Real value = 1.0;
+                    Float value = 1.0;
                     if (falloff) {
                         MDArray<Matrix> matArray = md->GetMatrixArray(MODATA_MATRIX);
-                        MDArray<Real> weightArray = md->GetRealArray(MODATA_WEIGHT);
+                        MDArray<Float> weightArray = md->GetRealArray(MODATA_WEIGHT);
 
                         Matrix mat = gen->GetMg() * (matArray ? matArray[cloneIndex] : Matrix());
-                        falloff->Sample(mat.off, &value, TRUE, 0.0);
+                        falloff->Sample(mat.off, &value, true, 0.0);
                     }
-                    return outPort->SetReal(value, run);
+                    return outPort->SetFloat(value, run);
                 }
                 case MODATANODE_SELWEIGHT: {
-                    Bool value = TRUE;
+                    Bool value = true;
                     if (sel) {
                         value = sel->IsSelected(cloneIndex);
                     }
@@ -615,14 +620,14 @@ public:
                 }
                 default:
                     if (!ServeDynamicOutport(node, outPort, run, md, cloneIndex)) {
-                        GePrint("Could not serve out-port " + LongToString(outPort->GetMainID()));
-                        return FALSE;
+                        GePrint("Could not serve out-port " + String::IntToString(outPort->GetMainID()));
+                        return false;
                     }
-                    return TRUE;
+                    return true;
             }
         }
 
-        return FALSE;
+        return false;
     }
 
     virtual const Vector GetBodyColor(GvNode* node) {
@@ -636,13 +641,13 @@ private:
     Bool GetEasyMode(GvNode* node) {
         GeData gEasyMode;
         node->GetParameter(MODATANODE_EASYMODE, gEasyMode, DESCFLAGS_GET_0);
-        Bool easyMode = gEasyMode.GetLong();
+        Bool easyMode = gEasyMode.GetInt32();
         return easyMode;
     }
 
-    Bool ServeDynamicInport(GvNode* node, GvPort* port, GvRun* run, MoData* md, LONG index) {
-        LONG mainId = port->GetMainID();
-        LONG handlerId = MoDataIdToHandlerId(mainId);
+    Bool ServeDynamicInport(GvNode* node, GvPort* port, GvRun* run, MoData* md, Int32 index) {
+        Int32 mainId = port->GetMainID();
+        Int32 handlerId = MoDataIdToHandlerId(mainId);
 
         // If we are in easy mode, we want to use the weight-sub ports.
         if (GetEasyMode(node) && m_execInfo.easyValues && mainId == MODATANODE_EASYWEIGHT) {
@@ -652,8 +657,8 @@ private:
 
         MoPortHandler* handler = FindMoPortHandler(handlerId);
         if (!handler) {
-            GePrint(__FUNCTION__ ": No MoPortHandler found for ID " + LongToString(handlerId));
-            return FALSE;
+            GePrint(String(NR_CURRENT_FUNCTION) + ": No MoPortHandler found for ID " + String::IntToString(handlerId));
+            return false;
         }
 
         switch (mainId) {
@@ -662,39 +667,41 @@ private:
                 if (matrices) {
                     Matrix& mat = matrices[index];
                     Vector size;
-                    if (!port->GetVector(&size, run)) return FALSE;
-                    mat.v1 = mat.v1.GetNormalized() * size.x;
-                    mat.v2 = mat.v2.GetNormalized() * size.y;
-                    mat.v3 = mat.v3.GetNormalized() * size.z;
-                    return TRUE;
+                    if (!port->GetVector(&size, run)) return false;
+                    using namespace c4d_apibridge::M;
+                    Mv1(mat) = Mv1(mat).GetNormalized() * size.x;
+                    Mv2(mat) = Mv2(mat).GetNormalized() * size.y;
+                    Mv3(mat) = Mv3(mat).GetNormalized() * size.z;
+                    return true;
                 }
                 break;
             }
             default:
                 return handler->PortToMD(port, run, md, index);
         }
-        return FALSE;
+        return false;
     }
 
-    Bool ServeDynamicOutport(GvNode* node, GvPort* port, GvRun* run, MoData* md, LONG index) {
-        LONG mainId = port->GetMainID();
-        LONG handlerId = MoDataIdToHandlerId(mainId);
+    Bool ServeDynamicOutport(GvNode* node, GvPort* port, GvRun* run, MoData* md, Int32 index) {
+        Int32 mainId = port->GetMainID();
+        Int32 handlerId = MoDataIdToHandlerId(mainId);
 
         MoPortHandler* handler = FindMoPortHandler(handlerId);
         if (!handler) {
-            GePrint(__FUNCTION__ ": No MoPortHandler found for ID " + LongToString(handlerId));
-            return FALSE;
+            GePrint(String(NR_CURRENT_FUNCTION) + ": No MoPortHandler found for ID " + String::IntToString(handlerId));
+            return false;
         }
 
         switch (mainId) {
             case MODATA_SIZE: {
                 Matrix* matrices = ((AwesomeMoPortHandler<Matrix>*) handler)->EnsureArray(md);
                 if (matrices) {
+                    using namespace c4d_apibridge::M;
                     Matrix& mat = matrices[index];
                     Vector size(
-                            mat.v1.GetLength(),
-                            mat.v2.GetLength(),
-                            mat.v3.GetLength());
+                            Mv1(mat).GetLength(),
+                            Mv2(mat).GetLength(),
+                            Mv3(mat).GetLength());
                     return port->SetVector(size, run);
                 }
                 break;
@@ -702,12 +709,12 @@ private:
             default:
                 return handler->MDToPort(port, run, md, index);
         }
-        return FALSE;
+        return false;
     }
 
-    LONG MoDataIdToHandlerId(LONG mainId) {
+    Int32 MoDataIdToHandlerId(Int32 mainId) {
         // Pre-process the main-id, mapping it to the handler-id.
-        LONG handlerId;
+        Int32 handlerId;
         switch (mainId) {
             case MODATA_SIZE:
                 handlerId = MODATA_MATRIX;
@@ -732,18 +739,18 @@ const Vector MoDataNodeData::c_wrongBodyColor = Vector(1.0, 0.2, 0.05);
 
 Bool RegisterMoDataNode() {
     InitMoPortHandlers();
-    nr::c4d::cleanup([] {
+    niklasrosenstein::c4d::cleanup([] {
         FreeMoPortHandlers();
     });
     return GvRegisterOperatorPlugin(
-            GvOperatorID(ID_MODATANODE),
-            GeLoadString(IDC_MODATANODE_NAME),
-            0,
-            MoDataNodeData::Alloc,
-            "Gvmodata",
-            MODATANODE_VERSION,
-            ID_GV_OPCLASS_TYPE_GENERAL,
-            ID_GV_OPGROUP_TYPE_XPRESSOEFFECTOR,
-            0, // owner
-            raii::AutoBitmap("icons/Gvmodata.tif"));
+        GvOperatorID(ID_MODATANODE),
+        GeLoadString(IDC_MODATANODE_NAME),
+        0,
+        MoDataNodeData::Alloc,
+        "Gvmodata"_s,
+        MODATANODE_VERSION,
+        ID_GV_OPCLASS_TYPE_GENERAL,
+        ID_GV_OPGROUP_TYPE_XPRESSOEFFECTOR,
+        0, // owner
+        raii::AutoBitmap("icons/Gvmodata.tif"_s));
 }

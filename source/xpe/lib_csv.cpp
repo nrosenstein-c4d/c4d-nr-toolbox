@@ -26,14 +26,14 @@
  * Wrapper for the std `isspace` function which will yield an assertion
  * error when passing a unicode character.
  */
-static Bool IsSpace(LONG chr) {
-    if (chr < 0 || chr > 255) return FALSE;
+static Bool IsSpace(Int32 chr) {
+    if (chr < 0 || chr > 255) return false;
     else return isspace(chr);
 }
 
 
-CSVReader::CSVReader(CHAR delimiter, Bool stripWhitespace)
-: m_isOpened(FALSE), m_delimiter(delimiter), m_stripWhitespace(stripWhitespace),
+CSVReader::CSVReader(Char delimiter, Bool stripWhitespace)
+: m_isOpened(false), m_delimiter(delimiter), m_stripWhitespace(stripWhitespace),
   m_error(CSVError_None), m_encoding(STRINGENCODING_UTF8) {
 }
 
@@ -42,16 +42,16 @@ CSVReader::~CSVReader() {
 
 Bool CSVReader::GetRow(CSVRow& destRow) {
     if (!IsOpened() || AtEnd() || m_error != CSVError_None) {
-        return FALSE;
+        return false;
     }
 
-    c4d_misc::BaseArray<CHAR> charArray;
-    CHAR current;
+    maxon::BaseArray<Char> charArray;
+    Char current;
     do {
         // Read the next character from the input file. If the method returns
-        // FALSE, the end of the file has been reached.
+        // false, the end of the file has been reached.
         if (!m_file->ReadChar(&current)) {
-            m_atEnd = TRUE;
+            m_atEnd = true;
             break;
         }
 
@@ -68,28 +68,30 @@ Bool CSVReader::GetRow(CSVRow& destRow) {
         // If the current character is a delimiter, append the current value
         // to the destination row.
         if (current == m_delimiter) {
-            if (destRow.Append(CharArrayToString(charArray)) == NULL) {
+            iferr (destRow.Append(CharArrayToString(charArray))) {
                 m_error = CSVError_Memory;
                 break;
             }
             charArray.Flush();
         }
         // Otherwise, we'll just add the current character to the string.
-        else if (charArray.Append(current) == NULL) {
-            m_error = CSVError_Memory;
-            break;
+        else {
+            iferr (charArray.Append(current)) {
+                m_error = CSVError_Memory;
+                break;
+            }
         }
-    } while (TRUE);
+    } while (true);
 
     if (m_error != CSVError_None) {
-        return FALSE;
+        return false;
     }
 
     // If there are any elements in the current string at this point, we
     // add it to the destination row as well.
     String lastString = CharArrayToString(charArray);
-    if (lastString.Content()) {
-        if (destRow.Append(lastString) == NULL) {
+    if (!c4d_apibridge::IsEmpty(lastString)) {
+        iferr (destRow.Append(lastString)) {
             m_error = CSVError_Memory;
         }
     }
@@ -98,7 +100,7 @@ Bool CSVReader::GetRow(CSVRow& destRow) {
     return m_error == CSVError_None;
 }
 
-String CSVReader::CharArrayToString(const c4d_misc::BaseArray<CHAR>& arr) {
+String CSVReader::CharArrayToString(const maxon::BaseArray<Char>& arr) {
     String string;
     string.SetCString(arr.GetFirst(), arr.GetCount(), m_encoding);
     if (m_stripWhitespace) string = StringStripWhitespace(string);
@@ -107,11 +109,11 @@ String CSVReader::CharArrayToString(const c4d_misc::BaseArray<CHAR>& arr) {
 
 
 Bool BaseCSVTable::Init(const Filename& filename, Bool forceUpdate, Bool* didReload) {
-    if (!forceUpdate && !CheckReload(filename)) return TRUE;
+    if (!forceUpdate && !CheckReload(filename)) return true;
     Bool fExist = GeFExist(filename);
-    if (!m_loaded && !fExist) return TRUE;
-    if (didReload) *didReload = TRUE;
-    m_loaded = FALSE;
+    if (!m_loaded && !fExist) return true;
+    if (didReload) *didReload = true;
+    m_loaded = false;
 
     // Instruct the sub-class to flush all its stored information.
     FlushData();
@@ -129,14 +131,14 @@ Bool BaseCSVTable::Init(const Filename& filename, Bool forceUpdate, Bool* didRel
     if (!reader.Open(filename)) {
         m_error = reader.GetError();
         m_fileError = reader.GetFileError();
-        return FALSE;
+        return false;
     }
 
     // Read in the header of the CSV File if we were instructed to do so.
     if (m_hasHeader) {
         if (!reader.GetRow(m_header)) {
             LoadDataEnd(m_error);
-            return TRUE;
+            return true;
         }
         m_error = ProcessHeader(m_header);
     }
@@ -171,21 +173,21 @@ Bool BaseCSVTable::CheckReload(const Filename& filename) {
     // Update if the filenames are different or if it was modified. Also update if
     // if the file does not exist since this will cause flusing of the stored data.
     Bool reload = differs || !exists || modified;
-    /** /
+    /*
     // DEBUG:
     if (reload) {
         #define BTOS(x) String((x) ? "true" : "false")
         GePrint(__FUNCTION__ ": Reloading(differs: " + BTOS(differs) + ", exists: " + BTOS(exists) + ", modified: " + BTOS(modified));
     }
-    /**/
+    */
 
     return reload;
 }
 
 
 String StringStripWhitespace(const String& ref) {
-    LONG start, end;
-    LONG count = ref.GetLength();
+    Int32 start, end;
+    Int32 count = ref.GetLength();
 
     for (start=0; start < count; start++) {
         if (!IsSpace(ref[start])) break;
@@ -198,24 +200,24 @@ String StringStripWhitespace(const String& ref) {
     return ref.SubStr(start, end - start + 1);
 }
 
-LONG StringToLong(const String& str) {
-    CHAR* cstr = str.GetCStringCopy();
+Int32 StringToLong(const String& str) {
+    Char* cstr = str.GetCStringCopy();
     if (!cstr) {
         return 0;
     }
-    long long int value = strtoll(cstr, NULL, 10);
-    GeFree(cstr);
+    long long int value = strtoll(cstr, nullptr, 10);
+    DeleteMem(cstr);
 
     return value;
 }
 
-Real StringToReal(const String& str) {
-    CHAR* cstr = str.GetCStringCopy();
+Float StringToReal(const String& str) {
+    Char* cstr = str.GetCStringCopy();
     if (!cstr) {
         return 0;
     }
-    Real value = strtod(cstr, NULL);
-    GeFree(cstr);
+    Float value = strtod(cstr, nullptr);
+    DeleteMem(cstr);
 
     return value;
 }

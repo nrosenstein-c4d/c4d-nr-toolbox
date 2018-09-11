@@ -19,10 +19,10 @@ namespace shapes {
     typedef struct ComplexShapeInfo {
 
         ComplexShapeInfo()
-        : target(null), useg(-1), umin(0), umax(0), vseg(-1), vmin(0), vmax(0),
+        : target(nullptr), useg(-1), umin(0), umax(0), vseg(-1), vmin(0), vmax(0),
           optimize(true), optimize_treshold(0.001), multithreading(true), inverse_normals(false),
-          watch_for_phong(true), uvw_dest(null), generate_uvw(true), flip_uvw_x(false),
-          flip_uvw_y(false), rotate_polys(false), data(null) {
+          watch_for_phong(true), uvw_dest(nullptr), generate_uvw(true), flip_uvw_x(false),
+          flip_uvw_y(false), rotate_polys(false), data(nullptr) {
         };
 
         // A pointer to the target-object that is used to store the generated
@@ -32,19 +32,19 @@ namespace shapes {
         PolygonObject* target;
 
         // The number of u-segments and the defintion-range of the u-parameter.
-        LONG useg;
-        Real umin;
-        Real umax;
+        Int32 useg;
+        Float umin;
+        Float umax;
 
         // The number of v-segments and the defintion-range of the v-parameter.
-        LONG vseg;
-        Real vmin;
-        Real vmax;
+        Int32 vseg;
+        Float vmin;
+        Float vmax;
 
         // true if points should be optimizied, false if not. Default is true.
         Bool optimize;
-        LONG optimize_passes;
-        Real optimize_treshold;
+        Int32 optimize_passes;
+        Float optimize_treshold;
 
         // true when multithreading should be done for calculating the
         // the points of the shape. When this is true, OS calls or other
@@ -74,8 +74,8 @@ namespace shapes {
         Bool rotate_polys;
 
         // The space between each segment. Will be filled after init_calculation().
-        Real udelta;
-        Real vdelta;
+        Float udelta;
+        Float vdelta;
 
         // Subclasses of ComplexShape can write a pointer to additional information
         // that is necessary to compute the meshes' vertices, etc. It has to be
@@ -103,10 +103,10 @@ namespace shapes {
         virtual Bool init_calculation(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info);
 
         // This method is called for allocating data required by threads.
-        virtual Bool init_thread_activity(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info, LONG thread_count);
+        virtual Bool init_thread_activity(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info, Int32 thread_count);
 
         // This method is called for freeing data allocated in init_thread_activity.
-        virtual void free_thread_activity(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info, LONG thread_count);
+        virtual void free_thread_activity(BaseObject* op, BaseContainer* bc, ComplexShapeInfo* info, Int32 thread_count);
 
         // Does post-processings to the object stored in *info->target*. It can even be exchanged,
         // but remember to free the old object then. Called before free_calculation().
@@ -117,7 +117,7 @@ namespace shapes {
 
         // This method is called for every pair of u-v parameters to generate
         // the meshes vertices.
-        virtual Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Real u, Real v, LONG thread_index);
+        virtual Vector calc_point(BaseObject* op, ComplexShapeInfo* info, Float u, Float v, Int32 thread_index);
 
       //
       // ObjectData -------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ namespace shapes {
 
         virtual BaseObject* GetVirtualObjects(BaseObject* op, HierarchyHelp* hh);
 
-        virtual Bool Message(GeListNode* node, LONG type, void* ptr);
+        virtual Bool Message(GeListNode* node, Int32 type, void* ptr);
 
     };
 

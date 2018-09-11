@@ -14,7 +14,7 @@
  * language governing permissions and limitations under the License.
  */
 
-#include "misc/legacy.h"
+#include <c4d_apibridge.h>
 #include <c4d_quaternion.h>
 #include <c4d_baseeffectordata.h>
 #include <c4d_falloffdata.h>
@@ -26,26 +26,29 @@
 #include "misc/raii.h"
 #include "menu.h"
 
+using namespace c4d_apibridge::M;
+
 #define CSVEFFECTOR_VERSION 1000
 
-typedef c4d_misc::BaseArray<Real> FloatArray;
+typedef maxon::BaseArray<Float> FloatArray;
 
-static Vector VectorInterpolate(const Vector& a, const Vector& b, Real weight);
+static Vector VectorInterpolate(const Vector& a, const Vector& b, Float weight);
 
-static Matrix MatrixInterpolate(const Matrix& a, const Matrix& b, Real weight);
+static Matrix MatrixInterpolate(const Matrix& a, const Matrix& b, Float weight);
 
-static Real RangeMap(Real value, Real minIn, Real maxIn, Real minOut, Real maxOut);
+static Float RangeMap(Float value, Float minIn, Float maxIn, Float minOut, Float maxOut);
 
 struct RowConfiguration {
-    LONG angle_mode;
+    Int32 angle_mode;
     struct Triple {
-        LONG x, y, z;
-    } pos, scale, rot;
+        Int32 x, y, z;
+    };
+    Triple pos, scale, rot;
 };
 
 struct RowOperationData {
-    Real minstrength;
-    Real maxstrength;
+    Float minstrength;
+    Float maxstrength;
     const FloatArray* minv;
     const FloatArray* maxv;
 };
@@ -56,7 +59,7 @@ class CSVEffectorData : public EffectorData {
 
 public:
 
-    static NodeData* Alloc() { return gNew(CSVEffectorData); }
+    static NodeData* Alloc() { return NewObjClear(CSVEffectorData); }
 
     //| EffectorData Overrides
 
@@ -69,17 +72,17 @@ public:
 
     virtual Bool GetDDescription(GeListNode* node, Description* description, DESCFLAGS_DESC& flags);
 
-    virtual Bool Message(GeListNode* node, LONG typeId, void* pData);
+    virtual Bool Message(GeListNode* node, Int32 typeId, void* pData);
 
 private:
 
     void GetRowConfiguration(const BaseContainer* bc, RowConfiguration* config);
 
-    Real GetRowCell(const RowOperationData& data, const FloatArray& row, LONG index, Real vDefault=0.0);
+    Float GetRowCell(const RowOperationData& data, const FloatArray& row, Int32 index, Float vDefault=0.0);
 
     void FillCycleParameter(BaseContainer* itemdesc);
 
-    void UpdateTable(BaseObject* op, BaseDocument* doc=NULL, BaseContainer* bc=NULL, Bool force=FALSE);
+    void UpdateTable(BaseObject* op, BaseDocument* doc=nullptr, BaseContainer* bc=nullptr, Bool force=false);
 
     MMFloatCSVTable m_table;
 
@@ -93,7 +96,7 @@ void CSVEffectorData::ModifyPoints(
     if (!bc) return;
     UpdateTable(op, doc, bc);
 
-    LONG rowCount = m_table.GetRowCount();
+    Int32 rowCount = m_table.GetRowCount();
     if (rowCount <= 0) return;
 
     // Retrieve the row-configuration.
@@ -102,10 +105,10 @@ void CSVEffectorData::ModifyPoints(
 
     // Obtain the number of clones in the MoData and allocate a Matrix
     // array of such.
-    LONG cloneCount = md->GetCount();
+    Int32 cloneCount = md->GetCount();
     if (cloneCount <= 0) return;
-    c4d_misc::BaseArray<Matrix> matrices;
-    matrices.Resize(Min<LONG>(rowCount, cloneCount));
+    maxon::BaseArray<Matrix> matrices;
+    (void) matrices.Resize(Min<Int32>(rowCount, cloneCount));
 
     // Retrieve the mulipliers from the effector parameters.
     Vector mulPos = bc->GetVector(CSVEFFECTOR_MULTIPLIER_POS);
@@ -118,13 +121,13 @@ void CSVEffectorData::ModifyPoints(
     rowOpData.maxv = &m_table.GetMaxValues();
 
     // Modify the matrices based on the CSV data.
-    for (LONG i=0; i < matrices.GetCount(); i++) {
+    for (Int32 i=0; i < matrices.GetCount(); i++) {
         const FloatArray& row = m_table.GetRow(i % rowCount);
         Matrix& matrix = matrices[i];
 
-        Real h = GetRowCell(rowOpData, row, config.rot.x) * mulRot.x;
-        Real p = GetRowCell(rowOpData, row, config.rot.y) * mulRot.y;
-        Real b = GetRowCell(rowOpData, row, config.rot.z) * mulRot.z;
+        Float h = GetRowCell(rowOpData, row, config.rot.x) * mulRot.x;
+        Float p = GetRowCell(rowOpData, row, config.rot.y) * mulRot.y;
+        Float b = GetRowCell(rowOpData, row, config.rot.z) * mulRot.z;
         if (config.angle_mode == CSVEFFECTOR_ANGLEMODE_DEGREES) {
             h = Rad(h);
             p = Rad(p);
@@ -132,32 +135,32 @@ void CSVEffectorData::ModifyPoints(
         }
         matrix = HPBToMatrix(Vector(h, p, b), ROTATIONORDER_DEFAULT);
 
-        Real xScale = GetRowCell(rowOpData, row, config.scale.x, 1.0) * mulScale.x;
-        Real yScale = GetRowCell(rowOpData, row, config.scale.y, 1.0) * mulScale.y;
-        Real zScale = GetRowCell(rowOpData, row, config.scale.z, 1.0) * mulScale.z;
-        matrix.v1 *= xScale; // Vector(xScale, 0, 0);
-        matrix.v2 *= yScale; // Vector(0, yScale, 0);
-        matrix.v3 *= zScale; // Vector(0, 0, zScale);
+        Float xScale = GetRowCell(rowOpData, row, config.scale.x, 1.0) * mulScale.x;
+        Float yScale = GetRowCell(rowOpData, row, config.scale.y, 1.0) * mulScale.y;
+        Float zScale = GetRowCell(rowOpData, row, config.scale.z, 1.0) * mulScale.z;
+        Mv1(matrix) *= xScale; // Vector(xScale, 0, 0);
+        Mv2(matrix) *= yScale; // Vector(0, yScale, 0);
+        Mv3(matrix) *= zScale; // Vector(0, 0, zScale);
 
-        matrix.off.x = GetRowCell(rowOpData, row, config.pos.x) * mulPos.x;
-        matrix.off.y = GetRowCell(rowOpData, row, config.pos.y) * mulPos.y;
-        matrix.off.z = GetRowCell(rowOpData, row, config.pos.z) * mulPos.z;
+        Moff(matrix).x = GetRowCell(rowOpData, row, config.pos.x) * mulPos.x;
+        Moff(matrix).y = GetRowCell(rowOpData, row, config.pos.y) * mulPos.y;
+        Moff(matrix).z = GetRowCell(rowOpData, row, config.pos.z) * mulPos.z;
     }
 
     // Retrieve the MD Matrices and additional important information
     // before finally adjusting the clones' matrices.
     MDArray<Matrix> destMatrices = md->GetMatrixArray(MODATA_MATRIX);
-    MDArray<LONG> flagArray = md->GetLongArray(MODATA_FLAGS);
-    MDArray<Real> weightArray = md->GetRealArray(MODATA_WEIGHT);
+    MDArray<Int32> flagArray = md->GetLongArray(MODATA_FLAGS);
+    MDArray<Float> weightArray = md->GetRealArray(MODATA_WEIGHT);
     if (!destMatrices) {
         GePrint("> WARNING: No Matrix Array could be retrieved."); // DEBUG
         return;
     }
 
     // Find the MoGraph selection tag.
-    BaseTag* moTag = NULL;
+    BaseTag* moTag = nullptr;
     String moTagName = bc->GetString(ID_MG_BASEEFFECTOR_SELECTION);
-    if (moTagName.Content()) moTag = gen->GetFirstTag();
+    if (!c4d_apibridge::IsEmpty(moTagName)) moTag = gen->GetFirstTag();
     while (moTag) {
         if (moTag->IsInstanceOf(Tmgselection) && moTag->GetName() == moTagName) {
             break;
@@ -166,24 +169,24 @@ void CSVEffectorData::ModifyPoints(
     }
 
     // Retrieve the BaseSelect from the MoGraph selection tag.
-    BaseSelect* moSelection = NULL;
+    BaseSelect* moSelection = nullptr;
     if (moTag && moTag->IsInstanceOf(Tmgselection)) {
         GetMGSelectionMessage data;
         moTag->Message(MSG_GET_MODATASELECTION, &data);
         moSelection = data.sel;
     }
 
-    C4D_Falloff* falloff = NULL;
+    C4D_Falloff* falloff = nullptr;
     if (GetEffectorFlags() & EFFECTORFLAGS_HASFALLOFF) {
         falloff = GetFalloff();
-        if (falloff && !falloff->InitFalloff(bc, doc, op)) falloff = NULL;
+        if (falloff && !falloff->InitFalloff(bc, doc, op)) falloff = nullptr;
     }
     const Matrix mParent = gen->GetMg();
 
     // And figure how to iterate over the MD Matrices.
-    LONG offset = bc->GetLong(CSVEFFECTOR_OFFSET);
+    Int32 offset = bc->GetInt32(CSVEFFECTOR_OFFSET);
     Bool repeat = bc->GetBool(CSVEFFECTOR_REPEAT);
-    LONG start = 0, end = cloneCount;
+    Int32 start = 0, end = cloneCount;
     if (!repeat) {
         start = offset;
         end = offset + rowCount;
@@ -192,14 +195,14 @@ void CSVEffectorData::ModifyPoints(
         offset = 0;
     }
 
-    Real weight = 0.0;
+    Float weight = 0.0;
 
     // Now apply the changes.
-    for (LONG i=start; i < end; i++) {
+    for (Int32 i=start; i < end; i++) {
         // Don't calculate the particle if not necessary.
         if (moSelection && !moSelection->IsSelected(i)) continue;
         if (flagArray) {
-            LONG flag = flagArray[i];
+            Int32 flag = flagArray[i];
             if (!(flag & MOGENFLAG_CLONE_ON) || (flag & MOGENFLAG_DISABLE)) {
                 continue;
             }
@@ -210,8 +213,8 @@ void CSVEffectorData::ModifyPoints(
 
         // Sample the weighting of the current particle.
         if (falloff) {
-            Real moWeight = weightArray ? weightArray[i] : 1.0;
-            falloff->Sample((mDest * mParent).off, &weight, TRUE, moWeight);
+            Float moWeight = weightArray ? weightArray[i] : 1.0;
+            falloff->Sample((mDest * mParent).off, &weight, true, moWeight);
         }
 
         // The offset matrix is relative to the particles matrix. Make it absolute.
@@ -229,40 +232,40 @@ void CSVEffectorData::ModifyPoints(
 }
 
 Bool CSVEffectorData::Init(GeListNode* node) {
-    if (!node || !super::Init(node)) return FALSE;
+    if (!node || !super::Init(node)) return false;
     BaseContainer* bc = ((BaseList2D*) node)->GetDataInstance();
-    if (!bc) return FALSE;
+    if (!bc) return false;
 
     bc->SetFilename(CSVEFFECTOR_FILENAME, Filename(""));
-    bc->SetString(CSVEFFECTOR_STATS, "");
-    bc->SetBool(CSVEFFECTOR_HASHEADER, TRUE);
-    bc->SetLong(CSVEFFECTOR_OFFSET, 0);
+    bc->SetString(CSVEFFECTOR_STATS, ""_s);
+    bc->SetBool(CSVEFFECTOR_HASHEADER, true);
+    bc->SetInt32(CSVEFFECTOR_OFFSET, 0);
 
-    bc->SetBool(CSVEFFECTOR_REPEAT, TRUE);
-    bc->SetLong(CSVEFFECTOR_DELIMITER, CSVEFFECTOR_DELIMITER_COMMA);
-    bc->SetLong(CSVEFFECTOR_ANGLEMODE, CSVEFFECTOR_ANGLEMODE_DEGREES);
+    bc->SetBool(CSVEFFECTOR_REPEAT, true);
+    bc->SetInt32(CSVEFFECTOR_DELIMITER, CSVEFFECTOR_DELIMITER_COMMA);
+    bc->SetInt32(CSVEFFECTOR_ANGLEMODE, CSVEFFECTOR_ANGLEMODE_DEGREES);
 
-    bc->SetLong(CSVEFFECTOR_ASSIGNMENT_XPOS, -1);
-    bc->SetLong(CSVEFFECTOR_ASSIGNMENT_YPOS, -1);
-    bc->SetLong(CSVEFFECTOR_ASSIGNMENT_ZPOS, -1);
+    bc->SetInt32(CSVEFFECTOR_ASSIGNMENT_XPOS, -1);
+    bc->SetInt32(CSVEFFECTOR_ASSIGNMENT_YPOS, -1);
+    bc->SetInt32(CSVEFFECTOR_ASSIGNMENT_ZPOS, -1);
 
-    bc->SetLong(CSVEFFECTOR_ASSIGNMENT_XSCALE, -1);
-    bc->SetLong(CSVEFFECTOR_ASSIGNMENT_YSCALE, -1);
-    bc->SetLong(CSVEFFECTOR_ASSIGNMENT_ZSCALE, -1);
+    bc->SetInt32(CSVEFFECTOR_ASSIGNMENT_XSCALE, -1);
+    bc->SetInt32(CSVEFFECTOR_ASSIGNMENT_YSCALE, -1);
+    bc->SetInt32(CSVEFFECTOR_ASSIGNMENT_ZSCALE, -1);
 
-    bc->SetLong(CSVEFFECTOR_ASSIGNMENT_XROT, -1);
-    bc->SetLong(CSVEFFECTOR_ASSIGNMENT_YROT, -1);
-    bc->SetLong(CSVEFFECTOR_ASSIGNMENT_ZROT, -1);
+    bc->SetInt32(CSVEFFECTOR_ASSIGNMENT_XROT, -1);
+    bc->SetInt32(CSVEFFECTOR_ASSIGNMENT_YROT, -1);
+    bc->SetInt32(CSVEFFECTOR_ASSIGNMENT_ZROT, -1);
 
     bc->SetVector(CSVEFFECTOR_MULTIPLIER_POS, Vector(1));
     bc->SetVector(CSVEFFECTOR_MULTIPLIER_SCALE, Vector(1));
     bc->SetVector(CSVEFFECTOR_MULTIPLIER_ROT, Vector(1));
-    return TRUE;
+    return true;
 }
 
 Bool CSVEffectorData::GetDDescription(
             GeListNode* node, Description* desc, DESCFLAGS_DESC& flags) {
-    if (!node || !super::GetDDescription(node, desc, flags)) return FALSE;
+    if (!node || !super::GetDDescription(node, desc, flags)) return false;
 
     // Fill in the cycle-fields of the assignment parameters.
     AutoAlloc<AtomArray> arr;
@@ -276,30 +279,30 @@ Bool CSVEffectorData::GetDDescription(
     FillCycleParameter(desc->GetParameterI(CSVEFFECTOR_ASSIGNMENT_YROT, arr));
     FillCycleParameter(desc->GetParameterI(CSVEFFECTOR_ASSIGNMENT_ZROT, arr));
 
-    return TRUE;
+    return true;
 }
 
-Bool CSVEffectorData::Message(GeListNode* node, LONG type, void* pData) {
-    if (!node) return FALSE;
+Bool CSVEffectorData::Message(GeListNode* node, Int32 type, void* pData) {
+    if (!node) return false;
     switch (type) {
     case MSG_DESCRIPTION_COMMAND: {
         DescriptionCommand* data = (DescriptionCommand*) pData;
-        if (!data) return FALSE;
-        if (data->id == CSVEFFECTOR_FORCERELOAD) {
-            UpdateTable((BaseObject*) node, NULL, NULL, TRUE);
+        if (!data) return false;
+        if (c4d_apibridge::GetDescriptionID(data) == CSVEFFECTOR_FORCERELOAD) {
+            UpdateTable((BaseObject*) node, nullptr, nullptr, true);
         }
         break;
     }
     case MSG_DESCRIPTION_POSTSETPARAMETER: {
         DescriptionPostSetValue* data = (DescriptionPostSetValue*) pData;
-        if (!data) return FALSE;
-        LONG id = (*data->descid)[data->descid->GetDepth() - 1].id;
+        if (!data) return false;
+        Int32 id = (*data->descid)[data->descid->GetDepth() - 1].id;
 
         switch (id) {
         case CSVEFFECTOR_HASHEADER:
         case CSVEFFECTOR_FILENAME:
         case CSVEFFECTOR_DELIMITER:
-            UpdateTable((BaseObject*) node, NULL, NULL, TRUE);
+            UpdateTable((BaseObject*) node, nullptr, nullptr, true);
             break;
         default:
             break;
@@ -313,24 +316,24 @@ Bool CSVEffectorData::Message(GeListNode* node, LONG type, void* pData) {
 }
 
 void CSVEffectorData::GetRowConfiguration(const BaseContainer* bc, RowConfiguration* config) {
-    config->pos.x = bc->GetLong(CSVEFFECTOR_ASSIGNMENT_XPOS);
-    config->pos.y = bc->GetLong(CSVEFFECTOR_ASSIGNMENT_YPOS);
-    config->pos.z = bc->GetLong(CSVEFFECTOR_ASSIGNMENT_ZPOS);
-    config->scale.x = bc->GetLong(CSVEFFECTOR_ASSIGNMENT_XSCALE);
-    config->scale.y = bc->GetLong(CSVEFFECTOR_ASSIGNMENT_YSCALE);
-    config->scale.z = bc->GetLong(CSVEFFECTOR_ASSIGNMENT_ZSCALE);
-    config->rot.x = bc->GetLong(CSVEFFECTOR_ASSIGNMENT_XROT);
-    config->rot.y = bc->GetLong(CSVEFFECTOR_ASSIGNMENT_YROT);
-    config->rot.z = bc->GetLong(CSVEFFECTOR_ASSIGNMENT_ZROT);
-    config->angle_mode = bc->GetLong(CSVEFFECTOR_ANGLEMODE);
+    config->pos.x = bc->GetInt32(CSVEFFECTOR_ASSIGNMENT_XPOS);
+    config->pos.y = bc->GetInt32(CSVEFFECTOR_ASSIGNMENT_YPOS);
+    config->pos.z = bc->GetInt32(CSVEFFECTOR_ASSIGNMENT_ZPOS);
+    config->scale.x = bc->GetInt32(CSVEFFECTOR_ASSIGNMENT_XSCALE);
+    config->scale.y = bc->GetInt32(CSVEFFECTOR_ASSIGNMENT_YSCALE);
+    config->scale.z = bc->GetInt32(CSVEFFECTOR_ASSIGNMENT_ZSCALE);
+    config->rot.x = bc->GetInt32(CSVEFFECTOR_ASSIGNMENT_XROT);
+    config->rot.y = bc->GetInt32(CSVEFFECTOR_ASSIGNMENT_YROT);
+    config->rot.z = bc->GetInt32(CSVEFFECTOR_ASSIGNMENT_ZROT);
+    config->angle_mode = bc->GetInt32(CSVEFFECTOR_ANGLEMODE);
 }
 
-Real CSVEffectorData::GetRowCell(const RowOperationData& data, const FloatArray& row, LONG index, Real vDefault) {
+Float CSVEffectorData::GetRowCell(const RowOperationData& data, const FloatArray& row, Int32 index, Float vDefault) {
     if (index < 0 || index >= row.GetCount()) return vDefault;
-    Real value = row[index];
-    Real minv = (*data.minv)[index];
-    Real maxv = (*data.maxv)[index];
-    Real x = RangeMap(value, minv, maxv, data.minstrength, data.maxstrength);
+    Float value = row[index];
+    Float minv = (*data.minv)[index];
+    Float maxv = (*data.maxv)[index];
+    Float x = RangeMap(value, minv, maxv, data.minstrength, data.maxstrength);
     return value * x;
 }
 
@@ -346,11 +349,11 @@ void CSVEffectorData::UpdateTable(BaseObject* op, BaseDocument* doc, BaseContain
     if (!doc) doc = op->GetDocument();
 
     // Retrieve the delimiter and validate it.
-    LONG delimiter = bc->GetLong(CSVEFFECTOR_DELIMITER);
+    Int32 delimiter = bc->GetInt32(CSVEFFECTOR_DELIMITER);
     if (delimiter < 0 || delimiter > 255) {
         delimiter = CSVEFFECTOR_DELIMITER_COMMA;
     }
-    m_table.SetDelimiter((CHAR) delimiter);
+    m_table.SetDelimiter((Char) delimiter);
     m_table.SetHasHeader(bc->GetBool(CSVEFFECTOR_HASHEADER));
 
     // Retrieve the filename and make it relative if it does not
@@ -360,7 +363,7 @@ void CSVEffectorData::UpdateTable(BaseObject* op, BaseDocument* doc, BaseContain
         filename = doc->GetDocumentPath() + filename;
     }
 
-    Bool updated = FALSE;
+    Bool updated = false;
     Bool success = m_table.Init(filename, force, &updated);
     if (updated) {
         // The description must be reloaded if the table did update.
@@ -369,8 +372,8 @@ void CSVEffectorData::UpdateTable(BaseObject* op, BaseDocument* doc, BaseContain
         // Update the statistics information in the effector parameters.
         String stats;
         if (m_table.Loaded()) {
-            String rowCnt = LongToString(m_table.GetRowCount());
-            String colCnt = LongToString(m_table.GetColumnCount());
+            String rowCnt = String::IntToString(m_table.GetRowCount());
+            String colCnt = String::IntToString(m_table.GetColumnCount());
             stats = GeLoadString(IDC_CSVEFFECTOR_STATS_FORMAT, rowCnt, colCnt);
         }
         else if (success) {
@@ -382,38 +385,38 @@ void CSVEffectorData::UpdateTable(BaseObject* op, BaseDocument* doc, BaseContain
         bc->SetString(CSVEFFECTOR_STATS, stats);
     }
     else if (!success) {
-        GePrint("No success initializing CSV file: " + LongToString(m_table.GetLastError()));
+        GePrint("No success initializing CSV file: " + String::IntToString(m_table.GetLastError()));
     }
 }
 
 //| Functions
 //| ==========================================================================
 
-Vector VectorInterpolate(const Vector& a, const Vector& b, Real weight) {
+Vector VectorInterpolate(const Vector& a, const Vector& b, Float weight) {
     return a + (b - a) * weight;
 }
 
-Real VectorLengthInterpolate(const Vector& a, const Vector& b, Real weight) {
-    Real base = a.GetSquaredLength();
+Float VectorLengthInterpolate(const Vector& a, const Vector& b, Float weight) {
+    Float base = a.GetSquaredLength();
     return Sqrt(base + (b.GetSquaredLength() - base) * weight);
 }
 
-Matrix MatrixInterpolate(const Matrix& a, const Matrix& b, Real weight) {
-    Matrix mA = a; mA.Normalize();
-    Matrix mB = b; mB.Normalize();
+Matrix MatrixInterpolate(const Matrix& a, const Matrix& b, Float weight) {
+    Matrix mA = a; c4d_apibridge::Normalize(mA);
+    Matrix mB = b; c4d_apibridge::Normalize(mB);
     Quaternion qA, qB;
     qA.SetMatrix(mA);
     qB.SetMatrix(mB);
 
     Matrix m = QSlerp(qA, qB, weight).GetMatrix();
-    m.off = VectorInterpolate(a.off, b.off, weight);
-    m.v1 *= VectorLengthInterpolate(a.v1, b.v1, weight);
-    m.v2 *= VectorLengthInterpolate(a.v2, b.v2, weight);
-    m.v3 *= VectorLengthInterpolate(a.v3, b.v3, weight);
+    Moff(m) = VectorInterpolate(Moff(a), Moff(b), weight);
+    Mv1(m) *= VectorLengthInterpolate(Mv1(a), Mv1(b), weight);
+    Mv2(m) *= VectorLengthInterpolate(Mv2(a), Mv2(b), weight);
+    Mv3(m) *= VectorLengthInterpolate(Mv3(a), Mv3(b), weight);
     return m;
 }
 
-Real RangeMap(Real value, Real minIn, Real maxIn, Real minOut, Real maxOut) {
+Float RangeMap(Float value, Float minIn, Float maxIn, Float minOut, Float maxOut) {
     return ((value - minIn) / (maxIn - minIn)) * (maxOut - minOut) + minOut;
 }
 
@@ -421,15 +424,11 @@ Real RangeMap(Real value, Real minIn, Real maxIn, Real minOut, Real maxOut) {
 Bool RegisterCSVEffector() {
     menu::root().AddPlugin(IDS_MENU_EFFECTORS, Ocsveffector);
     return RegisterEffectorPlugin(
-            Ocsveffector,
-            GeLoadString(IDC_CSVEFFECTOR_NAME),
-            OBJECT_MODIFIER | PLUGINFLAG_HIDEPLUGINMENU | OBJECT_CALL_ADDEXECUTION,
-            CSVEffectorData::Alloc,
-            "Ocsveffector",
-            raii::AutoBitmap("icons/Ocsveffector.tif"),
-            CSVEFFECTOR_VERSION);
+        Ocsveffector,
+        GeLoadString(IDC_CSVEFFECTOR_NAME),
+        OBJECT_MODIFIER | PLUGINFLAG_HIDEPLUGINMENU | OBJECT_CALL_ADDEXECUTION,
+        CSVEffectorData::Alloc,
+        "Ocsveffector"_s,
+        raii::AutoBitmap("icons/Ocsveffector.tif"_s),
+        CSVEFFECTOR_VERSION);
 }
-
-
-
-

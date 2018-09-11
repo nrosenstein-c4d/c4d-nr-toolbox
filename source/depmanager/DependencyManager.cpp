@@ -9,20 +9,22 @@
 #define PRINT_PREFIX "[nr-toolbox/DependencyManager]: "
 
 #include <c4d.h>
+#include <c4d_apibridge.h>
 #include <customgui_bitmapbutton.h>
 #include <customgui_inexclude.h>
 #include <lib_iconcollection.h>
-#include <Olayer.h>
-#include <nr/c4d/util.h>
-#include <nr/c4d/gui.h>
-#include <nr/c4d/tree_node.h>
-#include <nr/c4d/cleanup.h>
+#include <olayer.h>
+#include <NiklasRosenstein/c4d/utils.hpp>
+#include <NiklasRosenstein/c4d/gui.hpp>
+#include <NiklasRosenstein/c4d/tree_node.hpp>
+#include <NiklasRosenstein/c4d/cleanup.hpp>
 #include "res/c4d_symbols.h"
 #include "depmanager.h"
 #include "misc/print.h"
 #include "misc/raii.h"
 #include "menu.h"
 
+namespace nr { using namespace niklasrosenstein; }
 using namespace nr::depmanager;
 
 static const Int32 DIALOG_COUNT = 4;
@@ -327,13 +329,13 @@ private:
   Type m_type;
   DisplayFlags m_display;
 
-  nr::datastructures::tree_node* shallow_copy() const override { return new DepNode; }
+  nr::c4d::tree_node* shallow_copy() const override { return NewObjClear(DepNode); }
 
 };
 
-class DepNodeRebuildTable : private maxon::HashMap<BaseList2D*, DepNode*> {
+class DepNodeRebuildTable : private c4d_apibridge::HashMap<BaseList2D*, DepNode*> {
 
-  typedef maxon::HashMap<BaseList2D*, DepNode*> super;
+  typedef c4d_apibridge::HashMap<BaseList2D*, DepNode*> super;
 
   DepNode::Type m_type;
 
@@ -834,7 +836,7 @@ public:
 
     // Render the layout.
     layout->icon.Draw(area, xpos, ypos);
-    if (layout->text.Content()) {
+    if (!c4d_apibridge::IsEmpty(layout->text)) {
       Int32 flags = DRAWTEXT_HALIGN_LEFT | DRAWTEXT_VALIGN_CENTER;
       area->DrawSetTextCol(layout->textcol, bg_color);
       area->DrawText(layout->text, xpos + layout->textx, ymid, flags);
@@ -876,7 +878,7 @@ public:
     }
   }
 
-  virtual Bool DoubleClick(void* root, void* ud, void* obj, Int32 column, MouseInfo* mouse) {
+  virtual Int32 DoubleClick(void* root, void* ud, void* obj, Int32 column, MouseInfo* mouse) {
     if (!root || !ud || !obj) return true; // event catched
 
     Bool handled = false;
@@ -1235,7 +1237,9 @@ public:
     }
   }
 
-} *g_typemng = nullptr;
+};
+
+static DependencyTypeManager *g_typemng = nullptr;
 
 class DependencyManager_Dialog : public GeDialog {
 
@@ -1322,7 +1326,7 @@ public:
       bc.SetInt32(BITMAPBUTTON_ICONID1, RESOURCEIMAGE_EYEINACTIVE);
       bc.SetInt32(BITMAPBUTTON_ICONID2, RESOURCEIMAGE_EYEACTIVE);
       bc.SetBool(BITMAPBUTTON_TOGGLE, true);
-      AddCustomGui(BTN_SHOWEMPTY, CUSTOMGUI_BITMAPBUTTON, "", 0, 16, 16, bc);
+      AddCustomGui(BTN_SHOWEMPTY, CUSTOMGUI_BITMAPBUTTON, ""_s, 0, 16, 16, bc);
 
       // "New Window" icon.
       bc.SetBool(BITMAPBUTTON_BUTTON, true);
@@ -1330,13 +1334,13 @@ public:
       bc.SetInt32(BITMAPBUTTON_ICONID1, RESOURCEIMAGE_AMDUPLICATE);
       bc.SetBool(BITMAPBUTTON_TOGGLE, true);
       m_showempty_bmp = static_cast<BitmapButtonCustomGui*>(
-          AddCustomGui(BTN_DUPLICATE, CUSTOMGUI_BITMAPBUTTON, "", 0, 16, 16, bc)
+          AddCustomGui(BTN_DUPLICATE, CUSTOMGUI_BITMAPBUTTON, ""_s, 0, 16, 16, bc)
       );
 
       GroupEnd();
     }
 
-    if (GroupBegin(GRP_MAIN, BFH_SCALEFIT | BFV_SCALEFIT, 0, 0, "", 0)) {
+    if (GroupBegin(GRP_MAIN, BFH_SCALEFIT | BFV_SCALEFIT, 0, 0, ""_s, 0)) {
       // Initialize the parameters for a TreeViewCustomGUI which will display
       // the dependency tree.
       BaseContainer bc;
@@ -1344,7 +1348,7 @@ public:
       bc.SetBool(TREEVIEW_ALTERNATE_BG, true);  // Swap background color for each row
       bc.SetBool(TREEVIEW_NOENTERRENAME, true); // No renaming in the tree-view when pressing ENTER
       m_treeview = static_cast<TreeViewCustomGui*>(
-          AddCustomGui(WDG_TREEVIEW, CUSTOMGUI_TREEVIEW, "", BFH_SCALEFIT | BFV_SCALEFIT, 0, 0, bc)
+          AddCustomGui(WDG_TREEVIEW, CUSTOMGUI_TREEVIEW, ""_s, BFH_SCALEFIT | BFV_SCALEFIT, 0, 0, bc)
       );
       if (!m_treeview) return false;
 

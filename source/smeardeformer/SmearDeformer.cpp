@@ -8,7 +8,7 @@
  * the object due to multiple redraws & calculations per frame.
  */
 
-#include "misc/legacy.h"
+#include <c4d.h>
 #include "nrUtils/Marker.h"
 #include "nrUtils/Normals.h"
 
@@ -44,8 +44,8 @@ public:
 
     virtual Bool ModifyObject(
             BaseObject* mod, BaseDocument* doc, BaseObject* dest_,
-            const Matrix& mg_dest, const Matrix& mg_mod, Real lod,
-            LONG flags, BaseThread* thread);
+            const Matrix& mg_dest, const Matrix& mg_mod, Float lod,
+            Int32 flags, BaseThread* thread);
 
     virtual void CheckDirty(BaseObject* op, BaseDocument* doc);
 
@@ -69,7 +69,7 @@ private:
         return EnsureEngines(((BaseObject*) node)->GetDataInstance());
     }
 
-    typedef c4d_misc::HashMap<LLONG, SmearHistory> HistoryMap;
+    typedef c4d_apibridge::HashMap<Int64, SmearHistory> HistoryMap;
 
     HistoryMap m_history;
     BaseTime m_prevtime;
@@ -80,7 +80,7 @@ private:
 
 
 SmearDeformer::SmearDeformer()
-: super(), m_weighting_engine(NULL), m_smearing_engine(NULL) {
+: super(), m_weighting_engine(nullptr), m_smearing_engine(nullptr) {
 }
 
 SmearDeformer::~SmearDeformer() {
@@ -88,35 +88,35 @@ SmearDeformer::~SmearDeformer() {
 
 Bool SmearDeformer::Init(GeListNode* node) {
     if (!node || !super::Init(node)) {
-        return FALSE;
+        return false;
     }
     const EnginePlugin* pl_weight = GetFirstEnginePlugin(ID_WEIGHTINGENGINE);
     const EnginePlugin* pl_smear = GetFirstEnginePlugin(ID_SMEARINGENGINE);
 
     BaseContainer* bc = ((BaseObject*) node)->GetDataInstance();
 
-    bc->SetBool(SMEARDEFORMER_INTERACTIVE, FALSE);
-    bc->SetReal(SMEARDEFORMER_STRENGTH, 1.0);
+    bc->SetBool(SMEARDEFORMER_INTERACTIVE, false);
+    bc->SetFloat(SMEARDEFORMER_STRENGTH, 1.0);
 
-    bc->SetLong(SMEARDEFORMER_WEIGHTINGENGINE, pl_weight ? pl_weight->id : 0);
-    bc->SetBool(SMEARDEFORMER_WEIGHTINGINVERSE, FALSE);
+    bc->SetInt32(SMEARDEFORMER_WEIGHTINGENGINE, pl_weight ? pl_weight->id : 0);
+    bc->SetBool(SMEARDEFORMER_WEIGHTINGINVERSE, false);
 
     GeData ge_spline(CUSTOMDATATYPE_SPLINE, DEFAULTVALUE);
     SplineData* spline = (SplineData*) ge_spline.GetCustomDataType(CUSTOMDATATYPE_SPLINE);
 
     if (spline) spline->MakeLinearSplineLinear(2);
-    bc->SetBool(SMEARDEFORMER_WEIGHTINGUSEPLINE, FALSE);
+    bc->SetBool(SMEARDEFORMER_WEIGHTINGUSEPLINE, false);
     bc->SetData(SMEARDEFORMER_WEIGHTINGSPLINE, ge_spline);
 
     if (spline) {
         spline->MakeLinearSplineLinear(2);
         spline->Mirror();
     }
-    bc->SetBool(SMEARDEFORMER_EASEWEIGHT, TRUE);
+    bc->SetBool(SMEARDEFORMER_EASEWEIGHT, true);
     bc->SetData(SMEARDEFORMER_EASEWEIGHTSPLINE, ge_spline);
 
-    bc->SetLong(SMEARDEFORMER_SMEARINGENGINE, pl_smear ? pl_smear->id : 0);
-    return TRUE;
+    bc->SetInt32(SMEARDEFORMER_SMEARINGENGINE, pl_smear ? pl_smear->id : 0);
+    return true;
 }
 
 void SmearDeformer::Free(GeListNode* node) {
@@ -131,17 +131,17 @@ void SmearDeformer::Free(GeListNode* node) {
 
 Bool SmearDeformer::GetDDescription(GeListNode* node, Description* desc, DESCFLAGS_DESC& flags) {
     if (!node || !desc || !desc->LoadDescription(Osmeardeformer)) {
-        return FALSE;
+        return false;
     }
 
     BaseContainer cycle_weight;
     BaseContainer cycle_smear;
 
     AutoAlloc<EnginePluginIterator> it;
-    if (!it) return FALSE;
+    if (!it) return false;
 
-    LONG weight_id = -1;
-    LONG smear_id = -1;
+    Int32 weight_id = -1;
+    Int32 smear_id = -1;
     for (; !it->AtEnd(); ++(*it)) {
         const EnginePlugin* pl = it->GetPtr();
         switch (pl->base) {
@@ -158,14 +158,14 @@ Bool SmearDeformer::GetDDescription(GeListNode* node, Description* desc, DESCFLA
 
     EnsureEngines(node);
     if (m_weighting_engine) {
-        if (!m_weighting_engine->EnhanceDescription(desc)) return FALSE;
+        if (!m_weighting_engine->EnhanceDescription(desc)) return false;
     }
     if (m_smearing_engine) {
-        if (!m_smearing_engine->EnhanceDescription(desc)) return FALSE;
+        if (!m_smearing_engine->EnhanceDescription(desc)) return false;
     }
 
     AutoAlloc<AtomArray> arr;
-    if (!arr) return FALSE;
+    if (!arr) return false;
     BaseContainer* item_weight = desc->GetParameterI(SMEARDEFORMER_WEIGHTINGENGINE, arr);
     BaseContainer* item_smear = desc->GetParameterI(SMEARDEFORMER_SMEARINGENGINE, arr);
 
@@ -174,15 +174,15 @@ Bool SmearDeformer::GetDDescription(GeListNode* node, Description* desc, DESCFLA
 
 
     flags |= DESCFLAGS_DESC_LOADED;
-    return TRUE;
+    return true;
 }
 
 Bool SmearDeformer::GetDEnabling(
         GeListNode* node, const DescID& did, const GeData& t_data,
         DESCFLAGS_ENABLE flags, const BaseContainer* itemdesc) {
-    if (!node) return FALSE;
+    if (!node) return false;
 
-    LONG id = did[did.GetDepth() - 1].id;
+    Int32 id = did[did.GetDepth() - 1].id;
     const BaseContainer* bc = ((BaseObject*) node)->GetDataInstance();
     switch (id) {
         case SMEARDEFORMER_WEIGHTINGSPLINE:
@@ -204,41 +204,41 @@ Bool SmearDeformer::GetDEnabling(
 
 Bool SmearDeformer::ModifyObject(
         BaseObject* mod, BaseDocument* doc, BaseObject* dest_,
-        const Matrix& mg_dest, const Matrix& mg_mod, Real lod,
-        LONG flags, BaseThread* thread) {
+        const Matrix& mg_dest, const Matrix& mg_mod, Float lod,
+        Int32 flags, BaseThread* thread) {
     if (!mod || !doc || !dest_) {
-        return FALSE;
+        return false;
     }
     if (!dest_->IsInstanceOf(Opolygon)) {
-        return FALSE;
+        return false;
     }
     if (!nr::EnsureGeMarker(dest_)) {
-        return FALSE;
+        return false;
     }
     if (!EnsureEngines(mod)) {
-        return FALSE;
+        return false;
     }
 
     const BaseContainer* bc = mod->GetDataInstance();
-    if (!bc) return FALSE;
+    if (!bc) return false;
 
     PolygonObject* dest = ToPoly(dest_);
     SmearData data(bc, doc, mod, dest);
 
     if (!m_weighting_engine->InitData(*bc, data)) {
         GePrint("Could not init data of Weighting Engine.");
-        return FALSE;
+        return false;
     }
     if (!m_smearing_engine->InitData(*bc, data)) {
         GePrint("Could not init data of Smearing Engine.");
-        return FALSE;
+        return false;
     }
 
-    c4d_misc::Bool created = FALSE;
+    maxon::Bool created = false;
     HistoryMap::Entry* e = m_history.FindOrCreateEntry(dest->GetGUID(), created);
     if (!e) {
         GePrint(String(__FUNCTION__) + ": Could not create or find history entry.");
-        return FALSE;
+        return false;
     }
 
     SmearHistory& history = e->GetValue();
@@ -251,45 +251,45 @@ Bool SmearDeformer::ModifyObject(
 
     // Obtain the polygon object's information.
     Vector* vertices = dest->GetPointW();
-    LONG vertex_count = dest->GetPointCount();
+    Int32 vertex_count = dest->GetPointCount();
     const CPolygon* faces = dest->GetPolygonR();
-    LONG face_count = dest->GetPolygonCount();
+    Int32 face_count = dest->GetPolygonCount();
     if (!vertices || !faces) {
-        return FALSE;
+        return false;
     }
 
-    SmearSession* session = NULL;
-    LONG history_level = m_smearing_engine->GetMaxHistoryLevel();
+    SmearSession* session = nullptr;
+    Int32 history_level = m_smearing_engine->GetMaxHistoryLevel();
 
-    if (history.GetHistoryCount() <= 0) fake_session = FALSE;
+    if (history.GetHistoryCount() <= 0) fake_session = false;
     session = history.NewSession(history_level, fake_session);
     if (!session) {
         GePrint("> Could not allocate SmearSession.");
-        return FALSE;
+        return false;
     }
 
     if (!session->CreateState(mg_dest, vertices, vertex_count, faces, face_count)) {
-        return FALSE;
+        return false;
     }
 
     if (!m_weighting_engine->Init(data, history)) {
         GePrint("> Failed init weight");
         history.FreeSession(session);
-        return FALSE;
+        return false;
     }
     if (!m_smearing_engine->Init(data, history)) {
         GePrint("> Failed init smear");
         history.FreeSession(session);
-        return FALSE;
+        return false;
     }
 
-    SReal* vxmap = dest->CalcVertexMap(mod);
+    Float32* vxmap = dest->CalcVertexMap(mod);
     const SmearState* state = history.GetState(0);
-    const Matrix i_mg_dest = !state->mg;
-    LONG itercount = c4d_misc::Min<LONG>(vertex_count, state->vertex_count);
+    const Matrix i_mg_dest = c4d_apibridge::Invert(state->mg);
+    Int32 itercount = maxon::Min<Int32>(vertex_count, state->vertex_count);
 
-    for (LONG i=0; i < itercount; i++) {
-        Real weight = m_weighting_engine->WeightVertex(i, data, history);
+    for (Int32 i=0; i < itercount; i++) {
+        Float weight = m_weighting_engine->WeightVertex(i, data, history);
         if (vxmap) {
             weight *= vxmap[i];
         }
@@ -306,17 +306,17 @@ Bool SmearDeformer::ModifyObject(
 
         // Accumulate the weighting
         if (data.ease_spline) {
-            LONG count = history.GetHistoryCount();
-            Real new_weight = weight;
-            Real weight_div = 1.0;
-            Real count_r = (Real) count - 1;
+            Int32 count = history.GetHistoryCount();
+            Float new_weight = weight;
+            Float weight_div = 1.0;
+            Float count_r = (Float) count - 1;
 
-            for (LONG j=1; j < count; j++) {
+            for (Int32 j=1; j < count; j++) {
                 const SmearState* state = history.GetState(j);
                 if (!state) continue;
 
-                Real x = (Real) j / count_r;
-                Real y = data.ease_spline->GetPoint(x).y;
+                Float x = (Float) j / count_r;
+                Float y = data.ease_spline->GetPoint(x).y;
 
                 new_weight += state->weights[i] * y;
                 weight_div += y;
@@ -333,15 +333,15 @@ Bool SmearDeformer::ModifyObject(
     m_smearing_engine->Free();
 
     if (vxmap) {
-        GeFree(vxmap);
-        vxmap = NULL;
+        DeleteMem(vxmap);
+        vxmap = nullptr;
     }
 
     if (session) {
         session->DeformationComplete(mg_dest);
         history.FreeSession(session);
     }
-    return TRUE;
+    return true;
 }
 
 void SmearDeformer::CheckDirty(BaseObject* op, BaseDocument* doc) {
@@ -355,9 +355,9 @@ void SmearDeformer::CheckDirty(BaseObject* op, BaseDocument* doc) {
 }
 
 Bool SmearDeformer::EnsureEngines(BaseContainer* bc) {
-    LONG id_weighting_engine = bc->GetBool(SMEARDEFORMER_WEIGHTINGENGINE);
-    LONG id_smearing_engine = bc->GetBool(SMEARDEFORMER_SMEARINGENGINE);
-    Bool reallocated = FALSE;
+    Int32 id_weighting_engine = bc->GetBool(SMEARDEFORMER_WEIGHTINGENGINE);
+    Int32 id_smearing_engine = bc->GetBool(SMEARDEFORMER_SMEARINGENGINE);
+    Bool reallocated = false;
 
     BaseEngine::Realloc((BaseEngine*&) m_weighting_engine, id_weighting_engine, ID_WEIGHTINGENGINE, &reallocated);
     if (reallocated) m_weighting_engine->InitParameters(*bc);
@@ -371,7 +371,7 @@ Bool SmearDeformer::EnsureEngines(BaseContainer* bc) {
 
 
 static NodeData* AllocSmearDeformer() {
-    return gNew(SmearDeformer);
+    return NewObjClear(SmearDeformer);
 }
 
 // Extensions.cpp
@@ -380,22 +380,22 @@ extern Bool RegisterWeightExtensions();
 
 Bool RegisterSmearDeformer() {
     if (GetC4DVersion() < 14000) {
-        GePrint(GeLoadString(IDC_SMEARDEFORMER_VERSIONPROBLEM, "14"));
-        return FALSE;
+        GePrint(GeLoadString(IDC_SMEARDEFORMER_VERSIONPROBLEM, "14"_s));
+        return false;
     }
     menu::root().AddPlugin(IDS_MENU_DEFORMERS, Osmeardeformer);
-    RegisterDescription(Wbase, "Wbase");
-    RegisterDescription(Sbase, "Sbase");
+    RegisterDescription(Wbase, "Wbase"_s);
+    RegisterDescription(Sbase, "Sbase"_s);
     RegisterSmearExtensions();
     RegisterWeightExtensions();
     return RegisterObjectPlugin(
-            Osmeardeformer,
-            GeLoadString(IDC_SMEARDEFORMER_NAME),
-            PLUGINFLAG_HIDEPLUGINMENU | OBJECT_MODIFIER,
-            AllocSmearDeformer,
-            "Osmeardeformer",
-            raii::AutoBitmap("icons/Osmeardeformer.png"),
-            SMEARDEFORMER_VERSION);
+        Osmeardeformer,
+        GeLoadString(IDC_SMEARDEFORMER_NAME),
+        PLUGINFLAG_HIDEPLUGINMENU | OBJECT_MODIFIER,
+        AllocSmearDeformer,
+        "Osmeardeformer"_s,
+        raii::AutoBitmap("icons/Osmeardeformer.png"),
+        SMEARDEFORMER_VERSION);
 }
 
 

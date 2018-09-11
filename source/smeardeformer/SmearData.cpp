@@ -12,16 +12,16 @@
 SmearData::SmearData(const BaseContainer* bc, BaseDocument* doc, BaseObject* mod, PolygonObject* dest)
 : doc(doc), mod(mod), dest(dest) {
     interactive = bc->GetBool(SMEARDEFORMER_INTERACTIVE);
-    strength = bc->GetReal(SMEARDEFORMER_STRENGTH);
+    strength = bc->GetFloat(SMEARDEFORMER_STRENGTH);
     inverted = bc->GetBool(SMEARDEFORMER_WEIGHTINGINVERSE);
 
-    weight_spline = NULL;
+    weight_spline = nullptr;
     if (bc->GetBool(SMEARDEFORMER_WEIGHTINGUSEPLINE)) {
         weight_spline = (const SplineData*) bc->GetCustomDataType(
                 SMEARDEFORMER_WEIGHTINGSPLINE, CUSTOMDATATYPE_SPLINE);
     }
 
-    ease_spline = NULL;
+    ease_spline = nullptr;
     if (bc->GetBool(SMEARDEFORMER_EASEWEIGHT)) {
         ease_spline = (const SplineData*) bc->GetCustomDataType(
                 SMEARDEFORMER_EASEWEIGHTSPLINE, CUSTOMDATATYPE_SPLINE);

@@ -84,7 +84,7 @@ struct Error {
 
   String Format() const {
     String result = print::tostr(code);
-    if (message.Content()) result += ": " + message;
+    if (!c4d_apibridge::IsEmpty(message)) result += ": " + message;
     return result;
   }
 };
@@ -275,9 +275,9 @@ Error GroupData::Init(PolygonObject* op, BaseThread* bt, ProgressCallback const&
     return Error::Unknown("vertex/face data could not be read");
   if (!this->nb.Init(this->vcnt, this->fdata, this->fcnt, nullptr))
     return Error::Unknown("Neighbor could not be initialized");
-  if (!this->vgroups.Resize(vcnt))
+  iferr (this->vgroups.Resize(vcnt))
     return Error::Memory("vgroups could not be resized");
-  if (!this->fgroups.Resize(fcnt))
+  iferr (this->fgroups.Resize(fcnt))
     return Error::Memory("fgroups could not be resized");
 
   /* Initialize all group assignments with -1 (no group). */
@@ -321,9 +321,9 @@ Error GroupData::Init(PolygonObject* op, BaseThread* bt, ProgressCallback const&
   }
 
   /* Calculate the number of vertices & faces per group. */
-  if (!this->vcounts.Resize(this->groups))
+  iferr (this->vcounts.Resize(this->groups))
     return Error::Memory("vcounts could not be resized");
-  if (!this->fcounts.Resize(this->groups))
+  iferr (this->fcounts.Resize(this->groups))
     return Error::Memory("fcounts could not be resized");
   for (Int32 i = 0; i < vcnt; ++i)
     this->vcounts[this->vgroups[i]] += 1;
@@ -455,7 +455,7 @@ struct ObjectData {
    */
   //==========================================================================
   ObjectData(ObjectData&& other)
-  : op(std::move(op)), vfilled(other.vfilled), ffilled(other.ffilled),
+  : op(std::move(other.op)), vfilled(other.vfilled), ffilled(other.ffilled),
     vcnt(other.vcnt), fcnt(other.fcnt), vmap(std::move(other.vmap)),
     fmap(std::move(other.fmap)), vdata(other.vdata), fdata(other.fdata)
   { }
@@ -470,8 +470,8 @@ struct ObjectData {
   Bool Init(Int32 vcnt, Int32 fcnt) {
     this->op = PolygonObject::Alloc(vcnt, fcnt);
     if (!this->op) return false;
-    if (!this->vmap.Resize(vcnt)) return false;
-    if (!this->fmap.Resize(fcnt)) return false;
+    iferr (this->vmap.Resize(vcnt)) return false;
+    iferr (this->fmap.Resize(fcnt)) return false;
     this->vfilled = 0;
     this->ffilled = 0;
     this->vcnt = vcnt;
@@ -539,7 +539,7 @@ struct ObjectData {
         Int32 const pi = vmap[j];
         // TODO: Not sure if passing nullptr is valid, but what CPolygon to use??
         //       We're in per-point mode, nothing to do with polygons.
-        Vector4d32 c = VertexColorTag::Get(map.handle, nullptr, nullptr, pi);
+        auto c = VertexColorTag::Get(map.handle, nullptr, nullptr, pi);
         VertexColorTag::Set(handle, nullptr, nullptr, j, c);
       }
     }
@@ -609,7 +609,7 @@ Error BuildGeometry(
   static Float const STEPS = 5.0;
   if (p) p(0 / STEPS);
 
-  if (!objects.Resize(data.groups))
+  iferr (objects.Resize(data.groups))
     return Error::Memory("objects could not be resized");
 
   /* Initialize all ObjectData elements. */
@@ -641,10 +641,10 @@ Error BuildGeometry(
 
     /* Reduce vertex indices in the polygon. */
     CPolygon face  = data.fdata[i];
-    face.a = BinarySearch(od.vmap, od.vmap.GetCount(), face.a);
-    face.b = BinarySearch(od.vmap, od.vmap.GetCount(), face.b);
-    face.c = BinarySearch(od.vmap, od.vmap.GetCount(), face.c);
-    face.d = BinarySearch(od.vmap, od.vmap.GetCount(), face.d);
+    face.a = explode::BinarySearch(od.vmap, od.vmap.GetCount(), face.a);
+    face.b = explode::BinarySearch(od.vmap, od.vmap.GetCount(), face.b);
+    face.c = explode::BinarySearch(od.vmap, od.vmap.GetCount(), face.c);
+    face.d = explode::BinarySearch(od.vmap, od.vmap.GetCount(), face.d);
     CriticalAssert(face.a != -1 && face.b != -1 && face.c != -1 && face.d != -1);
 
     od.fdata[od.ffilled] = face;
@@ -798,5 +798,11 @@ Bool RegisterExplodeCommand() {
   String const help = GeLoadString(IDS_EXPLODE_HELP);
   Int32 const info = PLUGINFLAG_HIDEPLUGINMENU;
   raii::AutoBitmap icon("icons/explode.png");
-  return RegisterCommandPlugin(PLUGIN_ID, name, info, icon, help, NewObj(ExplodeCommand));
+  return RegisterCommandPlugin(
+    PLUGIN_ID,
+    name,
+    info,
+    icon,
+    help,
+    NewObjClear(ExplodeCommand));
 }

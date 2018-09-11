@@ -6,6 +6,7 @@
  * @brief Implementation of the public Dependency Manager API.
  */
 
+#include <c4d_apibridge.h>
 #include "depmanager.h"
 
 namespace nr {

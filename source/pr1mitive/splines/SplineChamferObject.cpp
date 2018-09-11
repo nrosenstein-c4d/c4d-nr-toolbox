@@ -21,14 +21,14 @@ namespace splines {
       private:
 
         // Integers for dirty-checks.
-        LONG dirty_input;
+        Int32 dirty_input;
         BaseObject* ref_input;
 
       public:
 
-        static NodeData* alloc() { return gNew(SplineChamferObject); }
+        static NodeData* alloc() { return NewObjClear(SplineChamferObject); }
 
-        SplineChamferObject() : dirty_input(-1), ref_input(null) {};
+        SplineChamferObject() : dirty_input(-1), ref_input(nullptr) {};
 
         bool check_optimize_cache(BaseObject* op, BaseObject* input);
 
@@ -38,16 +38,16 @@ namespace splines {
 
         void CheckDirty(BaseObject* op, BaseDocument* doc);
 
-        SplineObject* GetContour(BaseObject* op, BaseDocument* doc, Real lod, BaseThread* bt);
+        SplineObject* GetContour(BaseObject* op, BaseDocument* doc, Float lod, BaseThread* bt);
 
         Bool Init(GeListNode* node);
 
-        Bool Message(GeListNode* node, LONG type, void* ptr);
+        Bool Message(GeListNode* node, Int32 type, void* ptr);
 
     };
 
     struct PointKnot {
-        PointKnot() : point(0), tl(0), tr(0), has_tangents(false), next(null) {};
+        PointKnot() : point(0), tl(0), tr(0), has_tangents(false), next(nullptr) {};
 
         Vector point;
         Vector tl;
@@ -56,10 +56,10 @@ namespace splines {
         struct PointKnot* next;
     };
 
-    static void make_rounding(Real radius, Real ratio, Bool limit,
+    static void make_rounding(Float radius, Float ratio, Bool limit,
                               const Vector& na, const Vector& b, const Vector& nc,
                               struct PointKnot* pa, struct PointKnot* pc) {
-        Real dista, distc;
+        Float dista, distc;
         if (limit) {
             dista = na.GetLength() / 2.0;
             distc = nc.GetLength() / 2.0;
@@ -90,7 +90,7 @@ namespace splines {
 
     bool SplineChamferObject::check_optimize_cache(BaseObject* op, BaseObject* input) {
         if (!input) {
-            this->ref_input = null;
+            this->ref_input = nullptr;
             return false;
         }
 
@@ -117,21 +117,21 @@ namespace splines {
         }
 
         // TODO: Touch input-object and its children when cache is returned.
-        if (input->IsInstanceOf(Ospline) or input->GetInfo() & OBJECT_ISSPLINE) {
+        if (input->IsInstanceOf(Ospline) || input->GetInfo() & OBJECT_ISSPLINE) {
             input->Touch();
         }
     }
 
-    SplineObject* SplineChamferObject::GetContour(BaseObject* op, BaseDocument* doc, Real lod, BaseThread* bt) {
+    SplineObject* SplineChamferObject::GetContour(BaseObject* op, BaseDocument* doc, Float lod, BaseThread* bt) {
         // Obtain the input-object.
         BaseObject* input = op->GetDown();
         if (!input) {
-            this->ref_input = null;
+            this->ref_input = nullptr;
             return empty_spline();
         }
 
         // Obtain the SplineObject to work on or return an empty sploine.
-        SplineObject* src_spline = null;
+        SplineObject* src_spline = nullptr;
         Bool src_spline_owns;
 
         Matrix matrix;
@@ -143,19 +143,19 @@ namespace splines {
         }
         else if (input->GetInfo() & OBJECT_ISSPLINE) {
             ObjectData* data = input->GetNodeData<ObjectData>();
-            if (not data) {
+            if (!data) {
                 PR1MITIVE_DEBUG_ERROR("Could not retrieve NodeData of input-object. End");
                 return empty_spline();
             }
 
             OBJECTPLUGIN* vtable = (OBJECTPLUGIN*) C4DOS.Bl->RetrieveTableX(data, 0);
-            if (not vtable) {
+            if (!vtable) {
                 PR1MITIVE_DEBUG_ERROR("Could not retrieve VTable of input-objects' NodeData. End");
                 return empty_spline();
             }
 
             src_spline = (data->*(vtable->GetContour))(input, doc, lod, bt);
-            if (not src_spline) {
+            if (!src_spline) {
                 PR1MITIVE_DEBUG_ERROR("Contour of input-objects' VTable could not be retrieved. End");
                 return empty_spline();
             }
@@ -171,9 +171,9 @@ namespace splines {
         input->Touch();
 
         // Make a copy of the segments from the source-object.
-        Segment* segments = null;
-        LONG segcount = src_spline->GetSegmentCount();
-        LONG segcount_iter = segcount;
+        Segment* segments = nullptr;
+        Int32 segcount = src_spline->GetSegmentCount();
+        Int32 segcount_iter = segcount;
         if (!segcount) {
             segcount_iter = 1;
             segments = new Segment[1];
@@ -195,21 +195,21 @@ namespace splines {
             PR1MITIVE_DEBUG_ERROR("SplineData could not be retrieved.");
             return empty_spline();
         }
-        Real ratio  = bc->GetReal(PR1M_SPLINECHAMFER_RATIO);
-        ratio = helpers::limit_min<Real>(ratio, 0.001);
+        Float ratio  = bc->GetFloat(PR1M_SPLINECHAMFER_RATIO);
+        ratio = helpers::limit_min<Float>(ratio, 0.001);
 
         Bool inv_selection = bc->GetBool(PR1M_SPLINECHAMFER_INVERSESELECTION);
         SelectionTag* seltag = (SelectionTag*) bc->GetLink(PR1M_SPLINECHAMFER_SELECTION, doc);
-        BaseSelect* selection = null;
+        BaseSelect* selection = nullptr;
         if (seltag) selection = seltag->GetBaseSelect();
         const Vector* src_points = src_spline->GetPointR();
 
         Bool limit = bc->GetBool(PR1M_SPLINECHAMFER_LIMIT);
 
         // Storage variables.
-        LONG dst_pcount = 0;
-        LONG src_poffset = 0;
-        struct PointKnot* dst_points = null;
+        Int32 dst_pcount = 0;
+        Int32 src_poffset = 0;
+        struct PointKnot* dst_points = nullptr;
         struct PointKnot** dst_points_next = &(dst_points);
 
         auto append_knot = [&dst_points_next] (struct PointKnot* p) -> void {
@@ -220,14 +220,14 @@ namespace splines {
         // Iterate over all segments and process them.
         for (int i=0; i < segcount_iter; i++) {
             Segment* seg = segments + i;
-            LONG count = seg->cnt;
-            LONG j = 0;
-            LONG itercount = count;
+            Int32 count = seg->cnt;
+            Int32 j = 0;
+            Int32 itercount = count;
 
             if (!seg->closed && seg->cnt > 0) {
                 // Append the first point of the segment to the point-chain.
                 struct PointKnot* p = new struct PointKnot;
-                LONG index = src_poffset;
+                Int32 index = src_poffset;
                 p->point = src_points[index];
                 append_knot(p);
 
@@ -241,7 +241,7 @@ namespace splines {
             }
 
             for (; j < itercount; j++) {
-                LONG a, b, c;
+                Int32 a, b, c;
                 if (j == 0) a = count - 1;
                 else a = j - 1;
                 b = j;
@@ -257,7 +257,7 @@ namespace splines {
                 const Vector& pc = src_points[c];
                 Vector na = pa - pb;
                 Vector nc = pc - pb;
-                Real angle = acos(Dot(na, nc) / (na.GetLength() * nc.GetLength()));
+                Float angle = acos(Dot(na, nc) / (na.GetLength() * nc.GetLength()));
 
                 // Verify the point to actually be rounded.
                 Bool sel_ok = true;
@@ -266,7 +266,7 @@ namespace splines {
                 }
                 if (inv_selection) sel_ok = !sel_ok;
 
-                Real radius = spldata->GetPoint(angle / M_PI * 180).y;
+                Float radius = spldata->GetPoint(angle / M_PI * 180).y;
 
                 if (radius >= 0.0001 && sel_ok) {
                     struct PointKnot* p1 = new struct PointKnot;
@@ -291,7 +291,7 @@ namespace splines {
             if (!seg->closed && seg->cnt > 0) {
                 // Append the last point of the segment to the point-chain.
                 struct PointKnot* p = new struct PointKnot;
-                LONG index = src_poffset + count - 1;
+                Int32 index = src_poffset + count - 1;
                 p->point = src_points[index];
                 append_knot(p);
             }
@@ -311,7 +311,7 @@ namespace splines {
 
         // And set specific parameters.
         BaseContainer* dst_bc = dest->GetDataInstance();
-        dst_bc->SetLong(SPLINEOBJECT_TYPE, SPLINETYPE_BEZIER);
+        dst_bc->SetInt32(SPLINEOBJECT_TYPE, (Int32) SPLINETYPE_BEZIER);
         dst_bc->SetBool(SPLINEOBJECT_CLOSED, src_spline->IsClosed());
 
         // Set the segments to the destination-spline.
@@ -326,11 +326,11 @@ namespace splines {
         Vector* dst_wpoints = dest->GetPointW();
         Tangent* dst_tangents = dest->GetTangentW();
 
-        // NOTE: dst_tangents could be a possible crash-causer (null pointer)
+        // NOTE: dst_tangents could be a possible crash-causer (nullptr pointer)
 
         // Set the points and tangents to the destination-spline and free the PointKnots meanwhile.
         struct PointKnot* knot = dst_points;
-        LONG i = 0;
+        Int32 i = 0;
         Matrix matrix0 = matrix;
         matrix0.off = Vector(0);
         while (knot) {
@@ -358,12 +358,12 @@ namespace splines {
     }
 
     Bool SplineChamferObject::Init(GeListNode* node) {
-        if (not node) return false;
+        if (!node) return false;
         BaseContainer* bc = ((BaseObject*)node)->GetDataInstance();
 
-        Real radius = 20;
-        bc->SetReal(PR1M_SPLINECHAMFER_RADIUS, radius);
-        bc->SetReal(PR1M_SPLINECHAMFER_RATIO, 2.41);
+        Float radius = 20;
+        bc->SetFloat(PR1M_SPLINECHAMFER_RADIUS, radius);
+        bc->SetFloat(PR1M_SPLINECHAMFER_RATIO, 2.41);
 
         // Initialize the PR1M_SPLINECHAMFER_SPLINE parameter.
         SplineData* data = SplineData::Alloc();
@@ -378,13 +378,13 @@ namespace splines {
         bc->SetParameter(PR1M_SPLINECHAMFER_SPLINE, gedata);
         SplineData::Free(data);
 
-        bc->SetLink(PR1M_SPLINECHAMFER_SELECTION, NULL);
-        bc->SetBool(PR1M_SPLINECHAMFER_INVERSESELECTION, FALSE);
-        bc->SetBool(PR1M_SPLINECHAMFER_LIMIT, TRUE);
+        bc->SetLink(PR1M_SPLINECHAMFER_SELECTION, nullptr);
+        bc->SetBool(PR1M_SPLINECHAMFER_INVERSESELECTION, false);
+        bc->SetBool(PR1M_SPLINECHAMFER_LIMIT, true);
         return true;
     }
 
-    Bool SplineChamferObject::Message(GeListNode* node, LONG type, void* ptr) {
+    Bool SplineChamferObject::Message(GeListNode* node, Int32 type, void* ptr) {
         switch (type) {
             case MSG_DESCRIPTION_POSTSETPARAMETER: {
                 auto data = (DescriptionPostSetValue*) ptr;
@@ -397,18 +397,18 @@ namespace splines {
                         auto spldata = (SplineData*) bc->GetCustomDataType(PR1M_SPLINECHAMFER_SPLINE, CUSTOMDATATYPE_SPLINE);
                         if (!spldata) return false;
 
-                        Real t;
-                        Real pre_radius;
+                        Float t;
+                        Float pre_radius;
                         Bool success = spldata->GetRange(&t, &t, &t, &t, &pre_radius, &t);
                         if (!success) {
                             PR1MITIVE_DEBUG_ERROR("Could not retrieve previous y-max value.");
                             return false;
                         }
 
-                        Real radius = bc->GetReal(PR1M_SPLINECHAMFER_RADIUS);
+                        Float radius = bc->GetFloat(PR1M_SPLINECHAMFER_RADIUS);
                         spldata->SetRange(0, 180, 1, 0, radius, 1);
 
-                        Real shrink, add = 0;
+                        Float shrink, add = 0;
                         if (pre_radius >= 0.001) shrink = radius / pre_radius;
                         else {
                             shrink = 0.0;
@@ -441,7 +441,9 @@ namespace splines {
             GeLoadString(IDS_Opr1m_splinechamfer),
             PLUGINFLAG_HIDEPLUGINMENU | OBJECT_INPUT |  OBJECT_GENERATOR | OBJECT_ISSPLINE,
             SplineChamferObject::alloc,
-            "Opr1m_splinechamfer", PR1MITIVE_ICON("Opr1m_splinechamfer"), 0);
+            "Opr1m_splinechamfer"_s,
+            PR1MITIVE_ICON("Opr1m_splinechamfer"),
+            0);
     }
 
 } // end namespace splines

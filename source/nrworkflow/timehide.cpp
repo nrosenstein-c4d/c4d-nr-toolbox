@@ -1,6 +1,7 @@
 /* Copyright (C) 2013-2016  Niklas Rosenstein
  * All rights reserved. */
 
+#include <c4d_apibridge.h>
 #include <lib_description.h>
 #include "timehide.h"
 #include "res/description/Hnrtoolbox.h"
@@ -44,7 +45,7 @@ struct THStats
     */
   THStats()
   : only_active(false), only_animated(false), force_update(false),
-    tracks_mode(TRACKSMODE_0), preview_min(), preview_max(), prev(NULL) {
+    tracks_mode(TRACKSMODE_0), preview_min(), preview_max(), prev(nullptr) {
   }
 
   /**
@@ -67,8 +68,8 @@ struct THStats
       }
       return true;
     }
-    if (prev == NULL) {
-      GePrint("[TimeHide ERROR]: THStats.prev is NULL in AskUpdate()");
+    if (prev == nullptr) {
+      GePrint("[TimeHide ERROR]: THStats.prev is nullptr in AskUpdate()");
       return false;
     }
     return (*this) != (*prev);
@@ -82,7 +83,7 @@ struct THStats
   void Init(BaseDocument* doc)
   {
     static THStats default_stats;
-    if (prev == NULL) {
+    if (prev == nullptr) {
       prev = &default_stats;
     }
     BaseContainer bc = doc->GetData(DOCUMENTSETTINGS_GENERAL);
@@ -92,12 +93,12 @@ struct THStats
 
   /**
     * Copies the data from another THStats object, the :attr:`prev`
-    * attribute is set to NULL intentionally.
+    * attribute is set to nullptr intentionally.
     */
   void CopyFrom(const THStats& other)
   {
     *this = other;
-    prev = NULL;
+    prev = nullptr;
   }
 
   Bool operator == (const THStats& other) const
@@ -129,7 +130,7 @@ enum BRANCHITER
 
 struct BranchIterator {
   Bool RunIteration(GeListNode* root);
-  virtual Bool Initialize(GeListNode* root) { return TRUE; }
+  virtual Bool Initialize(GeListNode* root) { return true; }
   virtual BRANCHITER ProcessNode(GeListNode* current) = 0;
   virtual void Finalize() { }
 };
@@ -179,14 +180,14 @@ static BRANCHITER PerformIteration(BranchIterator* iter, GeListNode* node) {
 
 Bool BranchIterator::RunIteration(GeListNode* root) {
   if (!root) {
-    return FALSE;
+    return false;
   }
   if (!Initialize(root)) {
-    return FALSE;
+    return false;
   }
   PerformIteration(this, root);
   Finalize();
-  return TRUE;
+  return true;
 }
 
 class THUpdater : public BranchIterator
@@ -285,7 +286,7 @@ private:
     // in a document, their parent elements must have been unfolded
     // in the timeline. We store the previous states of the bits.
     BaseContainer* bc = dest->GetDataInstance();
-    GeData* dataPtr = NULL;
+    GeData* dataPtr = nullptr;
     if (bc) {
       bc->FindIndex(ID_TEMP_FOLDBITS, &dataPtr);
     }
@@ -309,8 +310,8 @@ private:
     if (visible && (m_stats.tracks_mode != TRACKSMODE_0 || m_stats.prev->tracks_mode != m_stats.tracks_mode)) {
       const CCurve* curve = track->GetCurve();
       const Int32 key_count = (curve ? curve->GetKeyCount() : 0);
-      const CKey* first_key = (key_count > 0 ? curve->GetKey(0) : NULL);
-      const CKey* last_key = (key_count > 0 ? curve->GetKey(key_count - 1) : NULL);
+      const CKey* first_key = (key_count > 0 ? curve->GetKey(0) : nullptr);
+      const CKey* last_key = (key_count > 0 ? curve->GetKey(key_count - 1) : nullptr);
 
       // Is the "unanimated" parameter set, or was it turned off? If so,
       // we need to update the tracks.
@@ -428,7 +429,7 @@ void THClearDocument(BaseDocument* doc)
 
 void THProcessDocument(BaseDocument* doc, THStats& stats, Bool first_call)
 {
-  if (doc == NULL) {
+  if (doc == nullptr) {
     GePrint("[TimeHide ERROR]: THProcessDocument() without document.");
     return;
   }

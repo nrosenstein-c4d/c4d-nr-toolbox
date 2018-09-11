@@ -25,30 +25,30 @@ namespace objects {
     }
 
     BaseObject* BasePrimitiveData::optimize_cache(BaseObject* op) {
-        LONG new_dirty_count = op->GetDirty(DIRTYFLAGS_DATA);
+        Int32 new_dirty_count = op->GetDirty(DIRTYFLAGS_DATA);
         if (new_dirty_count != dirty_count) {
             dirty_count = new_dirty_count;
-            return null;
+            return nullptr;
         }
         return op->GetCache();
     }
 
-    LONG BasePrimitiveData::get_handle_count(BaseObject* op) {
+    Int32 BasePrimitiveData::get_handle_count(BaseObject* op) {
         return 0;
     }
 
-    Bool BasePrimitiveData::get_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    Bool BasePrimitiveData::get_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
         return false;
     }
 
-    void BasePrimitiveData::set_handle(BaseObject* op, LONG handle, HandleInfo* info) {
+    void BasePrimitiveData::set_handle(BaseObject* op, Int32 handle, HandleInfo* info) {
     }
 
-    void BasePrimitiveData::draw_handle(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, LONG handle, LONG hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color) {
+    void BasePrimitiveData::draw_handle(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, Int32 handle, Int32 hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color) {
         bd->DrawHandle(info->position, DRAWHANDLE_BIG, NOCLIP_D | NOCLIP_Z);
     }
 
-    void BasePrimitiveData::draw_handle_customs(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, LONG handle, LONG hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color){
+    void BasePrimitiveData::draw_handle_customs(BaseObject* op, BaseDraw* bd, BaseDrawHelp* bh, Int32 handle, Int32 hitid, HandleInfo* info, Vector& mp, Vector& size, Matrix& mg, Vector& color){
         switch (info->type) {
             case HANDLECONSTRAINTTYPE_FREE:
                 break;
@@ -69,8 +69,8 @@ namespace objects {
 
     DRAWRESULT BasePrimitiveData::Draw(BaseObject* op, DRAWPASS pass, BaseDraw* bd, BaseDrawHelp* bh) {
         // We only require the DRAWPASS_HANDLES pass.
-        if (not op) return DRAWRESULT_ERROR;
-        if (pass isnot DRAWPASS_HANDLES) return DRAWRESULT_OK;
+        if (!op) return DRAWRESULT_ERROR;
+        if (pass != DRAWPASS_HANDLES) return DRAWRESULT_OK;
 
         bd->SetMatrix_Matrix(op, bh->GetMg());
         Matrix mg = op->GetMg();
@@ -78,11 +78,11 @@ namespace objects {
         GetDimension(op, &mp, &size);
 
         // Iterate over the object's handles and draw them into the viewport.
-        LONG hitid = op->GetHighlightHandle(bd);
+        Int32 hitid = op->GetHighlightHandle(bd);
         for (int i=0; i < get_handle_count(op); i++) {
             HandleInfo info;
             info.center = mp;
-            if (not get_handle(op, i, &info)) continue;
+            if (!get_handle(op, i, &info)) continue;
 
             // Offset the handle about the BB-center. Matrix-multiplication is not necessary due
             // to the bd->SetMatrix_Matrix() call.
@@ -90,7 +90,7 @@ namespace objects {
             info.position += mp;
 
             Vector* color;
-            if (i is hitid) color = &color_handle_selected;
+            if (i == hitid) color = &color_handle_selected;
             else color = &color_handle;
 
             bd->SetPen(*color);
@@ -101,24 +101,24 @@ namespace objects {
         return DRAWRESULT_OK;
     }
 
-    LONG BasePrimitiveData::DetectHandle(BaseObject* op, BaseDraw* bd, LONG x, LONG y, QUALIFIER qualifier) {
+    Int32 BasePrimitiveData::DetectHandle(BaseObject* op, BaseDraw* bd, Int32 x, Int32 y, QUALIFIER qualifier) {
         // CTRL is not allowed.
-        if (not op) return NOTOK;
+        if (!op) return NOTOK;
         if (qualifier & QUALIFIER_CTRL) return NOTOK;
 
         Matrix matrix = op->GetMg();
-        LONG handle   = NOTOK;
-        Bool shift    = qualifier & QUALIFIER_SHIFT;
+        Int32 handle   = NOTOK;
+        Bool shift    = Bool(qualifier & QUALIFIER_SHIFT);
 
         Vector mp, size;
         GetDimension(op, &mp, &size);
 
         // Iterate over each handle and check if one of theese match at
         // the current mouse-position.
-        for (LONG i=0; i < get_handle_count(op); i++) {
+        for (Int32 i=0; i < get_handle_count(op); i++) {
             HandleInfo info;
             info.center = mp;
-            if (not get_handle(op, i, &info)) continue;
+            if (!get_handle(op, i, &info)) continue;
 
             // Offset the handle by the object's bounding-box center.
             mp = info.center;
@@ -137,8 +137,8 @@ namespace objects {
         return handle;
     }
 
-    Bool BasePrimitiveData::MoveHandle(BaseObject* op, BaseObject* undo, const Vector& mouse_pos, LONG hitid, QUALIFIER qualifier, BaseDraw* bd) {
-        if (not op) return false;
+    Bool BasePrimitiveData::MoveHandle(BaseObject* op, BaseObject* undo, const Vector& mouse_pos, Int32 hitid, QUALIFIER qualifier, BaseDraw* bd) {
+        if (!op) return false;
 
         Vector mp, size;
         GetDimension(op, &mp, &size);
@@ -147,7 +147,7 @@ namespace objects {
         // False.
         HandleInfo info;
         info.center = mp;
-        if (not get_handle(op, hitid, &info)) return true;
+        if (!get_handle(op, hitid, &info)) return true;
 
         mp = info.center;
         info.position += mp;

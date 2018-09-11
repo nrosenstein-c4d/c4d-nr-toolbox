@@ -2,7 +2,9 @@
 // All rights reserved.
 
 #include "menu.h"
-#include <nr/c4d/cleanup.h>
+#include <NiklasRosenstein/c4d/cleanup.hpp>
+
+namespace nr { using namespace niklasrosenstein; }
 
 static menu::entry* _root = nullptr;
 
