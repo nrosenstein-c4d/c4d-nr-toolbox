@@ -77,7 +77,7 @@ Bool RandomWalkGenerator::Move(GenData_t* data, Vector* result, Int32 i) {
 
     // TODO: This implementation does not seem to be 100% correct.
     if (!data->zero_angle && (res.x || res.y || res.z) && (prev - res).GetLength() < length) {
-        Float angle = std::abs(VectorAngle(prev, res));
+        Float angle = std::abs(GetAngle(prev, res));
         if (angle < 0.0000001) {
             return Move(data, &prev, i);
         }

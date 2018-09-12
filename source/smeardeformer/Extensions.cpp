@@ -162,7 +162,7 @@ public:
         // the bounds of the _current_ state.
         const Vector& vxdir = curr->original_normals[vertex_index];
 
-        Float angle = VectorAngle(mvdir, vxdir);
+        Float angle = GetAngle(mvdir, vxdir);
         return angle / M_PI;
     }
 
