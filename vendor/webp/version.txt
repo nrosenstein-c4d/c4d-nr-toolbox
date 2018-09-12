@@ -1,1 +1,1 @@
-libwebp-0.5.1-windows-x64
+libwebp-1.0.0

@@ -29,13 +29,14 @@ overview of what is available in the nr-toolbox.
 
 ## Build Instructions
 
-You need the [Craftr 4][Craftr] build system. Clone the repository
-recursively and build.
+You need the [Craftr 4][Craftr] build system. On Windows, due to a problem
+with [dlib, MSVC and the /vms compiler option](https://github.com/davisking/dlib/issues/1479),
+you also need [LLVM for Windows](http://releases.llvm.org/download.html).
 
 [Craftr]: https://github.com/craftr-build/craftr
 
     cd /path/to/Cinema4D/plugins
-    git clone https://github.com/NiklasRosenstein/c4d-nr-toolbox.git
+    git clone https://github.com/NiklasRosenstein/c4d-nr-toolbox.git --recursive
     cd c4d-nr-toolbox
     craftr -cb --variant=release
 

@@ -21,3 +21,6 @@
 
 # XCode Project Files
 *.pbxproj text eol=lf
+
+vendor/webp/lib/lib*.a binary
+vendor/webp/lib/*.lib binary
