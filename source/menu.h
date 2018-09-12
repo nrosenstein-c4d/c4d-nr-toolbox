@@ -4,92 +4,106 @@
 #pragma once
 #include <stdexcept>
 #include <c4d.h>
+#include <c4d_apibridge.h>
 
 namespace menu {
 
 /*!
  * Represents a menu entry: Either a plugin ID which will be replaced
- * by the respective plugin's entry or a submenu. In the case of a
- * submenu, the #plugin_id equals 0 and the entry has no #children and
- * no #name.
+ * by the respective plugin's entry or a submenu.
  */
-struct entry {
+struct MenuEntry {
+
+  enum class Type {
+    Submenu,
+    Plugin,
+    Separator
+  };
+
+  Type type;
   String name;
-  Int32 plugin_id;
-  maxon::BaseArray<entry> children;
+  Int32 id;
+  maxon::BaseArray<MenuEntry*> children;
 
-  entry(entry const&) = delete;
+  MenuEntry(MenuEntry const&) = delete;
 
-  inline entry() : plugin_id(0) { }
+  inline MenuEntry() : type(Type::Separator), id(0) { }
 
-  inline entry(String const& _name, Int32 _plugin_id)
-  : name(_name), plugin_id(_plugin_id) { }
+  inline MenuEntry(Type _type, String const& _name, Int32 _id) : type(_type), name(_name), id(_id) { }
 
-  inline entry(entry&& that)
-  : name(std::move(that.name)), plugin_id(that.plugin_id) { }
+  inline MenuEntry(MenuEntry&& that) = delete; //: type(that.type), name(std::move(that.name)), id(that.id) { }
 
-  inline entry& AddSubmenu(Int32 string_id, Bool create=true) {
-    String name = GeLoadString(string_id);
-    for (entry& child : this->children) {
-      if (child.name == name)
-        return child;
+  ~MenuEntry() {
+    for (MenuEntry*& child : this->children) {
+      delete child;
+      child = nullptr;
     }
-    ifnoerr (entry& e = this->children.Append(entry(name, 0)))
-      return e;
-    throw std::runtime_error("children.Append() failed");
+    this->children.Flush();
   }
 
-  inline entry& AddPlugin(Int32 plugin_id) {
-    for (entry& child : this->children) {
-      if (child.plugin_id == plugin_id)
-        return child;
+  inline MenuEntry& AddSubmenu(Int32 string_id) {
+    String name = GeLoadString(string_id);
+    for (MenuEntry* child : this->children) {
+      if (child->type == Type::Submenu && child->id == string_id)
+        return *child;
     }
-    ifnoerr (entry& e = this->children.Append(entry("", plugin_id)))
-      return e;
-    throw std::runtime_error("children.Append() failed");
+    iferr (MenuEntry* e = this->children.Append(new MenuEntry(Type::Submenu, name, string_id)))
+      throw std::runtime_error("children.Append() failed");
+    return *e;
+  }
+
+  inline MenuEntry& AddPlugin(Int32 plugin_id) {
+    for (MenuEntry* child : this->children) {
+      if (child->type == Type::Plugin && child->id == plugin_id)
+        return *child;
+    }
+    iferr (MenuEntry* e = this->children.Append(new MenuEntry(Type::Plugin, "", plugin_id)))
+      throw std::runtime_error("children.Append() failed");
+    return *e;
+  }
+
+  inline MenuEntry& AddSeparator() {
+    MenuEntry** last = this->children.GetLast();
+    if (last && (*last)->type == Type::Separator) {
+      return **last;
+    }
+    iferr (MenuEntry* e = this->children.Append(new MenuEntry(Type::Separator, "", -1)))
+      throw std::runtime_error("children.Append() failed");
+    return *e;
   }
 
   template <typename... T>
-  inline entry& AddPlugin(Int32 string_id, T&&... remainder) {
+  inline MenuEntry& AddPlugin(Int32 string_id, T&&... remainder) {
     return this->AddSubmenu(string_id).AddPlugin(std::forward<T>(remainder)...);
   }
 
-  inline entry& AddSeparator() {
-    entry* last = this->children.GetLast();
-    if (last && last->plugin_id == -1) {
-      return *last;
-    }
-    ifnoerr (entry& e = this->children.Append(entry("", -1)))
-      return e;
-    throw std::runtime_error("children.Append() failed");
-  }
-
   template <typename... T>
-  inline entry& AddSeparator(Int32 string_id, T&&... remainder) {
+  inline MenuEntry& AddSeparator(Int32 string_id, T&&... remainder) {
     return this->AddSubmenu(string_id).AddSeparator(std::forward<T>(remainder)...);
   }
 
-  inline BaseContainer CreateMenu() {
+  inline BaseContainer CreateMenu(Int32 d = 0) {
+    CriticalAssert(type == Type::Submenu);
     BaseContainer bc;
     bc.InsData(MENURESOURCE_SUBTITLE, this->name);
-    for (entry& child : this->children) {
-      if (child.plugin_id == 0) {
-        bc.InsData(MENURESOURCE_SUBMENU, child.CreateMenu());
+    for (MenuEntry* child : this->children) {
+      if (child->type == Type::Submenu) {
+        bc.InsData(MENURESOURCE_SUBMENU, child->CreateMenu(d+1));
       }
-      else if (child.plugin_id == -1) {
+      else if (child->type == Type::Separator) {
         bc.InsData(MENURESOURCE_SEPERATOR, 1);
       }
-      else {
-        bc.InsData(MENURESOURCE_COMMAND,
-          "PLUGIN_CMD_" + String::IntToString(child.plugin_id));
+      else if (child->type == Type::Plugin) {
+        bc.InsData(MENURESOURCE_COMMAND, "PLUGIN_CMD_" + String::IntToString(child->id));
       }
     }
+
     return bc;
   }
 
 };
 
-entry& root();
+MenuEntry& root();
 void flush();
 
 } // namespace menu

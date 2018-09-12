@@ -6,17 +6,18 @@
 
 namespace nr { using namespace niklasrosenstein; }
 
-static menu::entry* _root = nullptr;
+static menu::MenuEntry* _root = nullptr;
 
-menu::entry& menu::root() {
+menu::MenuEntry& menu::root() {
   if (!_root) {
-    _root = NewObjClear(menu::entry, "nr-toolbox", 0);
-    nr::c4d::cleanup(&menu::flush);
+    _root = new MenuEntry(MenuEntry::Type::Submenu, "nr-toolbox", 0);
+    nr::c4d::cleanup(&flush);
   }
   CriticalAssert(_root != nullptr);
   return *_root;
 }
 
 void menu::flush() {
-  DeleteObj(_root);
+  delete _root;
+  _root = nullptr;
 }
