@@ -3,6 +3,7 @@ build.ninja
 .ninja_log
 .ninja_deps
 build/
+dist/
 generated/
 
 # Compiled Object files
