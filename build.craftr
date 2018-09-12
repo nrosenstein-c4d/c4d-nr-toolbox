@@ -5,6 +5,8 @@ from craftr.utils import sh
 
 project('com.niklasrosenstein.c4d-nr-toolbox', '1.0')
 
+PLUGIN_DIR = 'c4d-nr-toolbox'
+
 target('webp')
 properties({
   '@cxx.includes': ['vendor/webp/include'],
@@ -103,7 +105,7 @@ class ComponentList(object):
     return result
 
 def glob_descriptions(pattern):
-  result = glob(['plugin/res/description/' + pattern + '.h'])
+  result = glob([PLUGIN_DIR + '/res/description/' + pattern + '.h'])
   return [path.rmvsuffix(path.base(x)) for x in result]
 
 # ============================================================================
@@ -157,7 +159,7 @@ components = (ComponentList()
   .add("xpe",
     enabled=True,
     sources=glob(['source/xpe/*.cpp']),
-    files=['plugin/res/xpe-preset.c4d'],
+    files=[PLUGIN_DIR + '/res/xpe-preset.c4d'],
     descriptions=['Gvcsv', 'Gvmodata', 'Ocsveffector', 'Oxpressoeffector']
   )
   .add("webpio",
@@ -184,7 +186,7 @@ depends([
 ], public=True)
 properties({
   '@cxx.includes': [
-    'plugin',
+    'c4d-nr-toolbox',
     'include',
     'source',
     'vendor/NiklasRosenstein/nr.c4d/include',
@@ -203,7 +205,7 @@ depends(':deps')
 depends(objects)
 properties({
   'cxx.productName': 'c4d-nr-toolkit' + c4d.plugin_suffix,
-  'cxx.productDirectory': 'plugin',
+  'cxx.productDirectory': PLUGIN_DIR,
   'cxx.srcs': [],
   'cxx.type': 'library',
   'cxx.preferredLinkage': 'shared',
