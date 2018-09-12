@@ -130,6 +130,12 @@ STRINGTABLE
   IDC_C4DVERSIONTOOLD "XPresso Effector: Runs on R15 or newer only.";
   IDC_REGISTERED "XPresso Effector: Registered";
 
+  // XGraph
+  // ------
+
+  IDS_GVOPERATOR_GRAPH "XGraph";
+  IDS_GVPORT_NAME_REAL "Float";
+
   // TeaPresso
   // ---------
 

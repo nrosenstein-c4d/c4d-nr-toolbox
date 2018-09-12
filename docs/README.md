@@ -13,6 +13,7 @@ __Table of Contents__
 * [Resolve Duplicates](resolve-duplicates.md) \*
 * [Smear Deformer](smear-deformer.md) \*
 * [OffsetRandomizer](offsetrandomizer.md) \*
+* [XGraph](xgraph.md) \*
 * [XPresso Effector](xpresso-effector.md) \*
 * [CSV Effector](csv-effector.md) \*
 * [MoData Node](modata-node.md) \*

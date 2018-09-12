@@ -165,6 +165,11 @@ components = (ComponentList()
     files=['res/xpe-preset.c4d'],
     descriptions=['Gvcsv', 'Gvmodata', 'Ocsveffector', 'Oxpressoeffector']
   )
+  .add("xgraph",
+    enabled=True,
+    sources=glob(['source/xgraph/*.cpp']),
+    descriptions=['Gvgraph']
+  )
   .add("webpio",
     enabled=True,
     sources=['source/webpio.cpp'],

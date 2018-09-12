@@ -143,6 +143,12 @@ enum
   IDC_C4DVERSIONTOOLD,
   IDC_REGISTERED,
 
+  // XGraph
+  // ------
+
+  IDS_GVOPERATOR_GRAPH,
+  IDS_GVPORT_NAME_REAL,
+
   // TeaPresso
   // ---------
 

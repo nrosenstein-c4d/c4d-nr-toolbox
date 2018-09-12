@@ -119,6 +119,12 @@ Bool PluginStart() {
   }
   #endif
 
+  #ifdef HAVE_XGRAPH
+  if (nr::config::check_feature("xgraph")) {
+    _REGISTER(XGraphPlugin);
+  }
+  #endif
+
   #ifdef HAVE_TEAPRESSO
   if (nr::config::check_feature("teapresso")) {
     _REGISTER(Teapresso);
