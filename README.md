@@ -12,6 +12,11 @@ release on any of these.
 > destroys your PC, car and house, it may be my fault, but you can not hold me
 > accountable for it!
 
+## Contributions are Welcome!
+
+You don't have to code to contribute &ndash; donating icons would be pretty
+cool, too!
+
 ## Download & Installation Instructions
 
 Check the [Releases] page for prebuilt binaries. Unzip the appropriate ZIP
