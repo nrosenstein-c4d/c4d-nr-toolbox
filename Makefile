@@ -9,7 +9,9 @@ endif
 .PHONY: dist
 dist:
 	mkdir -p dist
-	tar -zcvf dist/c4d-nr-toolbox-$(VERSION)-rXX-$(PLATFORM).tar.gz \
+	tar -zcvf dist/c4d-nr-toolbox-$(VERSION)-r20-$(PLATFORM).tar.gz \
 		--exclude=*.lib --exclude=*.exp --exclude=*.ilk --exclude=*.pdb \
 		--exclude=build --exclude=*.pyc \
-		include res scripts python LICENSE.txt README.md default_features.cfg
+		docs examples include python res scripts \
+		default_features.cfg LICENSE.txt README.md \
+		$(shell ls c4d-nr-toolkit.xdl64 c4d-nr-toolkit.xlib)

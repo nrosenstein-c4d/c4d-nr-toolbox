@@ -1,25 +1,40 @@
 # nr-toolbox Documentation
 
-__Table of Contents__
+### Table of Contents
 
 * [Feature Manager](feature-manager.md)
-* [Viewport Settings](viewport.md) \*
+
+#### General/Workflow
+
 * [Colorpalette](colorpalette.md) \*
+* [Dependency Manager](depmanager.md) \*
 * [TimeHide](timehide.md)
 * [SafeFrame](safeframe.md)
+* [Viewport Settings](viewport.md) \*
+
+#### Objects/Tags/Commands
+
 * [AutoConnect](autoconnect.md)
-* [Pr1mitive](pr1mitive/README.md) \*
-* [Explode Segmnets](explode-segments.md) \*
-* [Resolve Duplicates](resolve-duplicates.md) \*
-* [Smear Deformer](smear-deformer.md) \*
+* [Explode Segments](explode-segments.md) \*
 * [OffsetRandomizer](offsetrandomizer.md) \*
-* [XGraph](xgraph.md) \*
-* [XPresso Effector](xpresso-effector.md) \*
+* [Resolve Duplicates](resolve-duplicates.md) \*
+* [Pr1mitive](pr1mitive/README.md) \*
+* [Smear Deformer](smear-deformer.md) \*
+
+#### XPresso/MoGraph
+
+* [CSV Node](csv-node.md) \*
 * [CSV Effector](csv-effector.md) \*
 * [MoData Node](modata-node.md) \*
-* [CSV Node](csv-node.md) \*
+* [XGraph](xgraph.md) \*
+* [XPresso Effector](xpresso-effector.md) \*
+
+#### IO
+
 * [WebP-IO](webp-io.md) \*
-* [Dependency Manager](depmanager.md) \*
+
+#### Babyshoes
+
 * [Procedural](procedural.md) \*
 * [TeaPresso](teapresso.md) \*
 
