@@ -1,6 +1,6 @@
 STRINGTABLE Hnrtoolbox
 {
-  Hnrtoolbox "nrToolbox";
+  Hnrtoolbox "nr-toolbox";
 
   NRTOOLBOX_HOOK_VIEWPORT_GROUP "Viewport";
   NRTOOLBOX_HOOK_VIEWPORT_SHOWUVS "Show UVs";

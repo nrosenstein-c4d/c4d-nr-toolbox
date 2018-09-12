@@ -194,7 +194,7 @@ public: // MessageData Overrides
 	{
 		return RegisterMessagePlugin(
 			PLUGIN_ID,
-			"nrToolbox-MessageHandler"_s,
+			"nr-toolbox-MessageHandler"_s,
 			0,
 			NewObjClear(MessageHandler));
 	}
@@ -275,7 +275,7 @@ public:
 		Int32 const priority = 0;
 		return RegisterVideoPostPlugin(
       PLUGIN_ID,
-			"nrToolbox-SafeFrame"_s,
+			"nr-toolbox-SafeFrame"_s,
 			PLUGINFLAG_VIDEOPOST_INHERENT,
       Alloc,
 			""_s,

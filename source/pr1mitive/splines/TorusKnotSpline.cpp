@@ -138,7 +138,7 @@ namespace splines {
     }
 
     Bool register_torusknot() {
-        menu::root().AddPlugin(IDS_MENU_OBJECTS, Opr1m_torusknot);
+        menu::root().AddPlugin(IDS_MENU_SPLINES, Opr1m_torusknot);
         return RegisterObjectPlugin(
             Opr1m_torusknot,
             GeLoadString(IDS_Opr1m_torusknot),
