@@ -255,13 +255,13 @@ Bool RegisterWebpIO() {
         /* id   */ ID_WEBP_BITMAP_LOADER,
         /* name */ "WebP"_s,
         /* info */ 0,
-        /* data */ new WebPBitmapImporter);
+        /* data */ NewObjClear(WebPBitmapImporter));
 
     RegisterBitmapSaverPlugin(
         /* id     */ ID_WEBP_BITMAP_SAVER,
         /* name   */ "WebP"_s,
         /* info   */ PLUGINFLAG_BITMAPSAVER_SUPPORT_8BIT | PLUGINFLAG_BITMAPSAVER_FORCESUFFIX,
-        /* data   */ new WebPBitmapExporter,
+        /* data   */ NewObjClear(WebPBitmapExporter),
         /* suffix */ "webp"_s);
 
     return true;
