@@ -12,6 +12,7 @@ __Table of Contents__
 * [Explode Segmnets](explode-segments.md) \*
 * [Resolve Duplicates](resolve-duplicates.md) \*
 * [Smear Deformer](smear-deformer.md) \*
+* [OffsetRandomizer](offsetrandomizer.md) \*
 * [XPresso Effector](xpresso-effector.md) \*
 * [CSV Effector](csv-effector.md) \*
 * [MoData Node](modata-node.md) \*

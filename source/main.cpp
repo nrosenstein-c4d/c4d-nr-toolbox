@@ -95,6 +95,12 @@ Bool PluginStart() {
   }
   #endif
 
+  #ifdef HAVE_OFFSETRANDOMIZER
+  if (nr::config::check_feature("offsetrandomizer")) {
+    _REGISTER(OffsetRandomizer);
+  }
+  #endif
+
   #ifdef HAVE_SMEARDEFORMER
   if (nr::config::check_feature("smeardeformer")) {
     _REGISTER(SmearDeformer);

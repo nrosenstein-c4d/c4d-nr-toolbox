@@ -24,3 +24,4 @@
 
 vendor/webp/lib/lib*.a binary
 vendor/webp/lib/*.lib binary
+res/icons/*.ai binary
