@@ -18,32 +18,44 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# File: TimeHide-v1_1-Toggle.py
-# Version: 1.2
+# File: TimeHide-v1_3-Cycle_TracksDisplay.py
+# Version: 1.3
 # Description:
 #
-#     This script toggles the "Only Show Selected Elements" and "Only Show
-#     Animated Elements" in the document's TimeHide settings. The TimeHide
-#     plugin needs to be installed. Visit http://niklasrosenstein.de/
+#     This script cycles through the valid choices in the "Tracks Display"
+#     parameter of the nr-toolbox TimeHide settings.
 
 import c4d
 import webbrowser
 
 def main():
-    if not hasattr(c4d, 'Htimehide'):
-        message = "It seems like the TimeHide plugin is not installed. Do you want to "\
+    if not hasattr(c4d, 'Hnrtoolbox'):
+        message = "It seems like the nr-toolbox plugin is not installed. Do you want to "\
                   "visit the download page?"
         result = c4d.gui.MessageDialog(message, c4d.GEMB_YESNO)
         if result == c4d.GEMB_R_YES:
-            webbrowser.open('http://niklasrosenstein.de/tag/timehide')
+            webbrowser.open('https://github.com/NiklasRosenstein/c4d-nr-toolbox')
         return
 
-    hook = doc.FindSceneHook(c4d.Htimehide)
+    choices = [
+        c4d.NRTOOLBOX_HOOK_TIMEHIDE_TRACKS_SHOWALL,
+        c4d.NRTOOLBOX_HOOK_TIMEHIDE_TRACKS_ANIMATED,
+        c4d.NRTOOLBOX_HOOK_TIMEHIDE_TRACKS_PREVIEWRANGE,
+    ]
+
+    hook = doc.FindSceneHook(c4d.Hnrtoolbox)
     if hook:
         doc.AddUndo(c4d.UNDOTYPE_CHANGE_SMALL, hook)
-        hook[c4d.TIMEHIDE_ONLYSELECTED] = not hook[c4d.TIMEHIDE_ONLYSELECTED]
-        hook[c4d.TIMEHIDE_ONLYANIMATED] = not hook[c4d.TIMEHIDE_ONLYANIMATED]
+        value = hook[c4d.NRTOOLBOX_HOOK_TIMEHIDE_TRACKS]
+        if value in choices:
+            value = choices[((choices.index(value) + 1) % len(choices))]
+        else:
+            value = c4d.NRTOOLBOX_HOOK_TIMEHIDE_TRACKS_SHOWALL
+
+        hook[c4d.NRTOOLBOX_HOOK_TIMEHIDE_TRACKS] = value
         c4d.EventAdd()
+    else:
+        message = "Unable to find the nr-toolbox settings in the current document."
+        c4d.gui.MessageDialog(message)
 
 main()
-
