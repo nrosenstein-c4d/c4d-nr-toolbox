@@ -7,18 +7,22 @@ project('net.dlib', '1.0')
 
 options = module.options
 options.add('version', str, '19.15')
+options.add('directory', str, '')
 options.add('nogui', bool, False)
 options.add('isocpp', bool, False)
 
-source_directory = get_source_archive(
-  "http://dlib.net/files/dlib-{}.zip".format(options.version))
-source_directory = path.join(source_directory, 'dlib-{}'.format(options.version))
+if options.directory:
+  options.directory = path.abs(options.directory)
+else:
+  options.directory = get_source_archive(
+    "http://dlib.net/files/dlib-{}.zip".format(options.version))
+  options.directory = path.join(options.directory, 'dlib-{}'.format(options.version))
 
 target('dlib')
 properties({
-  '@cxx.includes': [source_directory],
+  '@cxx.includes': [options.directory],
   '@cxx.cppStd': 'c++11',
-  'cxx.srcs': [path.join(source_directory, 'dlib/all/source.cpp')],
+  'cxx.srcs': [path.join(options.directory, 'dlib/all/source.cpp')],
   'cxx.type': 'library',
   'cxx.preferredLinkage': 'static'
 })
