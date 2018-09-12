@@ -7,11 +7,6 @@ that have not been released before. The collection also includes the
 I chose to open source all of it as I'm no longer planning on a commercial
 release on any of these.
 
-> __Disclaimer__: Most of this is really, really old code! I've made an effort
-> to make it available for R20. If something isn't working or if the plugin
-> destroys your PC, car and house, it may be my fault, but you can not hold me
-> accountable for it!
-
 ## Contributions are Welcome!
 
 You don't have to code to contribute &ndash; donating icons would be pretty
@@ -50,6 +45,17 @@ recursively and build.
 * dlib
 
 Check the [LICENSE.txt](LICENSE.txt) for license information.
+
+## Disclaimer
+
+Most of this is really old code (dating back to 2013 with TeaPresso and
+the Pr1mitive modules). I've decided to release all my prototypes and
+previously commercial plugins as a collection and effort to make them
+compatible with R20.
+
+Note that this is free software, licensed under the MIT license. If something
+isn't working, or even if the plugin destroys your PC, car or home, it may
+be my fault, but you can not hold me liable.
 
 ---
 

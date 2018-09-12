@@ -36,7 +36,7 @@ NR_C4D_CLEANUP_HEAD;
 //============================================================================
 Bool PluginStart() {
   print::info("=============================================================");
-  print::info("nr-toolbox v" GIT_VERSION " -- Developed by Niklas Rosenstein");
+  print::info("nr-toolbox " GIT_VERSION " -- Developed by Niklas Rosenstein");
 
   String err;
   Bool ok = nr::config::init_config(GeGetC4DPath(C4D_PATH_PREFS) + "nr_toolbox_features.cfg", &err);
