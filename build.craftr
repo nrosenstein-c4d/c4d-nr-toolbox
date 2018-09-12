@@ -9,7 +9,7 @@ target('webp')
 properties({
   '@cxx.includes': ['vendor/webp/include'],
   '@cxx.libraryPaths': ['vendor/webp/lib'],
-  '@cxx.systemLibraries': ['libwebp']
+  '@cxx.systemLibraries': ['libwebp'] if OS.id == 'win32' else ['webp']
 })
 
 # ============================================================================
