@@ -60,6 +60,14 @@ STRINGTABLE
   IDS_Opr1m_expression    "Expression Shape";
   IDS_Tpr1m_axisalign     "Axis Align";
 
+  // OffsetRandomizer
+  // ----------------
+
+  IDC_OFFSETRANDOMIZER "Offset Randomizer";
+  IDC_OFFSETRANDOMIZER_TAGSAFFECTED "# Tags affected in the last pass";
+  IDC_MESSAGE_REACHEDHIERARCHYEND "reached end of hierarchy at ";
+  IDC_MESSAGE_NOTEXTURETAGAT "no texture tag at position ";
+
   // Smear Deformer
   // --------------
 

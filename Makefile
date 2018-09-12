@@ -12,4 +12,4 @@ dist:
 	tar -zcvf dist/c4d-nr-toolbox-$(VERSION)-rXX-$(PLATFORM).tar.gz \
 		--exclude=*.lib --exclude=*.exp --exclude=*.ilk --exclude=*.pdb \
 		--exclude=build --exclude=*.pyc \
-		include c4d-nr-toolbox python LICENSE.txt README.md
+		include res scripts python LICENSE.txt README.md default_features.cfg

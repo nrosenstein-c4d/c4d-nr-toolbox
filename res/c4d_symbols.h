@@ -72,6 +72,14 @@ enum
   IDS_Opr1m_expression,
   IDS_Tpr1m_axisalign,
 
+  // OffsetRandomizer
+  // ----------------
+
+  IDC_OFFSETRANDOMIZER,
+  IDC_OFFSETRANDOMIZER_TAGSAFFECTED,
+  IDC_MESSAGE_REACHEDHIERARCHYEND,
+  IDC_MESSAGE_NOTEXTURETAGAT,
+
   // Smear Deformer
   // --------------
 
