@@ -71,7 +71,7 @@ public:
 
 	static Bool Register()
 	{
-		if (!ActiveObjectManager_RegisterMode((ACTIVEOBJECTMODE) Hnrtoolbox, "nr:Workflow", ActiveObjectManager_ToolBoxHook))
+		if (!ActiveObjectManager_RegisterMode((ACTIVEOBJECTMODE) Hnrtoolbox, "nr-toolbox", ActiveObjectManager_ToolBoxHook))
     	return false;
 		if (!RegisterDescription(Hnrtoolbox, "Hnrtoolbox"_s))
 			return false;
@@ -80,7 +80,7 @@ public:
 		Int32 const disklevel = 0;
 		return RegisterSceneHookPlugin(
 			Hnrtoolbox,
-			"nr:Workflow"_s,
+			"nr-toolbox"_s,
 			info,
 			ToolboxHook::Alloc,
 			priority,
