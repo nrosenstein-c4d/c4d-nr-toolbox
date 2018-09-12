@@ -70,16 +70,8 @@ class ComponentList(object):
     self.components.append(Component(*args, **kwargs))
     return self
 
-  def defines(self):
-    result = []
-    for comp in self:
-      if comp.enabled:
-        result.append('HAVE_' + comp.name.upper())
-    return result
-
   def compile_all(self, dependencies=(), **options):
     result = []
-    defines = self.defines()
     for comp in self:
       if not comp.enabled:
         continue
@@ -89,7 +81,7 @@ class ComponentList(object):
       properties({
         'cxx.srcs': comp.sources,
         'cxx.link': False,
-        'cxx.defines': comp.defines + defines,
+        'cxx.defines': comp.defines,
         'cxx.enableExceptions': True,
         'cxx.cppStd': 'c++17',
         'c4d.SourceProcessor': False
@@ -119,9 +111,6 @@ def glob_descriptions(pattern):
 # ============================================================================
 
 components = (ComponentList()
-  .add("main",
-    sources=['source/main.cpp', 'source/menu.cpp', 'source/config.cpp', 'source/fs.cpp']
-  )
   .add("autoconnect",
     enabled=True,
     sources=['source/autoconnect.cpp'],
@@ -176,6 +165,10 @@ components = (ComponentList()
     sources=['source/webpio.cpp'],
     dependencies=[':webp']
   )
+)
+components.add("main",
+  sources=['source/main.cpp', 'source/menu.cpp', 'source/config.cpp', 'source/fs.cpp'],
+  defines=['HAVE_' + x.name.upper() for x in components if x.enabled]
 )
 
 # ============================================================================

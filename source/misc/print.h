@@ -79,14 +79,14 @@ inline String _join_for_print(String const& sep, T const& t, R&&... r) {
  */
 //============================================================================
 template <typename... R>
-inline void print(R&&... r) {
+static inline void print(R&&... r) {
   GePrint(String(PRINT_PREFIX) + _join_for_print(String(" "), std::forward<R>(r)...));
 }
 
 //============================================================================
 //============================================================================
 template <typename... R>
-inline void info(R&&... r) {
+static inline void info(R&&... r) {
   if (PRINT_LEVEL <= PRINT_INFO)
     print(std::forward<R>(r)...);
 }
@@ -94,7 +94,7 @@ inline void info(R&&... r) {
 //============================================================================
 //============================================================================
 template <typename... R>
-inline void debug(R&&... r) {
+static inline void debug(R&&... r) {
   if (PRINT_LEVEL <= PRINT_DEBUG)
     print(std::forward<R>(r)...);
 }
@@ -102,7 +102,7 @@ inline void debug(R&&... r) {
 //============================================================================
 //============================================================================
 template <typename... R>
-inline void warn(R&&... r) {
+static inline void warn(R&&... r) {
   if (PRINT_LEVEL <= PRINT_WARN)
     print(std::forward<R>(r)...);
 }
@@ -110,7 +110,7 @@ inline void warn(R&&... r) {
 //============================================================================
 //============================================================================
 template <typename... R>
-inline void error(R&&... r) {
+static inline void error(R&&... r) {
   if (PRINT_LEVEL <= PRINT_ERROR)
     print(std::forward<R>(r)...);
 }
