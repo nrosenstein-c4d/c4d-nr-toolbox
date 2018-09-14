@@ -2,6 +2,9 @@
 linkModules = [ "vendor/craftr/net.maxon.c4d",
                 "vendor/craftr/net.dlib" ]
 
+[osx]
+minversion = "10.11"  # El Capitan
+
 [c4d]
 rtti = true
 
