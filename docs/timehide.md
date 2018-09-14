@@ -1,12 +1,15 @@
 # TimeHide
 
-The **TimeHide** feature was previously available as a separate plugin on the
+**TimeHide** was originally available as a separate plugin on the
 [niklasrosenstein.com] online store and is now integrated into **NR Workflow
 Tools**. It provides an enhanced workflow for animators that regularly deal
 with large amounts of animated objects, removing the clutter from the Cinema
 4D **Timeline** and showing you only what you want to focus on.
 
 [niklasrosenstein.com]: https://niklasrosenstein.com
+
+In the *nr-toolbox*, TimeHide can no longer be found in the Project Settings
+but instead in a separate Attribute Manager Mode called "nr-toolbox".
 
 ![](timehide-params.png)
 
