@@ -8,7 +8,7 @@ rtti = true
 [dlib]
 nogui = true
 isocpp = false
+directory = "vendor/davisking/dlib"
 
 [msvc]
 version = 140
-clangcl = true

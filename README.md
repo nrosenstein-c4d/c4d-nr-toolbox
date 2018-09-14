@@ -29,9 +29,7 @@ overview of what is available in the nr-toolbox.
 
 ## Build Instructions
 
-You need the [Craftr 4][Craftr] build system. On Windows, due to a problem
-with [dlib, MSVC and the /vms compiler option](https://github.com/davisking/dlib/issues/1479),
-you also need [LLVM for Windows](http://releases.llvm.org/download.html).
+You need the [Craftr 4][Craftr] build system.
 
 [Craftr]: https://github.com/craftr-build/craftr
 
