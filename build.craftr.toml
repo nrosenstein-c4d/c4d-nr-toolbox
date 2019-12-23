@@ -7,6 +7,7 @@ minversion = "10.11"  # El Capitan
 
 [c4d]
 rtti = true
+release = "21.115"
 
 [dlib]
 nogui = true
@@ -14,4 +15,5 @@ isocpp = false
 directory = "vendor/davisking/dlib"
 
 [msvc]
-version = 140
+#version = 140
+version = 0

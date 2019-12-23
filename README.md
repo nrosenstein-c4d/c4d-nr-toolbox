@@ -29,14 +29,18 @@ overview of what is available in the nr-toolbox.
 
 ## Build Instructions
 
-You need the [Craftr 4][Craftr] build system.
+  [Craftr]: https://github.com/craftr-build/craftr
+  [sdks]: https://github.com/craftr-build/net.maxon.c4d/releases
 
-[Craftr]: https://github.com/craftr-build/craftr
+You need the [Craftr 4][Craftr] build system. You will need to update the
+`net.maxon.c4d:release` option in `build.craftr.toml` depending on what
+version of C4D you want to build for. The list of available releases to build
+for can be found in the [net.maxon.c4d releases][sdks].
 
-    cd /path/to/Cinema4D/plugins
-    git clone https://github.com/NiklasRosenstein/c4d-nr-toolbox.git --recursive
-    cd c4d-nr-toolbox
-    craftr -cb --variant=release
+    $ cd /path/to/Cinema4D/plugins
+    $ git clone https://github.com/NiklasRosenstein/c4d-nr-toolbox.git --recursive
+    $ cd c4d-nr-toolbox
+    $ craftr -cb --variant=release
 
 ## Third party libraries
 
