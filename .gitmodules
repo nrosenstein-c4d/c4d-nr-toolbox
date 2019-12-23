@@ -1,12 +1,12 @@
 [submodule "vendor/NiklasRosenstein/nr.utils"]
 	path = vendor/NiklasRosenstein/nr.utils
-	url = git@gitlab.niklasrosenstein.com:NiklasRosenstein/cxx/nr.utils.git
+	url = git@git.niklasrosenstein.com:Cinema4D/cpp-nr.utils.git
 [submodule "vendor/NiklasRosenstein/nr.c4d"]
 	path = vendor/NiklasRosenstein/nr.c4d
-	url = git@gitlab.niklasrosenstein.com:NiklasRosenstein/cxx/nr.c4d.git
+	url = git@git.niklasrosenstein.com:Cinema4D/cpp-nr.c4d.git
 [submodule "vendor/NiklasRosenstein/nr.mathlib"]
 	path = vendor/NiklasRosenstein/nr.mathlib
-	url = git@gitlab.niklasrosenstein.com:NiklasRosenstein/cxx/nr.mathlib.git
+	url = git@git.niklasrosenstein.com:Cinema4D/cpp-nr.mathlib.git
 [submodule "vendor/craftr/net.maxon.c4d"]
 	path = vendor/craftr/net.maxon.c4d
 	url = git@github.com:craftr-build/net.maxon.c4d.git
