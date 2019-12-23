@@ -815,7 +815,7 @@ Bool CsvReaderPlugin::Message(GeListNode* node, Int32 msg, void* pData)
 /// **************************************************************************
 Bool nr::procedural::RegisterCsvReaderPlugin()
 {
-  nr::c4d::auto_bitmap const icon("res/icons/csv_reader.png");
+  nr::c4d::auto_bitmap icon("res/icons/csv_reader.png");
   Int32 const flags = TAG_VISIBLE | TAG_EXPRESSION;
   Int32 const disklevel = 0;
   if (!RegisterTagPlugin(

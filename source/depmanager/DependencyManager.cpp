@@ -1441,7 +1441,7 @@ public:
 
   //| CommandData Overrides
 
-  virtual Bool Execute(BaseDocument* doc) {
+  C4D_APIBRIDGE_COMMANDDATA_EXECUTE(doc) {
     if (!g_dialogs) return false;
 
     // Retreive input information. We want to open a NEW window if the CTRL

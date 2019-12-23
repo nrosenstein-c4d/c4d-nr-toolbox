@@ -152,7 +152,7 @@ private:
 
 struct command : public CommandData {
   dialog dlg;
-  Bool Execute(BaseDocument* doc) override {
+  C4D_APIBRIDGE_COMMANDDATA_EXECUTE(doc) {
     return dlg.Open(DLG_TYPE_ASYNC, PLUGIN_ID, -1, -1, 300, 200);
   }
 };

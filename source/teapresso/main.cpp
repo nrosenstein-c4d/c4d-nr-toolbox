@@ -812,13 +812,13 @@ public:
 
     /* CommandData Overrides */
 
-    virtual Bool Execute(BaseDocument* doc);
+    C4D_APIBRIDGE_COMMANDDATA_EXECUTE(doc);
 
     virtual Bool RestoreLayout(void* secret);
 
 };
 
-Bool TvManagerCommand::Execute(BaseDocument* doc) {
+C4D_APIBRIDGE_COMMANDDATA_EXECUTE_IMPL(TvManagerCommand, doc) {
     manager.SetRoot(TvGetActiveRoot());
     return manager.Open(DLG_TYPE_ASYNC, ID_TVMANAGER_COMMAND, -1, -1,
                  380, 180);
@@ -851,13 +851,13 @@ public:
 
     /* CommandData Overrides */
 
-    virtual Bool Execute(BaseDocument* doc);
+    C4D_APIBRIDGE_COMMANDDATA_EXECUTE(doc);
 
     virtual Bool RestoreLayout(void* secret);
 
 };
 
-Bool TvPluginsCommand::Execute(BaseDocument* doc) {
+C4D_APIBRIDGE_COMMANDDATA_EXECUTE_IMPL(TvPluginsCommand, doc) {
     return plugins.Open(DLG_TYPE_ASYNC, ID_TVPLUGINS_COMMAND, -1, -1,
                  380, 180);
 }

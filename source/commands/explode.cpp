@@ -703,7 +703,7 @@ public:
 
   //==========================================================================
   //==========================================================================
-  virtual Bool Execute(BaseDocument* doc) override {
+  C4D_APIBRIDGE_COMMANDDATA_EXECUTE(doc, dialog) {
     BaseObject* op = doc->GetActiveObject();
     if (!op || !op->IsInstanceOf(Opolygon))
       return false;
@@ -762,7 +762,7 @@ public:
 
   //==========================================================================
   //==========================================================================
-  virtual Int32 GetState(BaseDocument* doc) override {
+  C4D_APIBRIDGE_COMMANDDATA_GETSTATE(doc) {
     BaseObject* op = doc->GetActiveObject();
     if (op && op->IsInstanceOf(Opolygon))
       return CMD_ENABLED;

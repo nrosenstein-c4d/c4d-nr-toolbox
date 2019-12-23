@@ -525,7 +525,7 @@ class AutoConnectCommand : public CommandData
 public:
   //| CommandData Overrides
 
-  Bool Execute(BaseDocument* doc)
+  C4D_APIBRIDGE_COMMANDDATA_EXECUTE(doc)
   {
     return dialog.Open(DLG_TYPE_ASYNC, ID_AUTOCONNECT_COMMAND);
   }

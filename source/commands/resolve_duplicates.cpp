@@ -334,13 +334,13 @@ public:
 
   //==========================================================================
   //==========================================================================
-  virtual Bool Execute(BaseDocument* doc) override;
+  C4D_APIBRIDGE_COMMANDDATA_EXECUTE(doc);
 
 };
 
 //============================================================================
 //============================================================================
-Bool ResolveDuplicatesCommand::Execute(BaseDocument* doc) {
+C4D_APIBRIDGE_COMMANDDATA_EXECUTE_IMPL(ResolveDuplicatesCommand, doc) {
   // Ask the user if undos should be created. He/she should choose "No"
   // for large scenes as Cinema seems to have problems with large undo steps.
   Bool cancel = false;
