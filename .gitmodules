@@ -7,9 +7,9 @@
 [submodule "vendor/NiklasRosenstein/nr.mathlib"]
 	path = vendor/NiklasRosenstein/nr.mathlib
 	url = git@git.niklasrosenstein.com:Cinema4D/cpp-nr.mathlib.git
+[submodule "vendor/craftr/net.dlib"]
+	path = vendor/craftr/net.dlib
+	url = https://github.com/davisking/dlib.git
 [submodule "vendor/craftr/net.maxon.c4d"]
 	path = vendor/craftr/net.maxon.c4d
 	url = git@github.com:craftr-build/net.maxon.c4d.git
-[submodule "vendor/davisking/dlib"]
-	path = vendor/davisking/dlib
-	url = https://github.com/davisking/dlib.git
