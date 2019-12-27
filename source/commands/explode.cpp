@@ -703,7 +703,7 @@ public:
 
   //==========================================================================
   //==========================================================================
-  C4D_APIBRIDGE_COMMANDDATA_EXECUTE(doc, dialog) {
+  C4D_APIBRIDGE_COMMANDDATA_EXECUTE(doc) {
     BaseObject* op = doc->GetActiveObject();
     if (!op || !op->IsInstanceOf(Opolygon))
       return false;

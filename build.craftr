@@ -91,7 +91,12 @@ class ComponentList(object):
       #error()
       if OS.id == 'darwin':
         properties({
-          'cxx.compilerFlags+': ['-Wno-shadow', '-Wno-missing-prototypes']
+          'cxx.compilerFlags+': [
+            '-Wno-shadow',
+            '-Wno-missing-prototypes',
+            '-Wno-inconsistent-missing-override',
+            '-Wno-unused-result',
+          ]
         })
       if OS.id == 'win':
         properties({
